@@ -1,0 +1,22 @@
+<w>
+    <file name="ui\ui_medpack_btns">
+        <texture id="ui_medpack_btn_d" x="0" y="0" width="40" height="10"/>
+        <texture id="ui_medpack_btn_e" x="0" y="40" width="40" height="10"/>
+        <texture id="ui_medpack_btn_h" x="0" y="80" width="40" height="10"/>
+        <texture id="ui_medpack_btn_t" x="0" y="120" width="40" height="10"/>
+    </file>
+
+    <file name="ui\ui_medpack_menu_0">
+        <texture id="ui_medpack_menu_basic" x="34" y="29" width="189" height="186" />
+    </file>
+
+    <file name="ui\ui_medpack_menu_1">
+        <texture id="ui_medpack_menu_basic" x="34" y="27" width="189" height="186" />
+    </file>
+
+    <file name="ui\ui_medpack_menu_2">
+        <texture id="ui_medpack_menu_basic" x="34" y="30" width="189" height="186" />
+    </file>
+
+
+</w>

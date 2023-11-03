@@ -1,0 +1,33 @@
+
+
+function contains(tbl, key)
+    for k, v in pairs(tbl) do
+        if k == key then
+            return true, v
+        end
+    end
+    return false
+end
+
+function index_of(tbl, value, by_key)
+    for k, v in pairs(tbl) do
+        if not by_key then 
+            if v == value then
+                return k
+            end
+        else
+            if k == value then
+                return k
+            end
+        end
+    end
+    return false
+end
+
+function sum(tbl)
+    local sum = 0
+    for _, val in pairs(tbl) do
+        sum = sum + val
+    end
+    return sum
+ end
