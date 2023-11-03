@@ -11,12 +11,16 @@
     </file>
 
     <file name="ui\ui_medpack_menu_1">
-        <texture id="ui_medpack_menu_basic" x="34" y="27" width="189" height="186" />
+        <texture id="ui_medpack_menu_army" x="34" y="27" width="189" height="186" />
     </file>
 
     <file name="ui\ui_medpack_menu_2">
-        <texture id="ui_medpack_menu_basic" x="34" y="30" width="189" height="186" />
+        <texture id="ui_medpack_menu_scic" x="34" y="30" width="189" height="186" />
     </file>
 
-
+    <file name="ui\ui_medpack_side_menus">
+        <texture id="ui_medpack_side_menu_basic" x="0" y="0" width="100" height="200" stretch="1"/>
+        <texture id="ui_medpack_side_menu_army" x="50" y="0" width="100" height="200" stretch="1"/>
+        <texture id="ui_medpack_side_menu_sci" x="50" y="0" width="100" height="200" stretch="1"/>
+    </file>
 </w>

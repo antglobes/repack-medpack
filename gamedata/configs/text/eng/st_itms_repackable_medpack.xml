@@ -137,4 +137,33 @@
         %c[d_blue] � %c[ui_gray_2] repackable\n
         %c[d_green] � %c[ui_gray_2] zipped\n</text>
     </string>
+
+	<!--GUI Button Text-->
+	<string id="ui_rpmk_btn_unpack_all">
+		<text>Unpack All</text>
+	</string>
+
+	<string id="ui_rpmk_btn_close">
+		<text>Close</text>
+	</string>
+
+	<string id="ui_rpmk_btn_fill_all">
+		<text>Fill All</text>
+	</string>
+
+	<!--Functor Strings-->
+	<string id="st_rpmk_menu_unpack">
+		<text>Unpack</text>
+	</string>
+
+	<string id="st_rpmk_menu_fill">
+		<text>Fill</text>
+	</string>
+
+	<string id="st_rpmk_menu_zip">
+		<text>Zip</text>
+	</string>
+	<string id="st_rpmk_menu_unzip">
+		<text>Unzip</text>
+	</string>
 </string_table>

@@ -11,82 +11,20 @@ side_menu_names = {
 	[2] = "army_side_menu",
 	[3] = "sci_side_menu"
 }
-------------------
--- ui_inventory
-------------------
-local enable_feature        = true
-local enable_item_picker	= true
-
-local is_shift_pressed = false
 
 local weight_unit = game.translate_string("st_kg")
-local snd_open         = sound_object([[interface\inv_open]])
-local snd_close        = sound_object([[interface\inv_close]])
-local snd_properties   = sound_object([[interface\inv_properties_2]])
-local snd_drop_item    = sound_object([[interface\inv_drop]])
-local snd_item_use     = sound_object([[interface\inv_none]])
-
--- UI events
-local K_Timer   = false
-local K_M1      = DIK_keys.MOUSE_1
-local K_M2      = DIK_keys.MOUSE_2
-local K_CTRL    = DIK_keys.DIK_LCONTROL
-local K_SHFT    = DIK_keys.DIK_LSHIFT
-local E_PRESS   = ui_events.WINDOW_KEY_PRESSED
-local E_RELEASE = ui_events.WINDOW_KEY_RELEASED
-
--- Utils
-local in_actor_inv = utils_item.in_actor_inv
-
-function keybind_pass()
-	-- I added this to prevent inventory closing after starting because of release keybind
-	if (K_Timer and (time_global() > K_Timer + 200)) or (not K_Timer) then
-		K_Timer = time_global()
-		return true
-	end
-	return false
-end
-
-local function init_mode(mode, flags, obj)
-	if db.actor and db.actor:alive() then
-		start(mode, obj)
-	end
-	flags.ret = true
-end
-
-local function on_key_press(key)
-	if (key == DIK_keys.DIK_LSHIFT) or (key == DIK_keys.DIK_RSHIFT) then
-		is_shift_pressed = true
-		--printf( "shift pressed" )
-	end
-end
-
-local function on_key_release(key)
-	if (key == DIK_keys.DIK_LSHIFT) or (key == DIK_keys.DIK_RSHIFT) then
-		is_shift_pressed = false
-		--printf( "shift released" )
-	end
-end
-
-function on_game_start()
-	if enable_feature then
-		overrides()
-		RegisterScriptCallback("ActorMenu_on_before_init_mode",init_mode)
-		RegisterScriptCallback("on_key_press",on_key_press)
-		RegisterScriptCallback("on_key_release",on_key_release)
-	end
-end
-
 ---------------------------------------
 
+local medpack_obj = nil
 function display_medpack_gui(unpck, fill, medpack)
     hide_hud_inventory()
 
     if not GUI then
-        GUI = MPG(medpack)
+        GUI = MPG()
     end
 
     if GUI and not GUI:IsShown() then
+		medpack_obj = medpack
         GUI:Reset()
         GUI:ShowDialog(true)
         Register_UI("MPG", "medpack_gui")
@@ -94,18 +32,12 @@ function display_medpack_gui(unpck, fill, medpack)
 end
 
 
-class "MPG" (CUIScrptWnd)
+class "MPG" (CUIScriptWnd)
 
-function MPG:__init(medpack) super()
-    self:InitControls()
+function MPG:__init() super()
+	self:InitControls()
     self:InitCallBacks()
-    self.medpack = medpack
-	self.medpack_type = rpmk_medpack.get_medpack_type(medpack:id())
-	self.active_menu = self.medpack_type.."_menu"
-	self.active_side_menu = self.medpack_type.."_menu"
-
     
-
 end    
 
 function MPG:__finalize()
@@ -119,20 +51,27 @@ function MPG:InitControls()
     local xml = self.xml
     xml:ParseFile("ui_rmpk_gui.xml")
 
-    self.menus = {}
+	self.medpack = medpack_obj
+	self.medpack_type = rpmk_medpack.get_medpack_type(medpack:id())
+	self.active_menu = self.medpack_type.."_menu"
+	self.active_side_menu = self.medpack_type.."_side_menu"
+
+	self.menus = {}
     self.side_menus = {}
-    self.unpack_all_btn = xml:Init3tButton("unpack_all_btn", self)
-	self:Register(self.unpack_all_btn, "unpack_all")
-    self.fill_all_btn = xml:Init3tButton("fill_all_btn", self)
-	self:Register(self.fill_all_btn, "fill_all")
-    self.close_btn = xml:Init3tButton("close_btn", self)
-	self:Register(self.close_btn, "close")
-	self.medpack_weight = xml:InitTextwnd("weight", self)
-	self.medpack_total_items = xml:InitTextwnd("total_items", self)
+
+	self.tg_info  	     = nil
+	self.tg_info_step  	 = 2 --[ms]
+	self.tg_inv  		 = 0 --[ms]
+	self.tg_inv_step  	 = 100 --[ms]
+	self.tg_stats        = 0
+	self.tg_stats_step   = 2000 --[ms]
+	self.tg_hint         = nil
+	self.tg_hint_step    = 1000 --[ms]
+	self.tg_m1		     = 0
     
 	-- Cell Contaniers
     self.basic_menu = xml:InitStatic("basic_menu", self)
-    self.menus["basic_menu"] = utils_ui.UICellContainer("basic_menu", self, nil, nil, self.basic_menu, nil)
+    self.menus["basic_menu"] = utils_ui.UICellContainer("basic_menu", self, nil, nil, self.basic_menu, false)
     self.menus["basic_menu"].sort_method = "props"
     self.menus["basic_menu"].disable_callback["On_CC_Add"] = true
     self.menus["basic_menu"].disable_callback["On_CC_Remove"] = true
@@ -141,7 +80,7 @@ function MPG:InitControls()
     self.menus["basic_menu"]:Show(false)
 
 	self.basic_side_menu = xml:InitStatic("basic_side_menu", self)
-	self.side_menus["basic_side_menu"] = utils_ui.UICellContainer("basic_side_cont", self, nil, nil, self.basic_side_menu, nil)
+	self.side_menus["basic_side_menu"] = utils_ui.UICellContainer("basic_side_cont", self, nil, nil, self.basic_side_menu, false)
 	self.side_menus["basic_side_menu"].sort_method = "props"
 	self.side_menus["basic_side_menu"].disable_callback["On_CC_Add"] = true
 	self.side_menus["basic_side_menu"].disable_callback["On_CC_Remove"] = true
@@ -150,7 +89,7 @@ function MPG:InitControls()
 	self.side_menus["basic_side_menu"]:Show(false)
 
     self.army_menu = xml:InitStatic("army_menu", self)
-    self.menus["army_menu"] = utils_ui.UICellContainer("army_menu", self, nil, nil, self.army_menu, nil)
+    self.menus["army_menu"] = utils_ui.UICellContainer("army_menu", self, nil, nil, self.army_menu, false)
     self.menus["army_menu"].sort_method = "props"
     self.menus["army_menu"].disable_callback["On_CC_Add"] = true
     self.menus["army_menu"].disable_callback["On_CC_Remove"] = true
@@ -159,7 +98,7 @@ function MPG:InitControls()
     self.menus["army_menu"]:Show(false)
 
 	self.army_side_menu = xml:InitStatic("army_side_menu", self)
-	self.side_menus["army_side_menu"] = utils_ui.UICellContainer("army_side_cont", self, nil, nil, self.army_side_menu, nil)
+	self.side_menus["army_side_menu"] = utils_ui.UICellContainer("army_side_cont", self, nil, nil, self.army_side_menu, false)
 	self.side_menus["army_side_menu"].sort_method = "props"
 	self.side_menus["army_side_menu"].disable_callback["On_CC_Add"] = true
 	self.side_menus["army_side_menu"].disable_callback["On_CC_Remove"] = true
@@ -167,7 +106,7 @@ function MPG:InitControls()
 	self.side_menus["army_side_menu"]:Show(false)
 
     self.sci_menu = xml:InitStatic("sci_menu", self)
-    self.menus["sci_menu"] = utils_ui.UICellContainer("sci_menu", self, nil, nil, self.sci_menu, nil)
+    self.menus["sci_menu"] = utils_ui.UICellContainer("sci_menu", self, nil, nil, self.sci_menu, false)
     self.menus["sci_menu"].sort_method = "props"
     self.menus["sci_menu"].disable_callback["On_CC_Add"] = true
     self.menus["sci_menu"].disable_callback["On_CC_Remove"] = true
@@ -176,7 +115,7 @@ function MPG:InitControls()
     self.menus["sci_menu"]:Show(false)
 
 	self.sci_side_menu = xml:InitStatic("sci_side_menu", self)
-	self.side_menus["sci_side_menu"] = utils_ui.UICellContainer("sci_side_cont", self, nil, nil, self.sci_side_menu, nil)
+	self.side_menus["sci_side_menu"] = utils_ui.UICellContainer("sci_side_cont", self, nil, nil, self.sci_side_menu, false)
 	self.side_menus["sci_side_menu"].sort_method = "props"
 	self.side_menus["sci_side_menu"].disable_callback["On_CC_Add"] = true
 	self.side_menus["sci_side_menu"].disable_callback["On_CC_Remove"] = true
@@ -188,6 +127,21 @@ function MPG:InitControls()
 
 	-- Item Properties
 	self.item_props = utils_ui.UICellProperties(self)
+
+	self.unpack_all_btn = xml:Init3tButton("unpack_all_btn", self)
+	self:Register(self.unpack_all_btn, "unpack_all")
+
+    self.fill_all_btn = xml:Init3tButton("fill_all_btn", self)
+	self:Register(self.fill_all_btn, "fill_all")
+
+    self.close_btn = xml:Init3tButton("close_btn", self)
+	self:Register(self.close_btn, "close")
+
+	self.medpack_weight = xml:InitTextwnd("weight", self)
+	self.medpack_weight:Show(false)
+
+	self.medpack_total_items = xml:InitTextwnd("total_items", self)
+	self.medpack_total_items:Show(false)
 end
 
 function MPG:InitCallBacks()
@@ -196,221 +150,14 @@ function MPG:InitCallBacks()
     self:AddCallback("close", ui_events.BUTTON_CLICKED, self.Close, self)
 end
 
-function MPG:Reset()
-	self.unpack_all_btn:Show(true)
-    self.fill_all_btn:Show(true)
-    self.close_btn:Show(true)
-	self.medpack_weight:Show(true)
-	self.medpack_total_items:Show(true)
-	self.menus[self.active_menu]:Show(true)
-	self.side_menus[self.active_side_menu]:Show(true)		
-end
-
-function MPG:Close()
-
-end
-
-function MPG:ResetInventories()
-	for i=1, 3 do
-		if self.menus[menu_names[i]]:IsShown() and self.side_menus[side_menu_names[i]]:IsShown()then
-			self.menus[menu_names[i]]:Reinit(self:GetMedpackContents(nil))
-			self.side_menus[side_menu_names[i]]:Reinit(self:SearchInventory(nil))
-		end
-	end
-end
-
-function MPG:RefreshInventories()
-	for i=1, 3 do
-		if self.menus[menu_names[i]]:IsShown() and self.side_menus[side_menu_names[i]]:IsShown() then
-			local menu = self.menus[menu_names[i]]
-			local list_medpack = menu.indx_id
-			local medpack_inv = self:GetMedpackContents(nil)
-			for idx, obj in ipairs(medpack_inv) do
-				if not list_medpack[idx] then
-					menu:AddItem(obj, obj:section())
-				end
-			end
-		
-			local side_menu = self.side_menus[side_menu_names[i]]
-			local list_actor = side_menu.indx_id
-			local actor_inv = self:SearchInventory(nil)
-			for idx, obj in ipairs(actor_inv) do
-				if not list_actor[idx] then
-					side_menu:AddItem(obj, obj:section())
-				end
-			end
-		end
-	end
-end
-
-function MPG:UpdateInfo(now)
-
-	if (not now) then
-		if (self.update_info) then
-			self.update_info = false
-			self.tg_info = time_global()
-			return
-		end
-	
-		if (not self.tg_info) then
-			return
-		end
-		if (time_global() < self.tg_info + self.tg_info_step) then
-			return
-		end
-	end
-	self.tg_info = nil
-
-	self:UpdateTotalItems()
-	self:UpdateWeight()
-
-	for i=1, 3 do
-		if self.menus[menu_names[i]]:IsShown() and self.side_menus[side_menu_names[i]]:IsShown() then
-			local menu = self.menus[menu_names[i]]
-			local side_menu = self.side_menus[side_menu_names[i]]
-
-			for _, cont in pairs(menu) do
-				if cont:IsShown() and cont.pad:IsShown() then
-					cont.pd.update = true
-				end
-			end
-
-			for _, cont in pairs(side_menu) do
-				if cont:IsShown() and cont.pad:IsShown() then
-					cont.pd.update = true
-				end
-			end
-		end
-	end
-end
-
-function MPG:UpdateWeight()
-	local med_itms_weight = {}
-	local medpack_weight = rpmk_medpack.get_base_weight(self.medpack:id())
-    local function search(temp, obj)
-        if not rpmk_medpack.is_medpack_compatible(obj) then return end
-        med_itms_weight[#med_itms_weight + 1] = obj:get_inv_weight()
-    end
-    db.actor:iterate_inventory(search, nil)
-    
-	local total_weight = medpack_weight + rpmk_utils.sum(med_itms_weight)
-	self.medpack_weight:SetText(strformat("%s %s", round_idp(total_weight, 1), weight_unit))
-end
-
-function MPG:UpdateTotalItems()
-	self.medpack_total_items = #self:GetMedpackContents()
-end
-
-function MPG:UpdateItems()
-	for i=1, 3 do
-		local menu = self.menus[menu_names[i]]
-		local side_menu = self.side_menus[side_menu_names[i]]
-		if menu:IsShown() and side_menu:IsShown() then
-			for idx, cell_id in pairs(menu.cell) do
-				if cell_id:IsShown() then
-					cell_id:Update()
-				end
-			end
-			for idx, cell_id in pairs(side_menu.cell) do
-				if cell_id:IsShown() then
-					cell_id:Update()
-				end
-			end
-		end
-	end
-end
-
-function MPG:ItemUpdate()
-	self.tg_inv = time_global() - 30
-	self.update_info = true
-end
-
-function MPG:Highlight(sect, menu)
-	if menu:IsShown() then
-		for idx, cell_id in pairs(menu.cell) do
-			if cell_id.section == sect then
-				cell_id:Highlight(true, "white", true)
-			end
-		end
-	end
-end
-
-function UIInventory:UnHighlight_All(menu, side_menu)
-	for idx,ci in pairs(menu.cell) do
-		if (menu.selected ~= idx) then
-			ci:Highlight(false)
-		end
-	end
-	for idx,ci in pairs(side_menu.cell) do
-		if (side_menu.selected ~= idx) then
-			ci:Highlight(false)
-		end
-	end
-end
-
-function MPG:SearchInventory(inv_type)
-    local med_itms = {}
-    local function search(temp, obj)
-        if not rpmk_medpack.is_medpack_compatible(obj) then return end
-        med_itms[#med_itms + 1] = obj
-    end
-    db.actor:iterate_inventory(search, nil)
-    return med_itms
+function MPG:UnpackAll()
 end
 
 function MPG:FillAll()
-	for i=1, 3 do
-		if self.side_menus[side_menu_names[i]]:Show(true) then
-			local side_menu = self.side_menus[side_menu_names[i]]
-			for id, idx in pairs(side_menu.indx_id) do
-				local cell_id = side_menu:GetCell_ID(id)
-				if cell_id then
-					self:CalculateTotalWeight()
-				end
-			end
-
-			if self:AtMaxWeight() then return end
-
-			for id, idx in pairs(side_menu.indx_id) do
-				local cell_id = side_menu:GetCell_ID(id)
-				if cell_id then
-					--self:ItemToMedpack(id)
-					self:MoveItem(id, side_menu, self.menus[menu_names[i]])
-				end
-			end
-
-			self.update_info = true
-		end
-	end
 end
 
-function MPG:UnpackAll()
-	for i=1, 3 do
-		if self.menus[menu_names[i]]:Show(true) then
-			local menu = self.menus[menu_names[i]]
-			for id, idx in pairs(menu.indx_id) do
-				local cell_id = menu:GetCell_ID(id)
-				if cell_id then
-					--self:ItemToActor(id)
-					self:MoveItem(id, menu, self.side_menus[side_menu_names[i]])
-				end
-			end
-
-			self.update_info = true
-		end
-	end
+function MPG:Close()
 end
-
-function MPG:MoveItem(id, menu_from, menu_to)
-	local obj = level.object_by_id(id)
-	menu_from:TransferItem(menu_to, obj)
-	self:ItemUpdate()
-end
-
-
-
-
-
 
 
 

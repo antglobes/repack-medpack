@@ -1,53 +1,53 @@
 <w>
-    <menu_basic x="323" y="198" width="378" height="372">
-        <unpack_all_btn x="378" y="185" width="40" height="10" >
+    <!--Medpack GUI-->
+    <basic_menu x="323" y="198" width="378" height="372">
+        <texture>ui_medpack_menu_basic</texture>
+    </basic_menu>
+
+    <army_menu x="323" y="198" width="378" height="372">
+        <texture>ui_medpack_menu_army</texture>
+    </army_menu>
+
+    <sci_menu x="323" y="198" width="378" height="372">
+        <texture>ui_medpack_menu_sci</texture>
+    </sci_menu>
+
+    <!--Player GUI-->
+
+    <basic_side_menu x="741" y="283" width="100" height="200">
+        <texture>ui_medpack_side_menu_basic</texture>
+    </basic_side_menu>
+
+    <army_side_menu x="741" y="283" width="100" height="200">
+        <texture>ui_medpack_side_menu_army</texture>
+    </army_side_menu>
+
+    <sci_side_menu x="741" y="283" width="100" height="200">
+        <texture>ui_medpack_side_menu_sci</texture>
+    </sci_side_menu>
+
+    <!--Buttons-->
+    <unpack_all_btn x="378" y="185" width="40" height="10" >
             <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_unpack_all</text>
             <texture>ui_medpack_btn</texture>
-        </unpack_all_btn>
+    </unpack_all_btn>
 
-         <close_btn x="428" y="185" width="40" height="10" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_close</text>
-            <texture>ui_medpack_btn</texture>
-        </close_btn>
+    <close_btn x="428" y="185" width="40" height="10" >
+        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_close</text>
+        <texture>ui_medpack_btn</texture>
+    </close_btn>
 
-        <fill_all_btn x="478" y="185" width="40" height="10" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_fill_all</text>
-            <texture>ui_medpack_btn</texture>
-        </fill_all_btn>
-    </menu_basic>
+    <fill_all_btn x="478" y="185" width="40" height="10" >
+        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_fill_all</text>
+        <texture>ui_medpack_btn</texture>
+    </fill_all_btn>
 
-    <menu_army x="323" y="198" width="378" height="372">
-        <unpack_all_btn x="378" y="185" width="40" height="10" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_unpack_all</text>
-            <texture>ui_medpack_btn</texture>
-        </unpack_all_btn>
+    <!--Text Windows-->
+    <weight x="693" y="206" width="100" height="50">
+        <text complex_mode="1" r="255" g="255" b="255" align="c" vert_align="c" font="letterica16"/>
+    <weight>
 
-         <close_btn x="428" y="185" width="40" height="10" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_close</text>
-            <texture>ui_medpack_btn</texture>
-        </close_btn>
-
-        <fill_all_btn x="478" y="185" width="40" height="10" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_fill_all</text>
-            <texture>ui_medpack_btn</texture>
-        </fill_all_btn>
-    </menu_army>
-
-    <menu_scientific x="323" y="198" width="378" height="372">
-        <unpack_all_btn x="378" y="185" width="40" height="10" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_unpack_all</text>
-            <texture>ui_medpack_btn</texture>
-        </unpack_all_btn>
-
-         <close_btn x="428" y="185" width="40" height="10" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_close</text>
-            <texture>ui_medpack_btn</texture>
-        </close_btn>
-
-        <fill_all_btn x="478" y="185" width="40" height="10" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_fill_all</text>
-            <texture>ui_medpack_btn</texture>
-        </fill_all_btn>
-    </menu_scientific>
-
+    <total_items x="431" y="206" width="100" height="50">
+        <text complex_mode="1" r="255" g="255" b="255" align="c" vert_align="c" font="letterica16"/>
+    </total_items>
 <w>

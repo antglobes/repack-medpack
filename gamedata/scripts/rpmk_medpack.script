@@ -6,6 +6,7 @@ ini_medpack = ini_file("items\\items\\itms_repackable_medpack.ltx")
 ini_medical = ini_file("items\\items\\items_medical.ltx")
 ini_drugs = ini_file("items\\items\\items_drugs.ltx")
 ini_drink = ini_file("item\\items_items_drink.ltx")
+ini_manager = ini_file("items\\settings\\itms_manager.ltx")
 MEDPACK_TABLE = {}
 -- Once a medpack enters the player's inv add to table
 -- Store section, id, package contents, capacity, each item weight + medpack weight, max weight threshold
@@ -29,15 +30,60 @@ MEDPACK_TABLE = {}
 -- Bools
 -------------------------------
 
+function vanilla_to_repackable(sect, closed)
+    local closed_sects = {
+        ["medkit_ai1"] = "medpack_closed_basic",
+        ["medkit_ai2"] = "medpack_closed_army",
+        ["medkit_ai3"] = "medpack_closed_sci"
+    }
+    local open_sects = {
+        ["medkit_ai1"] = "medpack_open_basic",
+        ["medkit_ai2"] = "medpack_open_army",
+        ["medkit_ai3"] = "medpack_open_sci"
+    }
+    if closed then
+        return closed_sects[sect]
+    end
+    return open_sects[sect]
+end
+
+function is_vanilla_medpack(obj)
+    local v_m_sects = {
+        ["medkit_ai1"] = true,
+        ["medkit_ai2"] = true,
+        ["medkit_ai3"] = true
+    }
+    return v_m_sects[obj:section()]
+end
+
+function open_to_closed_medpack(sect)
+    local otc_sects = {
+        ["medpack_open_basic"] = "medpack_closed_basic",
+        ["medpack_open_army"] = "medpack_closed_army",
+        ["medpack_open_sci"] = "medpack_closed_sci",
+    }
+    return otc_sects[sect]
+end
+
+function closed_to_open_medpack(sect)
+    local cto_sects = {
+        ["medpack_closed_basic"] = "medpack_open_basic",
+        ["medpack_closed_army"] = "medpack_open_army",
+        ["medpack_closed_sci"] = "medpack_open_sci",
+    }
+    return cto_sects[sect]
+end
+
+
 function is_medpack(obj)
     local mp_sects = {
         ["medpack_open_basic"] = true,
         ["medpack_open_army"] = true,
-        ["medpack_open_scientific"] = true,
+        ["medpack_open_sci"] = true,
 
         ["medpack_closed_basic"] = true,
         ["medpack_closed_army"] = true,
-        ["medpack_closed_scientific"] = true
+        ["medpack_closed_sci"] = true
     }
     return mp_sects[obj:section()]
 end
@@ -66,6 +112,10 @@ function is_medpack_useable(medpack)
 end
 
 function is_medpack_full(medpack)
+    if get_total_itms(medpack:id()) >= get_max_capacity(medpack:id()) then
+        return true
+    end
+    return false
 end
 
 function is_medpack_empty(medpack)
@@ -90,7 +140,7 @@ function mt_new_entry(medpack)
     local _id = medpack:id()
     if is_medpack_in_table(_id) then return end
     local sect = medpack:section()
-    local _contents =  parse_list(ini_manager, "package_content", sect)
+    local _contents =  default_contents(sect)
     local ti = #_contents
     local mc = default_max_capacity(sect)
     local bw = ini_medpack:r_value(sect, "inv_weight")
@@ -123,7 +173,7 @@ function mt_replace_entry(old_id, new_id, sect, _contents, _closed)
     local bw = ini_medpack:r_value(sect, "inv_weight")
     local tw = calculate_total_weight(new_id, _contents, bw)
     local mw = default_max_weight(sect)
-    local idx = get_entry_index(old_id)
+    local idx = get_entry_index(old_id) or #MEDPACK_TABLE + 1
     MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, max_capacity=mc, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed}
 end
 
@@ -240,9 +290,34 @@ function default_max_weight(sect)
     return ini_medpack:r_value(sect, "max_weight")
 end
 
+function default_contents(sect)
+    return parse_list(ini_manager, "package_content", sect)
+end
+
 -------------------------------
 -- Common Medpack Functions
 -------------------------------
+base_use_package = itms_manager.use_package
+function itms_manager.use_package(obj)
+    base_use_package(obj)
+    create_new_medpack(obj, false)
+end
+
+base_use_package_random = itms_manager.use_package_random
+function itms_manager.use_package_random(obj)
+    base_use_package_random(obj)
+    create_new_medpack(obj, false)
+end
+
+function create_new_medpack(obj, closed)
+    if is_vanilla_medpack(obj) then
+        local contents = default_contents(obj:section())
+        local sect = obj:section()
+        local repack_sect = vanilla_to_repackable(obj:section(), closed)
+        local medpack = alife_create_item(repack_sect, db.actor)
+        mt_replace_entry(nil, medpack.id,repack_sect, contents, closed)
+    end
+end
 
 function update_contents(id, new_contents)
     local contents = get_contents(id)
@@ -373,8 +448,9 @@ function zip_action(obj, bag, mode)
 
     local contents = get_contents(medpack:id())
     local closed_sect = open_to_closed_medpack(medpack:sect())
-    local obj = alife_create_item(closed_sect, AC_ID)
-    mt_replace_entry(obj.id, closed_sect, contents, false)
+    local obj = alife_create_item(closed_sect, db.actor)
+    mt_replace_entry(medpack:id(), obj.id, closed_sect, contents, false)
+    alife_release(medpack)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
@@ -408,8 +484,9 @@ function unzip_action(obj, bag, mode)
 
     local contents = get_contents(medpack:id())
     local open_sect = closed_to_open_medpack(medpack:sect())
-    local obj = alife_create_item(open_sect, AC_ID)
-    mt_replace_entry(obj.id, open_sect, contents, false)
+    local obj = alife_create_item(open_sect, db.actor)
+    mt_replace_entry(medpack:id(), obj.id, open_sect, contents, false)
+    alife_release(medpack)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
