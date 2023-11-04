@@ -22,14 +22,22 @@
     </string>
 
 	<string id="st_medpack_zipped_descr">
-		<text>%c[d_green] ï¿½ %c[ui_gray_2] Zipped\n</text>
+		<text>Zipped</text>
 	</string>
 	<string id="st_medpack_unzipped_descr">
-		<text>%c[d_red] ï¿½ %c[ui_gray_2] Unzipped\n</text>
+		<text>Unzipped</text>
 	</string>
 
 	<string id="st_medpack_descr_bullet_point">
-		<text>ï¿½</text>
+		<text>•</text>
+	</string>
+
+	<string id="st_medpack_storage_descr">
+		<text>storage for medical equipment</text>
+	</string>
+
+	<string id="st_medpack_repack_descr">
+		<text>repackable</text>
 	</string>
 
     <!--Unzipped Medpack Titles-->
@@ -58,114 +66,114 @@
     <string id="st_medpack_open_basic_descr">
         <text>A medical package containing a variety of equipment for treatment of minor injuries.\n \n
 		%c[ui_gray_3]CONTENTS:\n
-		%c[d_cyan] ï¿½ %c[default] bandage (4)\n
-		%c[d_cyan] ï¿½ %c[default] diclofenac sodium\n
-		%c[d_cyan] ï¿½ %c[default] improvised stimpack\n
-		%c[d_cyan] ï¿½ %c[default] metamizole ampoule\n
-		%c[d_cyan] ï¿½ %c[default] mineral water\n
-		%c[d_cyan] ï¿½ %c[default] sulfadimethoxine\n
-		%c[d_cyan] ï¿½ %c[default] tourniquet\n
-		%c[d_cyan] ï¿½ %c[default] yadulin\n \n
+		%c[d_cyan] • %c[default] bandage (4)\n
+		%c[d_cyan] • %c[default] diclofenac sodium\n
+		%c[d_cyan] • %c[default] improvised stimpack\n
+		%c[d_cyan] • %c[default] metamizole ampoule\n
+		%c[d_cyan] • %c[default] mineral water\n
+		%c[d_cyan] • %c[default] sulfadimethoxine\n
+		%c[d_cyan] • %c[default] tourniquet\n
+		%c[d_cyan] • %c[default] yadulin\n \n
 		%c[ui_gray_3]PROPERTIES:\n
-		%c[d_blue] ï¿½ %c[ui_gray_2] storage for medical equipment\n
-        %c[d_blue] ï¿½ %c[ui_gray_2] repackable\n
-        %c[d_red] ï¿½ %c[ui_gray_2] unzipped\n</text>
+		%c[d_blue] • %c[ui_gray_2] storage for medical equipment\n
+        %c[d_blue] • %c[ui_gray_2] repackable\n
+        %c[d_red] • %c[ui_gray_2] unzipped\n</text>
     </string>
     <string id="st_medpack_open_army_descr">
         <text>A military-grade medical package, containing a large amount of stimulating medical drugs.\n \n
 		%c[ui_gray_3]CONTENTS:\n
-		%c[d_cyan] ï¿½ %c[default] ampoule of morphine\n
-		%c[d_cyan] ï¿½ %c[default] anti-radiaton preparation\n
-		%c[d_cyan] ï¿½ %c[default] aquatab tablets\n
-		%c[d_cyan] ï¿½ %c[default] bandage (4)\n
-		%c[d_cyan] ï¿½ %c[default] caffeine tablets\n
-		%c[d_cyan] ï¿½ %c[default] diclofenac sodium\n
-		%c[d_cyan] ï¿½ %c[default] harness (2)\n
-		%c[d_cyan] ï¿½ %c[default] military stimulant\n
-		%c[d_cyan] ï¿½ %c[default] mineral water\n
-		%c[d_cyan] ï¿½ %c[default] 027 R pill\n
-		%c[d_cyan] ï¿½ %c[default] tetanus vaccine\n \n
+		%c[d_cyan] • %c[default] ampoule of morphine\n
+		%c[d_cyan] • %c[default] anti-radiaton preparation\n
+		%c[d_cyan] • %c[default] aquatab tablets\n
+		%c[d_cyan] • %c[default] bandage (4)\n
+		%c[d_cyan] • %c[default] caffeine tablets\n
+		%c[d_cyan] • %c[default] diclofenac sodium\n
+		%c[d_cyan] • %c[default] harness (2)\n
+		%c[d_cyan] • %c[default] military stimulant\n
+		%c[d_cyan] • %c[default] mineral water\n
+		%c[d_cyan] • %c[default] 027 R pill\n
+		%c[d_cyan] • %c[default] tetanus vaccine\n \n
 		%c[ui_gray_3]PROPERTIES:\n
-		%c[d_blue] ï¿½ %c[ui_gray_2] storage for medical equipment\n
-        %c[d_blue] ï¿½ %c[ui_gray_2] repackable\n
-        %c[d_red] ï¿½ %c[ui_gray_2] unzipped\n</text>
+		%c[d_blue] • %c[ui_gray_2] storage for medical equipment\n
+        %c[d_blue] • %c[ui_gray_2] repackable\n
+        %c[d_red] • %c[ui_gray_2] unzipped\n</text>
     </string>
     <string id="st_medpack_open_scientific_descr">
         <text>A medical package, designed for use specifically in the Zone. It contains a large amount of drugs for the purposes of countering chemical, psy- and radioactive hazards.\n \n
 		%c[ui_gray_3]CONTENTS:\n
-		%c[d_cyan] ï¿½ %c[default] anti-radiation drugs (2)\n
-		%c[d_cyan] ï¿½ %c[default] antioxidant IP2\n
-		%c[d_cyan] ï¿½ %c[default] big glucose shot\n
-		%c[d_cyan] ï¿½ %c[default] cystamine (2)\n
-		%c[d_cyan] ï¿½ %c[default] diclofenac sodium\n
-		%c[d_cyan] ï¿½ %c[default] epinephrine\n
-		%c[d_cyan] ï¿½ %c[default] harness\n
-		%c[d_cyan] ï¿½ %c[default] indralin-B190\n
-		%c[d_cyan] ï¿½ %c[default] mineral water\n
-		%c[d_cyan] ï¿½ %c[default] psi-block\n
-		%c[d_cyan] ï¿½ %c[default] scientific stimulant (2)\n
-		%c[d_cyan] ï¿½ %c[default] sulfadimethoxine\n \n
+		%c[d_cyan] • %c[default] anti-radiation drugs (2)\n
+		%c[d_cyan] • %c[default] antioxidant IP2\n
+		%c[d_cyan] • %c[default] big glucose shot\n
+		%c[d_cyan] • %c[default] cystamine (2)\n
+		%c[d_cyan] • %c[default] diclofenac sodium\n
+		%c[d_cyan] • %c[default] epinephrine\n
+		%c[d_cyan] • %c[default] harness\n
+		%c[d_cyan] • %c[default] indralin-B190\n
+		%c[d_cyan] • %c[default] mineral water\n
+		%c[d_cyan] • %c[default] psi-block\n
+		%c[d_cyan] • %c[default] scientific stimulant (2)\n
+		%c[d_cyan] • %c[default] sulfadimethoxine\n \n
 		%c[ui_gray_3]PROPERTIES:\n
-		%c[d_blue] ï¿½ %c[ui_gray_2] storage for medical equipment\n
-        %c[d_blue] ï¿½ %c[ui_gray_2] repackable\n
-        %c[d_red] ï¿½ %c[ui_gray_2] unzipped\n</text>
+		%c[d_blue] • %c[ui_gray_2] storage for medical equipment\n
+        %c[d_blue] • %c[ui_gray_2] repackable\n
+        %c[d_red] • %c[ui_gray_2] unzipped\n</text>
     </string>
 
     <!--Zipped Medpack Descriptions-->
     <string id="st_medpack_closed_basic_descr">
         <text>A medical package containing a variety of equipment for treatment of minor injuries.\n \n
 		%c[ui_gray_3]CONTENTS:\n
-		%c[d_cyan] ï¿½ %c[default] bandage (4)\n
-		%c[d_cyan] ï¿½ %c[default] diclofenac sodium\n
-		%c[d_cyan] ï¿½ %c[default] improvised stimpack\n
-		%c[d_cyan] ï¿½ %c[default] metamizole ampoule\n
-		%c[d_cyan] ï¿½ %c[default] mineral water\n
-		%c[d_cyan] ï¿½ %c[default] sulfadimethoxine\n
-		%c[d_cyan] ï¿½ %c[default] tourniquet\n
-		%c[d_cyan] ï¿½ %c[default] yadulin\n \n
+		%c[d_cyan] • %c[default] bandage (4)\n
+		%c[d_cyan] • %c[default] diclofenac sodium\n
+		%c[d_cyan] • %c[default] improvised stimpack\n
+		%c[d_cyan] • %c[default] metamizole ampoule\n
+		%c[d_cyan] • %c[default] mineral water\n
+		%c[d_cyan] • %c[default] sulfadimethoxine\n
+		%c[d_cyan] • %c[default] tourniquet\n
+		%c[d_cyan] • %c[default] yadulin\n \n
 		%c[ui_gray_3]PROPERTIES:\n
-		%c[d_blue] ï¿½ %c[ui_gray_2] storage for medical equipment\n
-        %c[d_blue] ï¿½ %c[ui_gray_2] repackable\n
-        %c[d_red] ï¿½ %c[ui_gray_2] zipped\n</text>
+		%c[d_blue] • %c[ui_gray_2] storage for medical equipment\n
+        %c[d_blue] • %c[ui_gray_2] repackable\n
+        %c[d_red] • %c[ui_gray_2] zipped\n</text>
     </string>
     <string id="st_medpack_closed_army_descr">
         <text>A military-grade medical package, containing a large amount of stimulating medical drugs.\n \n
 		%c[ui_gray_3]CONTENTS:\n
-		%c[d_cyan] ï¿½ %c[default] ampoule of morphine\n
-		%c[d_cyan] ï¿½ %c[default] anti-radiaton preparation\n
-		%c[d_cyan] ï¿½ %c[default] aquatab tablets\n
-		%c[d_cyan] ï¿½ %c[default] bandage (4)\n
-		%c[d_cyan] ï¿½ %c[default] caffeine tablets\n
-		%c[d_cyan] ï¿½ %c[default] diclofenac sodium\n
-		%c[d_cyan] ï¿½ %c[default] harness (2)\n
-		%c[d_cyan] ï¿½ %c[default] military stimulant\n
-		%c[d_cyan] ï¿½ %c[default] mineral water\n
-		%c[d_cyan] ï¿½ %c[default] 027 R pill\n
-		%c[d_cyan] ï¿½ %c[default] tetanus vaccine\n \n
+		%c[d_cyan] • %c[default] ampoule of morphine\n
+		%c[d_cyan] • %c[default] anti-radiaton preparation\n
+		%c[d_cyan] • %c[default] aquatab tablets\n
+		%c[d_cyan] • %c[default] bandage (4)\n
+		%c[d_cyan] • %c[default] caffeine tablets\n
+		%c[d_cyan] • %c[default] diclofenac sodium\n
+		%c[d_cyan] • %c[default] harness (2)\n
+		%c[d_cyan] • %c[default] military stimulant\n
+		%c[d_cyan] • %c[default] mineral water\n
+		%c[d_cyan] • %c[default] 027 R pill\n
+		%c[d_cyan] • %c[default] tetanus vaccine\n \n
 		%c[ui_gray_3]PROPERTIES:\n
-		%c[d_blue] ï¿½ %c[ui_gray_2] storage for medical equipment\n
-        %c[d_blue] ï¿½ %c[ui_gray_2] repackable\n
-        %c[d_red] ï¿½ %c[ui_gray_2] zipped\n</text>
+		%c[d_blue] • %c[ui_gray_2] storage for medical equipment\n
+        %c[d_blue] • %c[ui_gray_2] repackable\n
+        %c[d_red] • %c[ui_gray_2] zipped\n</text>
     </string>
     <string id="st_medpack_closed_scientific_descr">
         <text>A medical package, designed for use specifically in the Zone. It contains a large amount of drugs for the purposes of countering chemical, psy- and radioactive hazards.\n \n
 		%c[ui_gray_3]CONTENTS:\n
-		%c[d_cyan] ï¿½ %c[default] anti-radiation drugs (2)\n
-		%c[d_cyan] ï¿½ %c[default] antioxidant IP2\n
-		%c[d_cyan] ï¿½ %c[default] big glucose shot\n
-		%c[d_cyan] ï¿½ %c[default] cystamine (2)\n
-		%c[d_cyan] ï¿½ %c[default] diclofenac sodium\n
-		%c[d_cyan] ï¿½ %c[default] epinephrine\n
-		%c[d_cyan] ï¿½ %c[default] harness\n
-		%c[d_cyan] ï¿½ %c[default] indralin-B190\n
-		%c[d_cyan] ï¿½ %c[default] mineral water\n
-		%c[d_cyan] ï¿½ %c[default] psi-block\n
-		%c[d_cyan] ï¿½ %c[default] scientific stimulant (2)\n
-		%c[d_cyan] ï¿½ %c[default] sulfadimethoxine\n \n
+		%c[d_cyan] • %c[default] anti-radiation drugs (2)\n
+		%c[d_cyan] • %c[default] antioxidant IP2\n
+		%c[d_cyan] • %c[default] big glucose shot\n
+		%c[d_cyan] • %c[default] cystamine (2)\n
+		%c[d_cyan] • %c[default] diclofenac sodium\n
+		%c[d_cyan] • %c[default] epinephrine\n
+		%c[d_cyan] • %c[default] harness\n
+		%c[d_cyan] • %c[default] indralin-B190\n
+		%c[d_cyan] • %c[default] mineral water\n
+		%c[d_cyan] • %c[default] psi-block\n
+		%c[d_cyan] • %c[default] scientific stimulant (2)\n
+		%c[d_cyan] • %c[default] sulfadimethoxine\n \n
 		%c[ui_gray_3]PROPERTIES:\n
-		%c[d_blue] ï¿½ %c[ui_gray_2] storage for medical equipment\n
-        %c[d_blue] ï¿½ %c[ui_gray_2] repackable\n
-        %c[d_green] ï¿½ %c[ui_gray_2] zipped\n</text>
+		%c[d_blue] • %c[ui_gray_2] storage for medical equipment\n
+        %c[d_blue] • %c[ui_gray_2] repackable\n
+        %c[d_green] • %c[ui_gray_2] zipped\n</text>
     </string>
 
 	<!--GUI Button Text-->
