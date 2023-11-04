@@ -1,5 +1,37 @@
 
 <string_table>
+	<!--Base Medpack Description-->
+	<string id="st_medpack_open_basic_base_descr">
+        <text>An unzipped basic medical package, containing a variety of equipment for treatment of minor injuries.\n \n</text>
+    </string>
+    <string id="st_medpack_open_army_base_descr">
+    	<text>An unzipped military-grade medical package, containing a large amount of stimulating medical drugs.\n \n</text>
+    </string>
+    <string id="st_medpack_open_sci_base_descr">
+    	<text>An unzipped scientific medical package, designed for use specifically in the Zone. It contains a large amount of drugs for the purposes of countering chemical, psy- and radioactive hazards.\n \n</text>
+    </string>
+
+    <string id="st_medpack_closed_basic_base_descr">
+        <text>A zipped basic medical package containing a variety of equipment for treatment of minor injuries.\n \n</text>
+    </string>
+    <string id="st_medpack_closed_army_base_descr">
+        <text>A zipped military-grade medical package, containing a large amount of stimulating medical drugs.\n \n</text>
+    </string>
+    <string id="st_medpack_closed_sci_base_descr">
+        <text>A zipped scientific medical package, designed for use specifically in the Zone. It contains a large amount of drugs for the purposes of countering chemical, psy- and radioactive hazards.\n \n</text>
+    </string>
+
+	<string id="st_medpack_zipped_descr">
+		<text>%c[d_green] � %c[ui_gray_2] Zipped\n</text>
+	</string>
+	<string id="st_medpack_unzipped_descr">
+		<text>%c[d_red] � %c[ui_gray_2] Unzipped\n</text>
+	</string>
+
+	<string id="st_medpack_descr_bullet_point">
+		<text>�</text>
+	</string>
+
     <!--Unzipped Medpack Titles-->
     <string id="st_medpack_open_basic">
         <text>An unzipped, basic medical package</text>
@@ -9,6 +41,17 @@
     </string>
     <string id="st_medpack_open_scientific">
     <text>An unzipped, scientific medical package</text>
+    </string>
+
+	<!--Zipped Medpack Titles-->
+    <string id="st_medpack_closed_basic">
+        <text>A zipped basic medical package</text>
+    </string>
+    <string id="st_medpack_closed_army">
+        <text>A zipped army medical package</text>
+    </string>
+    <string id="st_medpack_closed_scientific">
+        <text>A zipped scientific medical package</text>
     </string>
 
     <!--Unzipped Medpack Descriptions-->
@@ -44,7 +87,6 @@
 		%c[d_cyan] � %c[default] tetanus vaccine\n \n
 		%c[ui_gray_3]PROPERTIES:\n
 		%c[d_blue] � %c[ui_gray_2] storage for medical equipment\n
-        %c[d_blue] � %c[ui_gray_2] storage for medical equipment\n
         %c[d_blue] � %c[ui_gray_2] repackable\n
         %c[d_red] � %c[ui_gray_2] unzipped\n</text>
     </string>
@@ -67,17 +109,6 @@
 		%c[d_blue] � %c[ui_gray_2] storage for medical equipment\n
         %c[d_blue] � %c[ui_gray_2] repackable\n
         %c[d_red] � %c[ui_gray_2] unzipped\n</text>
-    </string>
-
-    <!--Zipped Medpack Titles-->
-    <string id="st_medpack_closed_basic">
-        <text>A zipped basic medical package</text>
-    </string>
-    <string id="st_medpack_closed_army">
-        <text>A zipped army medical package</text>
-    </string>
-    <string id="st_medpack_closed_scientific">
-        <text>A zipped scientific medical package</text>
     </string>
 
     <!--Zipped Medpack Descriptions-->
@@ -113,7 +144,6 @@
 		%c[d_cyan] � %c[default] tetanus vaccine\n \n
 		%c[ui_gray_3]PROPERTIES:\n
 		%c[d_blue] � %c[ui_gray_2] storage for medical equipment\n
-        %c[d_blue] � %c[ui_gray_2] storage for medical equipment\n
         %c[d_blue] � %c[ui_gray_2] repackable\n
         %c[d_red] � %c[ui_gray_2] zipped\n</text>
     </string>
