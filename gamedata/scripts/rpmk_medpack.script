@@ -198,7 +198,7 @@ function mt_new_entry(medpack)
     local _contents =  default_contents(sect)
     local ti = sum(_contents)
     local bw = default_base_weight(sect)
-    local tw = calculate_total_weight(_id, _contents, bw)
+    local tw = calculate_total_weight(_id, _contents, ti, bw)
     local mw = default_max_weight(sect)
     
     MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=true}
@@ -226,7 +226,7 @@ end
 function mt_replace_entry(old_id, new_id, sect, _contents, _closed)
     local ti = sum(_contents)
     local bw = default_base_weight(sect)
-    local tw = calculate_total_weight(new_id, _contents, bw)
+    local tw = calculate_total_weight(new_id, _contents, ti, bw)
     local mw = default_max_weight(sect)
     local idx = get_entry_index(old_id) or #MEDPACK_TABLE + 1
     pr(true, strformat("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, true))
@@ -496,6 +496,8 @@ end
 
 function update_contents(id, new_contents)
     local contents = get_contents(id)
+    pr(true, strformat("Updating medpack old contents %s", concat_pairs(contents)))
+    pr(true, strformat("old total items %s, old total weight %s", get_total_itms(id), get_total_weight(id)))
     for item, amount in pairs(new_contents) do
         local cond, value = rpmk_utils.contains(contents, item)
         if cond then
@@ -503,23 +505,29 @@ function update_contents(id, new_contents)
         else
             contents[item] = amount
         end
+        pr(true, strformat("adding %s %s to contents", amount, item))
     end
+    pr(true, strformat("new contents %s", concat_pairs(contents)))
     set_contents(id, contents)
     set_total_itms(id, sum(contents))
-    set_total_weight(id, calculate_total_weight(id, contents, get_base_weight(id)))
-    pr(true, strformat("Updating medpack %s, contents %s", id, concat_pairs(contents)))
+    set_total_weight(id, calculate_total_weight(id, new_contents, get_total_itms(id), get_base_weight(id)))
+    pr(true, strformat("new total items %s, new total weight %s", get_total_itms(id), get_total_weight(id)))
 end
 
-function calculate_total_weight(id, contents, base_weight)
-    if #contents <= 0 then return base_weight end    
-    local total_weight = get_total_weight(id) or (base_weight or 0.15)
+function get_item_weight(item)
+    return ini_drugs:r_float_ex(item, "inv_weight") or ini_medical:r_float_ex(item, "inv_weight") or ini_drink:r_float_ex(item, "inv_weight")
+end
+
+function calculate_total_weight(id, contents, total_items, base_weight)
+    if not total_items or total_items == 0 then return base_weight end    
+    local total_weight = get_total_weight(id) or base_weight
+    pr(true, strformat("total weight: %s", total_weight))
     for item, amount in pairs(contents) do
         for i=1, amount do
-            local itm_weight = ini_drugs:r_float_ex(item, "inv_weight") or ini_medical:r_float_ex(item, "inv_weight") or ini_drink:r_float_ex(item, "inv_weight")
-            total_weight = total_weight + itm_weight
+            total_weight = total_weight + get_item_weight(item)
         end
     end
-    pr(false, strformat("total weight: %s", total_weight))
+    
     return round_idp(total_weight, 2)
 end
   
@@ -713,7 +721,17 @@ add_functor("rpmk_medpack_unzip", unzip_condition_function, unzip_menu_function,
 -- Drag/Drop repack
 -------------------------------
 
+function drop_condition_met(item, medpack)
+    local total_weight = get_total_weight(medpack:id())
+    local item_weight = get_item_weight(item:section())
+    local max_weight = get_max_weight(medpack:id())
+    pr(true, strformat("medpack weight at %s, is %s's weight %s over %s", total_weight, item:section(), item_weight, max_weight))
+    return item_weight + total_weight < max_weight
+    
+end
+
 function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
+    pr(true, "on item drag dropped")
     local p_1, p_2 = obj_1:parent(), obj_2:parent()
 
     if not ((p_1 and p_1:id() == AC_ID) and (p_2 and p_2:id() == AC_ID)) then
@@ -727,8 +745,10 @@ function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
 
     if not drop_condition_met(itm, medpack) then return end
 
-    update_contents(medpack:id(), {itm:section()})
+    update_contents(medpack:id(), build_contents({itm:section()}))
     alife_release(itm)
+
+    --rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(itm:section())), get_medpack_type(medpack:id()))
 end
 
 -------------------------------
