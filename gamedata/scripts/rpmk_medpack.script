@@ -16,6 +16,7 @@ get_string = game.translate_string
 sum = rpmk_utils.sum
 concat_pairs = rpmk_utils.concat_pairs
 index_of = rpmk_utils.index_of
+lower = string.lower
 
 -- Configs
 
@@ -435,6 +436,9 @@ function medpack_descr(obj, sect)
             end
             itr = itr + 1
         end
+        if #items_str <= 0 then
+            items_str = "\\n"
+        end
         return base_descr..contents_str..items_str..props_str..storage_str..repack_str..zip_status_str
     end
     return build_string()
@@ -500,7 +504,7 @@ function unpack_all(obj)
     for item, amount in pairs(contents) do
         for i=1, amount do
             alife_create_item(item, db.actor)
-            rpmk_utils.display_msg("st_unpacked_item", med_itm_name(item), get_medpack_type(obj:id()))
+            rpmk_utils.display_msg("st_unpacked_item", lower(med_itm_name(item)), get_medpack_type(obj:id()))
         end
         contents[index_of(contents, item, true)] = nil
     end
@@ -515,7 +519,7 @@ function repack_all(obj)
     local med_items = get_medpack_comptible_items()
     for idx, item in ipairs(med_items) do
         alife_release(item)
-        rpmk_utils.display_msg("st_repacked_item", med_itm_name(item), get_medpack_type(obj:id()))
+        rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(item)), get_medpack_type(obj:id()))
     end
     update_contents(obj:id(), build_contents(med_items))
 end

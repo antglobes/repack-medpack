@@ -13,7 +13,7 @@
 
     <file name="ui\ui_rpmk_icons_news_manager">
         <texture id="ui_icon_news_tip_medpack_basic" x="0" y="0" width="100" height="50" />
-        <texture id="ui_icon_news_tip_medpack_army" x="0" y="1" width="100" height="50" />
-        <texture id="ui_icon_news_tip_medpack_sci" x="0" y="2" width="100" height="50" />
+        <texture id="ui_icon_news_tip_medpack_army" x="0" y="100" width="100" height="50" />
+        <texture id="ui_icon_news_tip_medpack_sci" x="0" y="50" width="100" height="50" />
     </file>
 </w>

@@ -43,6 +43,7 @@ function sum(tbl)
 end
 
  function display_msg(text_string, values, medpack_type)
+    printf("Displaying message: %s with icon for %s", get_translation(text_string, values), medpack_type)
     news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 6000)
 end
 
