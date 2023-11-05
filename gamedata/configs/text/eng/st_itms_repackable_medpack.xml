@@ -191,11 +191,11 @@
 
 	<!--Functor Strings-->
 	<string id="st_rpmk_menu_unpack">
-		<text>Unpack</text>
+		<text>unpack all</text>
 	</string>
 
 	<string id="st_rpmk_menu_repack">
-		<text>Fill</text>
+		<text>repack all</text>
 	</string>
 
 	<string id="st_rpmk_menu_zip">
