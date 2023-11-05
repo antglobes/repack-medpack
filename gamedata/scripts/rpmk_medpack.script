@@ -78,6 +78,16 @@ closed_to_zip_status = {
     [false] = "unzipped"
 }
 
+sect_to_exclude = {
+    ["identity_immunities"] = true,
+    ["booster"] = true,
+    ["medkit_ai1"] = true,
+    ["medkit_ai2"] = true,
+    ["medkit_ai3"] = true,
+    ["booster_multi"] = true,
+
+}
+
 -------------------------------
 -- Table Functions
 -------------------------------
@@ -187,7 +197,7 @@ function mt_new_entry(medpack)
     local sect = medpack:section()
     local _contents =  default_contents(sect)
     local ti = sum(_contents)
-    local bw = ini_medpack:r_value(sect, "inv_weight")
+    local bw = default_base_weight(sect)
     local tw = calculate_total_weight(_id, _contents, bw)
     local mw = default_max_weight(sect)
     
@@ -330,6 +340,7 @@ function default_max_weight(sect)
 end
 
 function default_contents(sect)
+    pr(true, strformat("Getting contents for: %s", sect))
     return build_contents(parse_list(ini_manager, "package_content", sect))
 end
 
@@ -397,20 +408,14 @@ end
 
 function get_medpack_comptible_items()
     local items_sects = {}
-    for _, config in pairs({ini_drugs, ini_medical, ini_drink}) do
-        for idx, value in pairs(config:get_sections()) do
-            table.insert(items_sects, #items_sects + 1, value)
-        end
-    end
-
+    
     pr(true, strformat("med items sections: %s", concat(items_sects)))
     local compatible_itms = {}
     local function search(temp, obj)
         pr(true, strformat("Is %s a medpack compatible item?", obj:section()))
-        for _, sect in pairs(items_sects) do
-            if sect == obj:section() then
-                compatible_itms[#compatible_itms + 1] = obj
-            end
+        if is_medpack_compatible(obj:section()) and not sect_to_exclude[obj:section()] then
+            items_sects[#items_sects + 1] = obj:section()
+            compatible_itms[#compatible_itms + 1] = obj
         end
     end
 
@@ -502,6 +507,7 @@ function update_contents(id, new_contents)
     set_contents(id, contents)
     set_total_itms(id, sum(contents))
     set_total_weight(id, calculate_total_weight(id, contents, get_base_weight(id)))
+    pr(true, strformat("Updating medpack %s, contents %s", id, concat_pairs(contents)))
 end
 
 function calculate_total_weight(id, contents, base_weight)
