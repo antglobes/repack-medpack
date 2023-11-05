@@ -15,8 +15,10 @@ end
 get_string = game.translate_string
 sum = rpmk_utils.sum
 concat_pairs = rpmk_utils.concat_pairs
+concat = rpmk_utils.concat
 index_of = rpmk_utils.index_of
 lower = string.lower
+collect_section = utils_data.collect_section
 
 -- Configs
 
@@ -169,7 +171,10 @@ function is_medpack_empty(medpack)
 end
 
 function is_medpack_full(medpack)
-    return get_total_weight(medpack:id()) < get_max_weight(medpack:id())
+    local tw = get_total_weight(medpack:id())
+    local mw = get_max_weight(medpack:id())
+    pr(true, strformat("total weight: %s type %s max weight: %s type %s", tw, type(tw),mw, type(mw) ))
+    return tw >= mw
 end
 
 -------------------------------
@@ -321,7 +326,7 @@ end
 
 function default_max_weight(sect)
     pr(true, strformat("Getting max weight for: %s", sect))
-    return ini_medpack:r_value(sect, "max_weight")
+    return ini_medpack:r_float_ex(sect, "max_weight")
 end
 
 function default_contents(sect)
@@ -330,7 +335,7 @@ end
 
 function default_base_weight(sect)
     pr(true, strformat("Getting max weight for: %s", sect))
-    return ini_medpack:r_value(sect, "inv_weight")
+    return ini_medpack:r_float_ex(sect, "inv_weight")
 end
 
 -------------------------------
@@ -388,6 +393,29 @@ function build_contents(contents)
         end
     end
     return ordered_contents
+end
+
+function get_medpack_comptible_items()
+    local items_sects = {}
+    for _, config in pairs({ini_drugs, ini_medical, ini_drink}) do
+        for idx, value in pairs(config:get_sections()) do
+            table.insert(items_sects, #items_sects + 1, value)
+        end
+    end
+
+    pr(true, strformat("med items sections: %s", concat(items_sects)))
+    local compatible_itms = {}
+    local function search(temp, obj)
+        pr(true, strformat("Is %s a medpack compatible item?", obj:section()))
+        for _, sect in pairs(items_sects) do
+            if sect == obj:section() then
+                compatible_itms[#compatible_itms + 1] = obj
+            end
+        end
+    end
+
+    db.actor:iterate_inventory(search, nil)
+    return compatible_itms, items_sects
 end
 
 -- Colour Related
@@ -476,7 +504,8 @@ function update_contents(id, new_contents)
     set_total_weight(id, calculate_total_weight(id, contents, get_base_weight(id)))
 end
 
-function calculate_total_weight(id, contents, base_weight)    
+function calculate_total_weight(id, contents, base_weight)
+    if #contents <= 0 then return base_weight end    
     local total_weight = get_total_weight(id) or (base_weight or 0.15)
     for item, amount in pairs(contents) do
         for i=1, amount do
@@ -521,12 +550,12 @@ function repack_all(obj)
         rpmk_utils.display_msg("st_full_medpack", nil, get_medpack_type(obj:id()))
         return 
     end
-    local med_items = get_medpack_comptible_items()
+    local med_items, med_sects = get_medpack_comptible_items()
     for idx, item in ipairs(med_items) do
         alife_release(item)
-        rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(item)), get_medpack_type(obj:id()))
+        rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(item:section())), get_medpack_type(obj:id()))
     end
-    update_contents(obj:id(), build_contents(med_items))
+    update_contents(obj:id(), build_contents(med_sects))
 end
 
 
