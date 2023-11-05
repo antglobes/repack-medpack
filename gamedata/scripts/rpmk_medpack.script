@@ -22,7 +22,7 @@ collect_section = utils_data.collect_section
 
 -- Configs
 
-ini_medpack = ini_file_ex("items\\items\\items_repackable_medpack.ltx")
+ini_medpack = ini_file_ex("items\\items\\items_repackable_medpack.ltx", true)
 ini_medical = ini_file_ex("items\\items\\items_medical.ltx")
 ini_drugs = ini_file_ex("items\\items\\items_drugs.ltx")
 ini_drink = ini_file_ex("items\\items\\items_drink.ltx")
@@ -31,6 +31,7 @@ ini_manager = ini_file_ex("items\\settings\\itms_manager.ltx")
 -- Other
 
 bullet_point = get_string("st_medpack_descr_bullet_point")
+weight_unit = get_string("st_kg")
 
 -- Globals & Constants
 MEDPACK_TABLE = {}
@@ -439,6 +440,19 @@ function ui_item.get_obj_desc(obj)
     end
 end
 
+local ui_info_item_update = utils_ui.UIInfoItem.Update
+function utils_ui.UIInfoItem:Update(obj, sec, flags)
+    ui_info_item_update(self, obj, sec, flags)
+    if obj and is_repackable_medpack(obj) then
+        pr(true, strformat("Writing %s to medpack", get_total_weight(obj:id())))
+        --ini_medpack:w_value(obj:section(), "inv_weight", get_total_weight(obj:id()))
+        self.weight:SetText(get_total_weight(obj:id()).." "..weight_unit)
+    end
+
+   
+end
+
+
 function medpack_descr(obj, sect)
     if not is_repackable_medpack(obj) then return end
     local descr = ""
@@ -481,6 +495,9 @@ function medpack_descr(obj, sect)
     end
     return build_string()
 end    
+
+-- Monkey patch UIInfoItem:Update for weight correction
+
 
 -- Medpack Info
 
