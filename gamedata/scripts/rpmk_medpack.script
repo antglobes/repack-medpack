@@ -165,10 +165,8 @@ end
 
 function is_medpack_useable(medpack)
     local condition = medpack:condition()
-    if condition > 39 then
-        return true
-    end
-    return false
+    printf("medpack condition: %s:%s", medpack:section(), condition)
+    return math.ceil(condition * 100) > 39
 end
 
 
@@ -622,7 +620,7 @@ function unpack_action(obj, bag, mode)
 
     --rpmk_gui.display_medpack_gui(true, nil, medpack)
     unpack_all(obj)
-    switch_medpack(obj, false)
+    --switch_medpack(obj, false)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
@@ -655,7 +653,7 @@ function repack_medpack_action(obj, bag, mode)
 
     --rpmk_gui.display_medpack_gui(nil, true, medpack)
     repack_all(obj)
-    switch_medpack(obj, true)
+    --switch_medpack(obj, true)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
@@ -684,11 +682,11 @@ function zip_menu_function(obj, bag, mode)
 end
 
 function zip_action(obj, bag, mode)
-    local medpack = obj and is_repackable_medpack(obj)
+    local medpack = is_repackable_medpack(obj) and  obj
     if not medpack then return end
 
     local contents = get_contents(medpack:id())
-    local closed_sect = switch_status(medpack:sect())
+    local closed_sect = switch_status(medpack:section())
     local obj = alife_create_item(closed_sect, db.actor)
     mt_replace_entry(medpack:id(), obj.id, closed_sect, contents, false)
     alife_release(medpack)
@@ -720,11 +718,11 @@ function unzip_menu_function(obj, bag, mode)
 end
 
 function unzip_action(obj, bag, mode)
-    local medpack = obj and is_repackable_medpack(obj)
+    local medpack = is_repackable_medpack(obj) and obj
     if not medpack then return end
 
     local contents = get_contents(medpack:id())
-    local open_sect = switch_status(medpack:sect())
+    local open_sect = switch_status(medpack:section())
     local obj = alife_create_item(open_sect, db.actor)
     mt_replace_entry(medpack:id(), obj.id, open_sect, contents, false)
     alife_release(medpack)
