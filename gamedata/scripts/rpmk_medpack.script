@@ -6,23 +6,40 @@ function pr(debug, ...)
     end
 end
 
-get_string = game.translate_string
+------------------
+-- Imports
+------------------
 
-ini_medpack = ini_file_ex("items\\items\\itms_repackable_medpack.ltx")
+-- Functions
+
+get_string = game.translate_string
+sum = rpmk_utils.sum
+concat_pairs = rpmk_utils.concat_pairs
+index_of = rpmk_utils.index_of
+
+-- Configs
+
+ini_medpack = ini_file_ex("items\\items\\items_repackable_medpack.ltx")
 ini_medical = ini_file_ex("items\\items\\items_medical.ltx")
 ini_drugs = ini_file_ex("items\\items\\items_drugs.ltx")
 ini_drink = ini_file_ex("items\\items\\items_drink.ltx")
 ini_manager = ini_file_ex("items\\settings\\itms_manager.ltx")
 
+-- Other
+
 bullet_point = get_string("st_medpack_descr_bullet_point")
 
+-- Globals & Constants
 MEDPACK_TABLE = {}
 
+function get_colour_string(name)
+    return strformat("%c[%s]", name)
+end
 
 -- Once a medpack enters the player's inv add to table
 -- Store section, id, package contents, capacity, each item weight + medpack weight, max weight threshold
 -- if unpacking decrease only package contents
--- if fill add to package contents and for each item added also add it's weight
+-- if repack add to package contents and for each item added also add it's weight
 -- above max weight threshold and medpack slowly starts to decrease in condition (possible update icon in stages)
 -- if medpack is open, when zipped, create closed medpack with package contents, remove open medpack
 -- if medpack is closed, when unzipped, create open medpack with package contents, remove closed medpack
@@ -36,6 +53,60 @@ MEDPACK_TABLE = {}
 -- total_weight = the sum weight of all items in the medpack plus the medpack weight
 -- max_weight = total weight limit that the medpack can contain
 -- Remove all kits of medpacks and replace all trader profiles with medpack with repackable version
+
+
+
+
+
+
+
+
+-------------------------------
+-- Tables
+-------------------------------
+
+zip_colour = {
+    ["zipped"] = get_colour_string("d_green"),
+    ["unzipped"] = get_colour_string("d_red")
+}
+
+closed_to_zip_status = {
+    [true] = "zipped",
+    [false] = "unzipped"
+}
+
+-------------------------------
+-- Table Functions
+-------------------------------
+
+function vanilla_to_repackable(sect, closed)
+    local closed_sects = {
+        ["medkit_ai1"] = "medpack_closed_basic",
+        ["medkit_ai2"] = "medpack_closed_army",
+        ["medkit_ai3"] = "medpack_closed_sci"
+    }
+    local open_sects = {
+        ["medkit_ai1"] = "medpack_open_basic",
+        ["medkit_ai2"] = "medpack_open_army",
+        ["medkit_ai3"] = "medpack_open_sci"
+    }
+    if closed then
+        return closed_sects[sect]
+    end
+    return open_sects[sect]
+end
+
+function switch_status(sect)
+    local medpack_sect = {
+        ["medpack_closed_basic"] = "medpack_open_basic",
+        ["medpack_closed_army"] = "medpack_open_army",
+        ["medpack_closed_sci"] = "medpack_open_sci",
+        ["medpack_open_basic"] = "medpack_closed_basic",
+        ["medpack_open_army"] = "medpack_closed_army",
+        ["medpack_open_sci"] = "medpack_closed_sci"
+    }
+    return medpack_sect[sect]
+end
 
 -------------------------------
 -- Bools
@@ -94,7 +165,7 @@ function is_medpack_full(medpack)
 end
 
 function is_medpack_empty(medpack)
-    local capacity = get_capacity(medpack:id())
+    local capacity = get_total_itms(medpack:id())
     if capacity > 0 then
         return false
     end
@@ -107,62 +178,6 @@ function is_medpack_max_weight(medpack)
     return total_weight < max_weight
 end
 
--------------------------------
--- Tables
--------------------------------
-
-function vanilla_to_repackable(sect, closed)
-    local closed_sects = {
-        ["medkit_ai1"] = "medpack_closed_basic",
-        ["medkit_ai2"] = "medpack_closed_army",
-        ["medkit_ai3"] = "medpack_closed_sci"
-    }
-    local open_sects = {
-        ["medkit_ai1"] = "medpack_open_basic",
-        ["medkit_ai2"] = "medpack_open_army",
-        ["medkit_ai3"] = "medpack_open_sci"
-    }
-    if closed then
-        return closed_sects[sect]
-    end
-    return open_sects[sect]
-end
-
-function open_to_closed_medpack(sect)
-    local otc_sects = {
-        ["medpack_open_basic"] = "medpack_closed_basic",
-        ["medpack_open_army"] = "medpack_closed_army",
-        ["medpack_open_sci"] = "medpack_closed_sci",
-    }
-    return otc_sects[sect]
-end
-
-function closed_to_open_medpack(sect)
-    local cto_sects = {
-        ["medpack_closed_basic"] = "medpack_open_basic",
-        ["medpack_closed_army"] = "medpack_open_army",
-        ["medpack_closed_sci"] = "medpack_open_sci",
-    }
-    return cto_sects[sect]
-end
-
-function get_colour(name)
-    return utils_xml.get_color(name)
-end
-
-function get_colour_string(name)
-    return strformat("%c[%s]", name)
-end
-
-zip_colour = {
-    ["zipped"] = get_colour_string("d_green"),
-    ["unzipped"] = get_colour_string("d_red")
-}
-
-closed_to_zip_status = {
-    [true] = "zipped",
-    [false] = "unzipped"
-}
 -------------------------------
 -- Track medpacks through table
 -------------------------------
@@ -201,7 +216,7 @@ function mt_remove_entry(id)
 end
 
 function mt_replace_entry(old_id, new_id, sect, _contents, _closed)
-    local ti = #_contents
+    local ti = sum(_contents)
     local mc  = default_max_capacity(sect)
     local bw = default_base_weight(sect)
     local tw = calculate_total_weight(new_id, _contents, bw)
@@ -327,7 +342,7 @@ function default_max_weight(sect)
 end
 
 function default_contents(sect)
-    return parse_list(ini_manager, "package_content", sect)
+    return build_contents(parse_list(ini_manager, "package_content", sect))
 end
 
 function default_base_weight(sect)
@@ -338,6 +353,30 @@ end
 -------------------------------
 -- Common Medpack Functions
 -------------------------------
+
+function create_new_medpack(obj, closed)
+    if is_vanilla_medpack(obj) then
+        local contents = default_contents(obj:section())
+        local sect = obj:section()
+        local repack_sect = vanilla_to_repackable(obj:section(), closed)
+        local medpack = alife_create_item(repack_sect, db.actor)
+        alife_release(obj)
+        pr(true, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
+        mt_replace_entry(nil, medpack.id, repack_sect, contents, closed)
+
+    elseif is_repackable_medpack(obj) then
+        local contents = get_contents(obj:id())
+        local sect = obj:section()
+        local repack_sect = switch_status(sect)
+        local medpack = alife_create_item(repack_sect, db.actor)
+        alife_release(obj)
+        pr(true, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
+        mt_replace_entry(nil, medpack.id, repack_sect, contents, closed)
+    end
+end
+
+-- Medpack Creation & Var building
+
 base_use_package = itms_manager.use_package
 function itms_manager.use_package(obj)
     base_use_package(obj)
@@ -350,27 +389,26 @@ function itms_manager.use_package_random(obj)
     create_new_medpack(obj, false)
 end
 
-function create_new_medpack(obj, closed)
-    if is_vanilla_medpack(obj) then
-        local contents = default_contents(obj:section())
-        local sect = obj:section()
-        local repack_sect = vanilla_to_repackable(obj:section(), closed)
-        local medpack = alife_create_item(repack_sect, db.actor)
-        alife_release(obj)
-        pr(true, strformat("Creating %s , with the contents: %s", repack_sect, table.concat(contents, ", ")))
-        mt_replace_entry(nil, medpack.id, repack_sect, contents, closed)
+function build_contents(contents)
+    local ordered_contents = {}
+ 
+    for _, item in ipairs(contents) do
+        if ordered_contents[item] then
+            ordered_contents[item] = ordered_contents[item] + 1
+        else
+            ordered_contents[item] = 1
+        end
     end
+    return ordered_contents
 end
 
-function med_itm_name(sect)
-    if ini_drugs:section_exist(sect) then
-        return get_string(ini_drugs:r_value(sect, "inv_name"))
-    elseif ini_medical:section_exist(sect) then
-        return get_string(ini_medical:r_value(sect, "inv_name"))
-    elseif ini_drink:section_exist(sect) then
-        return get_string(ini_drink:r_value(sect, "inv_name"))
-    end  
+-- Colour Related
+
+function get_colour(name)
+    return utils_xml.get_color(name)
 end
+
+-- Medpack Description 
 
 base_obj_desc = ui_item.get_obj_desc
 function ui_item.get_obj_desc(obj)
@@ -399,46 +437,63 @@ function medpack_descr(obj, sect)
         local storage_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_storage_descr").."\\n"
         local repack_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_repack_descr").."\\n"
         local closed_status = get_closed_status(obj:id())
-        pr(true, strformat("medpack id=%s", obj:id()))
-        pr(true, strformat("closed status=%s", closed_status))
         local zip_status = closed_to_zip_status[closed_status]
         local zip_status_str = zip_colour[zip_status].." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_"..zip_status.."_descr").."\\n"
         local end_char = "\\n"
 
         local items_str = ""
-        for i=1, total_items do
-            if i == total_items then
+        local itr = 1
+        for item, amount in pairs(contents) do
+            if itr == total_items then
                 end_char = "\\n \\n"
-            end        
-            items_str = items_str..strformat("%s %s %s %s %s", cyan_clr, bullet_point, default_clr, med_itm_name(contents[i]), end_char)
+            end   
+            for i=1, amount do
+                     
+                items_str = items_str..strformat("%s %s %s %s %s", cyan_clr, bullet_point, default_clr, med_itm_name(item), end_char)
+            end
+            itr = itr + 1
         end
         return base_descr..contents_str..items_str..props_str..storage_str..repack_str..zip_status_str
     end
     return build_string()
 end    
 
+-- Medpack Info
+
+function med_itm_name(sect)
+    if ini_drugs:section_exist(sect) then
+        return get_string(ini_drugs:r_value(sect, "inv_name"))
+    elseif ini_medical:section_exist(sect) then
+        return get_string(ini_medical:r_value(sect, "inv_name"))
+    elseif ini_drink:section_exist(sect) then
+        return get_string(ini_drink:r_value(sect, "inv_name"))
+    end  
+end
+
 function update_contents(id, new_contents)
     local contents = get_contents(id)
-    for k, v in pairs(new_contents) do
-        local cond, value = rpmk_utils.contains(contents, k)
+    for item, amount in pairs(new_contents) do
+        local cond, value = rpmk_utils.contains(contents, item)
         if cond then
-                contents[k] = value + v
+                contents[item] = value + amount
         else
-            contents[k] = v
+            contents[item] = amount
         end
     end
     set_contents(id, contents)
-    set_capcity(id, #contents)
+    set_total_itms(id, sum(contents))
     set_total_weight(id, calculate_total_weight(id, contents, get_base_weight(id)))
 end
 
 function calculate_total_weight(id, contents, base_weight)    
     local total_weight = get_total_weight(id) or (base_weight or 0.15)
-    for k, v in pairs(contents) do
-        local itm_weight = ini_drugs:r_value(v, "inv_weight") or ini_medical:r_value(v, "inv_weight") or ini_drink:r_value(v, "inv_weight")
-        pr(false, strformat("section: %s, itm_weight: %s, total weight: %s", v, itm_weight, total_weight))
-        total_weight = total_weight + itm_weight
+    for item, amount in pairs(contents) do
+        for i=1, amount do
+            local itm_weight = ini_drugs:r_value(item, "inv_weight") or ini_medical:r_value(item, "inv_weight") or ini_drink:r_value(item, "inv_weight")
+            total_weight = total_weight + itm_weight
+        end
     end
+    pr(false, strformat("total weight: %s", total_weight))
     return round_idp(total_weight, 2)
 end
 
@@ -452,8 +507,41 @@ function get_medpack_type(id)
     end
 end
 
+-- Medpack Functionality
+
+function unpack_all(obj)
+    if is_medpack_empty(obj) then
+        rpmk_utils.display_msg("st_empty_medpack", nil, get_medpack_type(obj:id()))
+        return 
+    end
+    local contents = get_contents(obj:id())
+    for item, amount in pairs(contents) do
+        for i=1, amount do
+            alife_create_item(item, db.actor)
+            rpmk_utils.display_msg("st_unpacked_item", med_itm_name(item), get_medpack_type(obj:id()))
+        end
+        contents[index_of(contents, item, true)] = nil
+    end
+    update_contents(obj:id(), build_contents(contents))
+end
+
+function repack_all(obj)
+    if is_medpack_full(obj) then
+        rpmk_utils.display_msg("st_full_medpack", nil, get_medpack_type(obj:id()))
+        return 
+    end
+    local med_items = get_medpack_comptible_items()
+    for idx, item in ipairs(med_items) do
+        alife_release(item)
+        rpmk_utils.display_msg("st_repacked_item", med_itm_name(item), get_medpack_type(obj:id()))
+    end
+    update_contents(obj:id(), build_contents(med_items))
+end
+
+
+
 ---------------------------------------
--- Functors
+-- Custom Functors
 ---------------------------------------
 
 -- Unpack
@@ -468,7 +556,7 @@ end
 function unpack_condition_function(obj, bag, mode)
     local p = obj:parent()
 	if not (p and p:id() == AC_ID) then return end
-    if not rpmk_utils.is_repackable_medpack(obj) then return end
+    if not is_repackable_medpack(obj) then return end
 
     return unpack_condition_met(obj)
 end
@@ -478,10 +566,12 @@ function unpack_menu_function(obj, bag, mode)
 end
 
 function unpack_action(obj, bag, mode)
-    local medpack = obj and rpmk_utils.is_repackable_medpack(obj)
+    local medpack = obj and is_repackable_medpack(obj)
     if not medpack then return end
 
-    rpmk_gui.display_medpack_gui(true, nil, medpack)
+    --rpmk_gui.display_medpack_gui(true, nil, medpack)
+    unpack_all(obj)
+    create_new_medpack(obj, false)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
@@ -489,34 +579,36 @@ add_functor("rpmk_medpack_unpack", unpack_condition_function, unpack_menu_functi
 
 -- Fill 
 
-function fill_medpack_condition_met(obj)
+function repack_medpack_condition_met(obj)
     if obj and is_medpack_open(obj) and not is_medpack_full(obj) and not is_medpack_max_weight(obj) then
         return true
     end
     return false
 end
 
-function fill_medpack_conditon_function(obj, bag, mode)
+function repack_medpack_condition_function(obj, bag, mode)
     local p = obj:parent()
 	if not (p and p:id() == AC_ID) then return end
-    if not rpmk_utils.is_repackable_medpack(obj) then return end
+    if not is_repackable_medpack(obj) then return end
 
-    return fill_medpack_condition_met(obj)
+    return repack_medpack_condition_met(obj)
 end
 
-function fill_medpack_menu_function(obj, bag, mode)
-    return get_string("st_rpmk_menu_fill")
+function repack_medpack_menu_function(obj, bag, mode)
+    return get_string("st_rpmk_menu_repack")
 end
 
-function fill_medpack_action(obj, bag, mode)
-    local medpack = obj and rpmk_utils.is_repackable_medpack(obj)
+function repack_medpack_action(obj, bag, mode)
+    local medpack = obj and is_repackable_medpack(obj)
     if not medpack then return end
 
-    rpmk_gui.display_medpack_gui(nil, true, medpack)
+    --rpmk_gui.display_medpack_gui(nil, true, medpack)
+    repack_all(obj)
+    create_new_medpack(obj, true)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
-add_functor("rpmk_medpack_fill", fill_medpack_condition_function, fill_medpack_menu_function, nil, fill_medpack_action)
+add_functor("rpmk_medpack_repack", repack_medpack_condition_function, repack_medpack_menu_function, nil, repack_medpack_action)
 
 
 -- Zip
@@ -528,10 +620,10 @@ function zip_condition_met(obj)
     return false
 end
 
-function zip_conditon_function(obj, bag, mode)
+function zip_condition_function(obj, bag, mode)
     local p = obj:parent()
 	if not (p and p:id() == AC_ID) then return end
-    if not rpmk_utils.is_repackable_medpack(obj) then return end
+    if not is_repackable_medpack(obj) then return end
 
     return zip_condition_met(obj)
 end
@@ -545,7 +637,7 @@ function zip_action(obj, bag, mode)
     if not medpack then return end
 
     local contents = get_contents(medpack:id())
-    local closed_sect = open_to_closed_medpack(medpack:sect())
+    local closed_sect = switch_status(medpack:sect())
     local obj = alife_create_item(closed_sect, db.actor)
     mt_replace_entry(medpack:id(), obj.id, closed_sect, contents, false)
     alife_release(medpack)
@@ -564,7 +656,7 @@ function unzip_condition_met(obj)
     return false
 end
 
-function unzip_conditon_function(obj, bag, mode)
+function unzip_condition_function(obj, bag, mode)
     local p = obj:parent()
 	if not (p and p:id() == AC_ID) then return end
     if not is_repackable_medpack(obj) then return end
@@ -577,11 +669,11 @@ function unzip_menu_function(obj, bag, mode)
 end
 
 function unzip_action(obj, bag, mode)
-    local medpack = obj and rpmk_utils.is_repackable_medpack(obj)
+    local medpack = obj and is_repackable_medpack(obj)
     if not medpack then return end
 
     local contents = get_contents(medpack:id())
-    local open_sect = closed_to_open_medpack(medpack:sect())
+    local open_sect = switch_status(medpack:sect())
     local obj = alife_create_item(open_sect, db.actor)
     mt_replace_entry(medpack:id(), obj.id, open_sect, contents, false)
     alife_release(medpack)
@@ -592,7 +684,7 @@ add_functor("rpmk_medpack_unzip", unzip_condition_function, unzip_menu_function,
 
 
 -------------------------------
--- Drag/Drop fill
+-- Drag/Drop repack
 -------------------------------
 
 function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)

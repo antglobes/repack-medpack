@@ -194,7 +194,7 @@
 		<text>Unpack</text>
 	</string>
 
-	<string id="st_rpmk_menu_fill">
+	<string id="st_rpmk_menu_repack">
 		<text>Fill</text>
 	</string>
 
@@ -203,5 +203,21 @@
 	</string>
 	<string id="st_rpmk_menu_unzip">
 		<text>Unzip</text>
+	</string>
+	
+	<!--News Manager Strings-->
+	<string id="st_empty_medpack">
+		<text>This medpack is empty</text>
+	</string>
+
+	<string id="st_full_medpack">
+		<text>This medpack is full</text>
+	</string>
+
+	<string id="st_unpacked_item">
+		<text>Unpacked %s</text>
+	</string>
+	<string id="st_repacked_item">
+		<text>Repacked %s</text>
 	</string>
 </string_table>

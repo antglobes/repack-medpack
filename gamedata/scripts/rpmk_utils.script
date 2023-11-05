@@ -31,3 +31,50 @@ function sum(tbl)
     end
     return sum
  end
+
+ function concat_pairs(tbl)
+    local result = ""
+    for key, value in pairs(tbl) do
+        result = result .. key ..  ", "
+    end
+    
+    result = result:sub(1, -3)
+    return result
+end
+
+ function display_msg(text_string, values, medpack_type)
+    news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 6000)
+end
+
+--- @author NLTP_ASHES
+--- Function used to know if there exists a translation for a given game string.
+--- @param str string
+--- @return boolean
+function has_translation(str)
+    return game.translate_string(str) ~= str
+end
+
+--- @author NLTP_ASHES
+--- Function used to know if there exists a translation for a given game string.
+--- @param str string
+--- @return boolean
+function get_translation(str,...)
+    if not has_translation(str) then return "No translation" end
+
+    local string = game.translate_string(str)
+
+    if (select('#',...) >= 1) then
+        local i = 0
+        local p = {...}
+        local function sr()
+            i = i + 1
+            if (type(p[i]) == "userdata") then
+                return "userdata"
+            end
+            return tostring(p[i])
+        end
+        string = string.gsub(string,"%%s",sr)
+    end
+
+    return string
+end
