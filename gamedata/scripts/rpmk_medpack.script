@@ -157,12 +157,7 @@ function is_medpack_useable(medpack)
     return false
 end
 
-function is_medpack_full(medpack)
-    if get_total_itms(medpack:id()) >= get_max_capacity(medpack:id()) then
-        return true
-    end
-    return false
-end
+
 
 function is_medpack_empty(medpack)
     local capacity = get_total_itms(medpack:id())
@@ -172,10 +167,8 @@ function is_medpack_empty(medpack)
     return true
 end
 
-function is_medpack_max_weight(medpack)
-    local max_weight = get_max_weight(medpack:id())
-    local total_weight = get_total_weight(medpack:id())
-    return total_weight < max_weight
+function is_medpack_full(medpack)
+    return get_total_weight(medpack:id()) < get_max_weight(medpack:id())
 end
 
 -------------------------------
@@ -187,14 +180,13 @@ function mt_new_entry(medpack)
     if is_medpack_in_table(_id) then return end
     local sect = medpack:section()
     local _contents =  default_contents(sect)
-    local ti = #_contents
-    local mc = default_max_capacity(sect)
+    local ti = sum(_contents)
     local bw = ini_medpack:r_value(sect, "inv_weight")
     local tw = calculate_total_weight(_id, _contents, bw)
     local mw = default_max_weight(sect)
     
-    MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, max_capacity=mc, total_weight=tw, max_weight=mw, base_weight=bw, closed=true}
-    pr(true, strformat("new entry: id=%s section=%s, contents=%s, total items=%s, max capcity=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s", _id, sect, _contents, ti, mc, tw, mw, bw, true))
+    MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=true}
+    pr(true, strformat("new entry: id=%s section=%s, contents=%s, total items=%s, max capcity=%s, total weight=%s, base weight=%s, closed=%s", _id, sect, _contents, ti, tw, mw, bw, true))
 end
 
 function get_entry_index(id)
@@ -217,13 +209,12 @@ end
 
 function mt_replace_entry(old_id, new_id, sect, _contents, _closed)
     local ti = sum(_contents)
-    local mc  = default_max_capacity(sect)
     local bw = default_base_weight(sect)
     local tw = calculate_total_weight(new_id, _contents, bw)
     local mw = default_max_weight(sect)
     local idx = get_entry_index(old_id) or #MEDPACK_TABLE + 1
-    pr(true, strformat("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, max capcity=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s", idx, new_id, sect, _contents, ti, mc, tw, mw, bw, true))
-    MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, max_capacity=mc, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed}
+    pr(true, strformat("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, true))
+    MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed}
 end
 
 function mt_set_var(id, var, value)
@@ -287,10 +278,6 @@ function get_contents(id)
     return mt_get_var(id, "contents")
 end
 
-function get_max_capacity(id)
-    return mt_get_var(id, "max_capacity")
-end
-
 function get_total_itms(id)
     return mt_get_var(id, "total_itms")
 end
@@ -330,11 +317,6 @@ end
 -------------------------------
 -- Default Medpack vars
 -------------------------------
-
-function default_max_capacity(sect)
-    pr(true, strformat("Getting max weight for: %s", sect))
-    return ini_medpack:r_value(sect, "max_capcity")
-end
 
 function default_max_weight(sect)
     pr(true, strformat("Getting max weight for: %s", sect))
@@ -489,14 +471,14 @@ function calculate_total_weight(id, contents, base_weight)
     local total_weight = get_total_weight(id) or (base_weight or 0.15)
     for item, amount in pairs(contents) do
         for i=1, amount do
-            local itm_weight = ini_drugs:r_value(item, "inv_weight") or ini_medical:r_value(item, "inv_weight") or ini_drink:r_value(item, "inv_weight")
+            local itm_weight = ini_drugs:r_float_ex(item, "inv_weight") or ini_medical:r_float_ex(item, "inv_weight") or ini_drink:r_float_ex(item, "inv_weight")
             total_weight = total_weight + itm_weight
         end
     end
     pr(false, strformat("total weight: %s", total_weight))
     return round_idp(total_weight, 2)
 end
-
+  
 function get_medpack_type(id)
     local section = get_section(id)
     for _, pattern in pairs({"(medpack_closed_)", "(medpack_open_)"}) do
@@ -580,7 +562,7 @@ add_functor("rpmk_medpack_unpack", unpack_condition_function, unpack_menu_functi
 -- Fill 
 
 function repack_medpack_condition_met(obj)
-    if obj and is_medpack_open(obj) and not is_medpack_full(obj) and not is_medpack_max_weight(obj) then
+    if obj and is_medpack_open(obj) and not is_medpack_full(obj) then
         return true
     end
     return false
