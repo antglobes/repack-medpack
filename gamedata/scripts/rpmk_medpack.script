@@ -338,22 +338,27 @@ end
 -------------------------------
 
 function create_new_medpack(obj, closed)
-    if is_vanilla_medpack(obj) then
+    if is_vanilla_medpack(obj) and not is_medpack_in_table(obj:id()) then
         local contents = default_contents(obj:section())
         local sect = obj:section()
         local repack_sect = vanilla_to_repackable(obj:section(), closed)
+        alife():release(alife_object(obj:id()), true)
         local medpack = alife_create_item(repack_sect, db.actor)
-        alife_release(obj)
+        --alife_release(obj)
         pr(true, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
         mt_replace_entry(nil, medpack.id, repack_sect, contents, closed)
+    end
+end
 
-    elseif is_repackable_medpack(obj) then
+function switch_medpack(obj, closed)
+    if is_repackable_medpack(obj) and is_medpack_in_table(obj:id()) then
         local contents = get_contents(obj:id())
         local sect = obj:section()
         local repack_sect = switch_status(sect)
         local medpack = alife_create_item(repack_sect, db.actor)
-        alife_release(obj)
-        pr(true, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
+        --alife_release(obj)
+        alife():release(alife_object(obj:id()), true)
+        pr(true, strformat("Switching medpack from %s to %s, with the contents: %s", sect, repack_sect, concat_pairs(contents)))
         mt_replace_entry(nil, medpack.id, repack_sect, contents, closed)
     end
 end
@@ -557,7 +562,7 @@ function unpack_action(obj, bag, mode)
 
     --rpmk_gui.display_medpack_gui(true, nil, medpack)
     unpack_all(obj)
-    create_new_medpack(obj, false)
+    switch_medpack(obj, false)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
@@ -590,7 +595,7 @@ function repack_medpack_action(obj, bag, mode)
 
     --rpmk_gui.display_medpack_gui(nil, true, medpack)
     repack_all(obj)
-    create_new_medpack(obj, true)
+    switch_medpack(obj, true)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
@@ -707,13 +712,11 @@ local function load_table(mdata)
 end
 
 local function actor_on_item_take(item)
-    printf("on take")
-    if not is_vanilla_medpack(item) or is_repackable_medpack(item) then return end
+    pr(true, "on take")
     local function search(temp, obj)
-        pr(true, strformat("is %s a medpack?", obj:section()))
-        if is_vanilla_medpack(obj) or is_repackable_medpack(obj) then
-            create_new_medpack(obj, true)
-        end
+        pr(false, strformat("is %s a medpack?", obj:section()))
+        create_new_medpack(obj, true)
+        
     end
 
     db.actor:iterate_inventory(search, nil)
