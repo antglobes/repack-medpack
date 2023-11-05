@@ -475,17 +475,17 @@ function medpack_descr(obj, sect)
         local zip_status = closed_to_zip_status[closed_status]
         local zip_status_str = zip_colour[zip_status].." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_"..zip_status.."_descr").."\\n"
         local end_char = "\\n"
-
+        local sect_colour = get_string("st_"..sect.."_descr_colour")
         local items_str = ""
         local itr = 1
         for item, amount in pairs(contents) do
-            if itr == total_items then
+            if index_of(contents, item) == #contents then
                 end_char = "\\n \\n"
             end   
-            for i=1, amount do
-                     
-                items_str = items_str..strformat("%s %s %s %s %s", cyan_clr, bullet_point, default_clr, med_itm_name(item), end_char)
-            end
+           
+            local amount_str = strformat("%s x%s", sect_colour, amount)         
+            items_str = items_str..strformat("%s %s %s %s %s %s", sect_colour, bullet_point, default_clr, med_itm_name(item), amount_str, end_char)
+            
             itr = itr + 1
         end
         if #items_str <= 0 then
