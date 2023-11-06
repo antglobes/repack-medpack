@@ -602,7 +602,7 @@ end
 -- Unpack
 
 function unpack_condition_met(obj)
-    if obj and is_medpack_open(obj) and not is_medpack_zipped then
+    if obj and is_medpack_open(obj) or is_medpack_closed and is_medpack_zipped  then
         return true
     end
     return false
@@ -635,7 +635,7 @@ add_functor("rpmk_medpack_unpack", unpack_condition_function, unpack_menu_functi
 -- Fill 
 
 function repack_medpack_condition_met(obj)
-    if obj and is_medpack_closed(obj) and is_medpack_zipped(obj) then
+    if obj and is_medpack_open(obj) and not is_medpack_zipped(obj) then
         return true
     end
     return false
