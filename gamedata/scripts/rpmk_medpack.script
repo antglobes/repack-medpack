@@ -169,14 +169,13 @@ function is_medpack_useable(medpack)
     return math.ceil(condition * 100) > 39
 end
 
+function is_medpack_zipped(medpack)
+    return get_zipped_status(medpack:id())
+end
 
 
 function is_medpack_empty(medpack)
-    local capacity = get_total_itms(medpack:id())
-    if capacity > 0 then
-        return false
-    end
-    return true
+    return get_total_itms(medpack:id()) < 0
 end
 
 function is_medpack_full(medpack)
@@ -200,8 +199,8 @@ function mt_new_entry(medpack)
     local tw = calculate_total_weight(_id, _contents, ti, bw)
     local mw = default_max_weight(sect)
     
-    MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=true}
-    pr(true, strformat("new entry: id=%s section=%s, contents=%s, total items=%s, max capcity=%s, total weight=%s, base weight=%s, closed=%s", _id, sect, _contents, ti, tw, mw, bw, true))
+    MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=true, zipped=true}
+    pr(true, strformat("new entry: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max_weight=%s, base weight=%s, closed=%s, zipped=%s", _id, sect, _contents, ti, tw, mw, bw, true, true))
 end
 
 function get_entry_index(id)
@@ -222,14 +221,14 @@ function mt_remove_entry(id)
     end
 end
 
-function mt_replace_entry(old_id, new_id, sect, _contents, _closed)
+function mt_replace_entry(old_id, new_id, sect, _contents, _closed, _zipped)
     local ti = sum(_contents)
     local bw = default_base_weight(sect)
     local tw = calculate_total_weight(new_id, _contents, ti, bw)
     local mw = default_max_weight(sect)
     local idx = get_entry_index(old_id) or #MEDPACK_TABLE + 1
-    pr(true, strformat("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, true))
-    MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed}
+    pr(true, strformat("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s, zipped=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, _closed, _zipped))
+    MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed, zipped=_zipped}
 end
 
 function mt_set_var(id, var, value)
@@ -313,6 +312,10 @@ function get_closed_status(id)
     return mt_get_var(id, "closed")
 end
 
+function get_zipped_status(id)
+    return mt_get_var(id, "zipped")
+end
+
 -------------------------------
 -- Setters
 -------------------------------
@@ -327,6 +330,10 @@ end
 
 function set_total_weight(id, total_weight)
     mt_set_var(id, "total_weight", total_weight)
+end
+
+function set_zipped_status(id, zipped)
+    mt_set_var(id, "zipped", zipped)
 end
 
 -------------------------------
@@ -352,7 +359,7 @@ end
 -- Common Medpack Functions
 -------------------------------
 
-function create_new_medpack(obj, closed)
+function create_new_medpack(obj, closed, zipped)
     if is_vanilla_medpack(obj) and not is_medpack_in_table(obj:id()) then
         local contents = default_contents(obj:section())
         local sect = obj:section()
@@ -361,11 +368,11 @@ function create_new_medpack(obj, closed)
         local medpack = alife_create_item(repack_sect, db.actor)
         --alife_release(obj)
         pr(true, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
-        mt_replace_entry(nil, medpack.id, repack_sect, contents, closed)
+        mt_replace_entry(nil, medpack.id, repack_sect, contents, closed, zipped)
     end
 end
 
-function switch_medpack(obj, closed)
+function switch_medpack(obj, closed, zipped)
     if is_repackable_medpack(obj) and is_medpack_in_table(obj:id()) then
         local contents = get_contents(obj:id())
         local sect = obj:section()
@@ -374,7 +381,7 @@ function switch_medpack(obj, closed)
         --alife_release(obj)
         alife():release(alife_object(obj:id()), true)
         pr(true, strformat("Switching medpack from %s to %s, with the contents: %s", sect, repack_sect, concat_pairs(contents)))
-        mt_replace_entry(nil, medpack.id, repack_sect, contents, closed)
+        mt_replace_entry(nil, medpack.id, repack_sect, contents, closed, zipped)
     end
 end
 
@@ -383,13 +390,13 @@ end
 base_use_package = itms_manager.use_package
 function itms_manager.use_package(obj)
     base_use_package(obj)
-    create_new_medpack(obj, false)
+    create_new_medpack(obj, false, true)
 end
 
 base_use_package_random = itms_manager.use_package_random
 function itms_manager.use_package_random(obj)
     base_use_package_random(obj)
-    create_new_medpack(obj, false)
+    create_new_medpack(obj, false, true)
 end
 
 function build_contents(contents)
@@ -446,8 +453,6 @@ function utils_ui.UIInfoItem:Update(obj, sec, flags)
         --ini_medpack:w_value(obj:section(), "inv_weight", get_total_weight(obj:id()))
         self.weight:SetText(get_total_weight(obj:id()).." "..weight_unit)
     end
-
-   
 end
 
 
@@ -584,6 +589,7 @@ function repack_all(obj)
         alife_release(item)
         rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(item:section())), get_medpack_type(obj:id()))
     end
+    -- get the weight of each item add to total weight, if total weight exceeds actual total weight then end loop, collect items removed, remove sects from med sects that aren't in items removed
     update_contents(obj:id(), build_contents(med_sects))
 end
 
@@ -596,7 +602,7 @@ end
 -- Unpack
 
 function unpack_condition_met(obj)
-    if obj and is_medpack_closed(obj) and not is_medpack_empty(obj) then
+    if obj and is_medpack_open(obj) and not is_medpack_zipped then
         return true
     end
     return false
@@ -629,7 +635,7 @@ add_functor("rpmk_medpack_unpack", unpack_condition_function, unpack_menu_functi
 -- Fill 
 
 function repack_medpack_condition_met(obj)
-    if obj and is_medpack_open(obj) and not is_medpack_full(obj) then
+    if obj and is_medpack_closed(obj) and is_medpack_zipped(obj) then
         return true
     end
     return false
@@ -663,7 +669,7 @@ add_functor("rpmk_medpack_repack", repack_medpack_condition_function, repack_med
 -- Zip
 
 function zip_condition_met(obj)
-    if obj and is_medpack_open(obj) and is_medpack_useable(obj) then
+    if obj and is_medpack_open(obj) and is_medpack_useable(obj) and not is_medpack_zipped(obj) then
         return true
     end
     return false
@@ -688,7 +694,7 @@ function zip_action(obj, bag, mode)
     local contents = get_contents(medpack:id())
     local closed_sect = switch_status(medpack:section())
     local obj = alife_create_item(closed_sect, db.actor)
-    mt_replace_entry(medpack:id(), obj.id, closed_sect, contents, false)
+    mt_replace_entry(medpack:id(), obj.id, closed_sect, contents, true, true)
     alife_release(medpack)
 end
 
@@ -699,7 +705,7 @@ add_functor("rpmk_medpack_zip", zip_condition_function, zip_menu_function, nil, 
 -- Unzip
 
 function unzip_condition_met(obj)
-    if obj and is_medpack_closed(obj) and is_medpack_useable(obj) then
+    if obj and is_medpack_closed(obj) and is_medpack_useable(obj) and is_medpack_zipped(obj) then
         return true
     end
     return false
@@ -724,7 +730,7 @@ function unzip_action(obj, bag, mode)
     local contents = get_contents(medpack:id())
     local open_sect = switch_status(medpack:section())
     local obj = alife_create_item(open_sect, db.actor)
-    mt_replace_entry(medpack:id(), obj.id, open_sect, contents, false)
+    mt_replace_entry(medpack:id(), obj.id, open_sect, contents, false, false)
     alife_release(medpack)
 end
 
@@ -785,7 +791,7 @@ local function actor_on_item_take(item)
     pr(true, "on take")
     local function search(temp, obj)
         pr(false, strformat("is %s a medpack?", obj:section()))
-        create_new_medpack(obj, true)
+        create_new_medpack(obj, true, true)
         
     end
 

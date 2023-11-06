@@ -220,10 +220,10 @@
 	</string>
 
 	<string id="st_rpmk_menu_zip">
-		<text>Zip</text>
+		<text>zip</text>
 	</string>
 	<string id="st_rpmk_menu_unzip">
-		<text>Unzip</text>
+		<text>unzip</text>
 	</string>
 	
 	<!--News Manager Strings-->
