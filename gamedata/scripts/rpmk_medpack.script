@@ -598,12 +598,27 @@ function repack_all(obj)
         rpmk_utils.display_msg("st_no_meds", nil, get_medpack_type(obj:id()))
         return
     end
+
+    local total_weight = get_total_weight(obj:id())
+    local max_weight = get_max_weight(obj:id())
+    local items_to_remove = {}
     local med_items, med_sects = get_medpack_comptible_items()
+    
     for idx, item in ipairs(med_items) do
-        alife_release(item)
-        rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(item:section())), get_medpack_type(obj:id()))
+        total_weight = total_weight + get_item_weight(item:section())
+        if total_weight >= max_weight then
+            pr(false, strformat("medpack is at/over max weight threshold cannot add %s", item:section()))
+            med_sects[index_of(med_sects, item:section())] = nil
+            rpmk_utils.display_msg("st_max_weight_item", lower(med_itm_name(item:section())), get_medpack_type(obj:id()))
+        else
+            rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(item:section())), get_medpack_type(obj:id()))
+            alife():release(alife_object(item:id()), true)
+        end     
     end
-    -- get the weight of each item add to total weight, if total weight exceeds actual total weight then end loop, collect items removed, remove sects from med sects that aren't in items removed
+
+    -- get the weight of each item add to total weight,
+    -- if total weight exceeds actual total weight then end loop, 
+    -- collect items removed, remove sects from med sects that aren't in items removed
     update_contents(obj:id(), build_contents(med_sects))
 end
 
