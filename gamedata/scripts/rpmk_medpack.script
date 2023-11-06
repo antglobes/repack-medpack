@@ -609,7 +609,7 @@ function repack_all(obj)
         if total_weight >= max_weight then
             pr(false, strformat("medpack is at/over max weight threshold cannot add %s", item:section()))
             med_sects[index_of(med_sects, item:section())] = nil
-            rpmk_utils.display_msg("st_max_weight_item", lower(med_itm_name(item:section())), get_medpack_type(obj:id()))
+            rpmk_utils.display_msg("st_full_medpack_item", lower(med_itm_name(item:section())), get_medpack_type(obj:id()))
         else
             rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(item:section())), get_medpack_type(obj:id()))
             alife():release(alife_object(item:id()), true)
@@ -795,7 +795,10 @@ function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
 
     if not is_medpack_compatible(itm:section()) or not is_medpack_open(medpack) then return end
 
-    if not drop_condition_met(itm, medpack) then return end
+    if not drop_condition_met(itm, medpack) then
+        rpmk_utils.display_msg("st_full_medpack_item", lower(med_itm_name(itm:section())), get_medpack_type(medpack:id()))
+        return 
+    end
 
     update_contents(medpack:id(), build_contents({itm:section()}))
     alife_release(itm)

@@ -245,7 +245,7 @@
 	<string id="st_repacked_item">
 		<text>Repacked %s</text>
 	</string>
-	<string id="st_max_weight_item">
-		<text>Medpack at max weight, cannot add %s</text>
+	<string id="st_full_medpack_item">
+		<text>Medpack full, cannot add %s</text>
 	</string>
 </string_table>
