@@ -175,7 +175,7 @@ end
 
 
 function is_medpack_empty(medpack)
-    return get_total_itms(medpack:id()) < 0
+    return get_total_itms(medpack:id()) <= get_base_weight(medpack:id())
 end
 
 function is_medpack_full(medpack)
@@ -277,6 +277,17 @@ function is_medpack_in_table(id)
         end
     end
     return false
+end
+
+function has_med_items()
+    local med_items = 0
+    local function search(temp, obj)
+        if is_medpack_compatible(obj:section()) then
+            med_items = med_items + 1
+        end
+    end
+    db.actor:iterate_inventory(search, nil)
+    return med_items > 0
 end
 
 -- Getters and Setters for medpack variables: "contents, capacity, total_weight, max_weight"
@@ -582,7 +593,10 @@ end
 function repack_all(obj)
     if is_medpack_full(obj) then
         rpmk_utils.display_msg("st_full_medpack", nil, get_medpack_type(obj:id()))
-        return 
+        return
+    elseif not has_med_items() then
+        rpmk_utils.display_msg("st_no_meds", nil, get_medpack_type(obj:id()))
+        return
     end
     local med_items, med_sects = get_medpack_comptible_items()
     for idx, item in ipairs(med_items) do
@@ -602,7 +616,7 @@ end
 -- Unpack
 
 function unpack_condition_met(obj)
-    if obj and is_medpack_open(obj) or is_medpack_closed and is_medpack_zipped  then
+    if obj and is_medpack_open(obj) or is_medpack_closed(obj) and is_medpack_zipped(obj)  then
         return true
     end
     return false
@@ -621,12 +635,14 @@ function unpack_menu_function(obj, bag, mode)
 end
 
 function unpack_action(obj, bag, mode)
-    local medpack = obj and is_repackable_medpack(obj)
+    local medpack = is_repackable_medpack(obj) and obj
     if not medpack then return end
 
     --rpmk_gui.display_medpack_gui(true, nil, medpack)
     unpack_all(obj)
-    --switch_medpack(obj, false)
+    if is_medpack_closed(medpack) and is_medpack_zipped(medpack) and is_medpack_empty(medpack) then
+        switch_medpack(obj, false, false)
+    end
 end
 
 local add_functor = custom_functor_autoinject.add_functor
@@ -654,7 +670,7 @@ function repack_medpack_menu_function(obj, bag, mode)
 end
 
 function repack_medpack_action(obj, bag, mode)
-    local medpack = obj and is_repackable_medpack(obj)
+    local medpack = is_repackable_medpack(obj) and obj
     if not medpack then return end
 
     --rpmk_gui.display_medpack_gui(nil, true, medpack)

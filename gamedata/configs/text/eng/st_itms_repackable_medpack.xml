@@ -234,6 +234,10 @@
 	<string id="st_full_medpack">
 		<text>This medpack is full</text>
 	</string>
+	
+	<string id="st_no_meds">
+		<text>No medpack compaitble items</text>
+	</string>
 
 	<string id="st_unpacked_item">
 		<text>Unpacked %s</text>
