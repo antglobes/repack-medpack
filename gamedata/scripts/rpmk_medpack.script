@@ -349,7 +349,7 @@ function get_total_itms(id)
 end
 
 function get_total_weight(id)
-    return mt_get_var(id, "total_weight")
+    return mt_get_var(id, "total_weight") or 0
 end
 
 function get_max_weight(id)
@@ -501,7 +501,9 @@ function sum_medpack_weight()
     local medpack_weight = 0
     if not has_medpacks_in_inv() then return medpack_weight end
     for idx, medpack in ipairs(get_medpacks()) do
-        medpack_weight = medpack_weight + get_total_weight(medpack:id())
+        local total_weight =  get_total_weight(medpack:id())
+        if not total_weight then total_weight = 0 end
+        medpack_weight = medpack_weight + total_weight
     end
     return medpack_weight
 end
@@ -550,7 +552,7 @@ function ui_inventory.UIInventory:UpdateWeight()
     ui_inv_update_weight(self)
     pr(true, "has medpack in inv in order to update")
     if not has_medpacks_in_inv() then return end
-    local updated_weight = sum_medpack_weight() + db.actor:get_total_weight()
+    local updated_weight = db.actor:get_total_weight() + sum_medpack_weight() or 0
     pr(true, strformat("Updating weight to %s", updated_weight))
     self.player_weight:SetText(strformat("%s %s", round_idp(updated_weight, 1), weight_unit))
 end
