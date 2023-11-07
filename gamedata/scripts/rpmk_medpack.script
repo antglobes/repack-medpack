@@ -667,7 +667,6 @@ end
 
 -- Medpack Condition
 
-
 function update_condition(medpack, result)
     pr(true, strformat("Material %s, Flag %s", result.material_name, result.material_flags))
     if not medpack or not result or not is_medpack_in_table(medpack:id()) then return end
@@ -689,6 +688,34 @@ function utils_item.is_degradable(obj, sec)
         return base_item_degrade(obj, sec)
     else
         return true
+    end
+end
+
+function drop_rand_itm(id)
+    local med_items, med_sects = get_medpack_comptible_items()
+    local rand_idx = math.random(1,#get_total_itms(id))
+    local rand_itm = med_items[rand_idx]
+    local obj = db.actor:object(rand_itm:section())
+    news_manager.relocate_item(db.actor, "out", rand_itm:section())
+    db.actor:drop_item(obj)
+    local contents = get_contents(id)
+    for item, amount in pairs(contents) do
+        if item == rand_itm:section() then
+            contents[item] = amount - 1
+        end
+    end
+    update_contents(id, contents)
+    return rand_itm:section()
+end
+
+function on_medpack_above_threshold()
+    for idx, medpack in pairs(get_medpacks()) do 
+        if get_total_weight(medpack:id()) > get_max_weight(medpack:id()) and (is_medpack_open(medpack) and not is_medpack_zipped(medpack))then
+            local item = drop_rand_itm(medpack:id())
+            rpmk_utils.display_msg("st_drop_medpack_item", lower(item), get_medpack_type(medpack:id()))
+            set_conditon(medpack, medpack:condition() - 0.01)
+            tmr = 0
+        end
     end
 end
 
@@ -944,13 +971,9 @@ end
 
 local function actor_on_item_take(item)
     pr(true, "on take")
-    local function search(temp, obj)
-        pr(false, strformat("is %s a medpack?", obj:section()))
-        create_new_medpack(obj, true, true)
-        
+    if is_vanilla_medpack(item) then
+        create_new_medpack(item, true, true)
     end
-
-    db.actor:iterate_inventory(search, nil)
 end
 
 local function on_item_drop(obj)
@@ -967,10 +990,20 @@ local function on_item_drop(obj)
 
 end
 
+local step = 5000
+local tmr = 0
+function on_update()
+    local tg = time_global()
+    if tmr > tg then return end
+    tmr = tg + step
+    on_medpack_above_threshold()
+end
+
 function on_game_start()
     pr(true, "registering callbacks")
     RegisterScriptCallback("actor_on_item_take", actor_on_item_take)
     RegisterScriptCallback("actor_on_item_drop", on_item_drop)
+    RegisterScriptCallback("actor_on_update", on_update)
     RegisterScriptCallback("save_state", save_table)
     RegisterScriptCallback("load_state", load_table)
     RegisterScriptCallback("ActorMenu_on_item_drag_drop", on_item_drag_dropped)
