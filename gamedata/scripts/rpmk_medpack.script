@@ -10,9 +10,13 @@ end
 -- Imports
 ------------------
 
+-- Classes
+local geometry_ray = demonized_geometry_ray.geometry_ray
+
 -- Functions
 
 get_string = game.translate_string
+get_translation = rpmk_utils.get_translation
 sum = rpmk_utils.sum
 concat_pairs = rpmk_utils.concat_pairs
 concat = rpmk_utils.concat
@@ -89,6 +93,38 @@ sect_to_exclude = {
 
 }
 
+surfaces = {
+    "grass", "earth", "tin", "water", "wood", "metal", "soft", "gravel", "bushes", "default",
+    "glass", "concrete", "dirt", "sand", "tree", "clothes", "tile", "asphalt", "furniture"
+}
+
+damages = {
+    ["grass"] = 0.001,
+    ["tin"] = 0.001,
+    ["soft"] = 0.001,
+    ["clothes"] = 0.001,
+    ["metal"] = 0.001,
+    ["concrete"] = 0.001,
+    ["tile"] = 0.001,
+    ["glass"] = 0.001,
+    ["tree"] = 0.001,
+    ["wood"] = 0.001,
+    ["dirt"] = 0.002,
+    ["furniture"] = 0.002,
+    ["earth"] = 0.0025,
+    ["asphalt"] = 0.003,
+    ["sand"] = 0.004,
+    ["default"] = 0.01,
+    ["water"] = 0.015,
+    ["bushes"] = 0.02,
+    ["gravel"] = 0.02,
+}
+
+damage_multi ={
+    ["basic"] = 10,
+    ["army"] = 6,
+    ["sci"] = 2
+}
 -------------------------------
 -- Table Functions
 -------------------------------
@@ -347,6 +383,11 @@ function set_zipped_status(id, zipped)
     mt_set_var(id, "zipped", zipped)
 end
 
+function set_conditon(medpack, condition)
+    if not is_medpack_in_table(medpack:id()) then return end
+    medpack:set_condition(condition)
+end
+
 -------------------------------
 -- Default Medpack vars
 -------------------------------
@@ -446,6 +487,19 @@ function get_colour(name)
     return utils_xml.get_color(name)
 end
 
+function get_condition_colour(condition)
+    condition = math.floor(condition * 100)
+    if condition > 75 then
+        return get_colour_string("d_green")
+    elseif condition <= 75 and condition >= 50  then
+        return get_colour_string("pda_yellow")
+    elseif condition < 50 and condition > 25 then
+        return get_colour_string("d_orange")
+    else
+        return get_colour_string("d_red")
+    end
+end
+
 -- Medpack Description 
 
 base_obj_desc = ui_item.get_obj_desc
@@ -475,6 +529,8 @@ function medpack_descr(obj, sect)
     local title_grey_clr = get_colour_string("ui_gray_3")
     local text_grey_clr = get_colour_string("ui_gray_2")
     local cyan_clr = get_colour_string("d_cyan")
+    local orange_clr = get_colour_string("d_orange")
+    local condition_clr = get_condition_colour(obj:condition())
 
     local total_items = get_total_itms(obj:id())
     local contents = get_contents(obj:id())
@@ -484,6 +540,7 @@ function medpack_descr(obj, sect)
         local contents_str = title_grey_clr.."CONTENTS:\\n"
         local props_str = title_grey_clr.."PROPERTIES:\\n"
         local storage_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_storage_descr").."\\n"
+        local condition_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." ".."Condition:"..condition_clr.." "..get_translation("st_medpack_condition_descr", math.floor(obj:condition() * 100)).."\\n"
         local repack_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_repack_descr").."\\n"
         local closed_status = get_closed_status(obj:id())
         local zip_status = closed_to_zip_status[closed_status]
@@ -505,7 +562,7 @@ function medpack_descr(obj, sect)
         if #items_str <= 0 then
             items_str = "\\n"
         end
-        return base_descr..contents_str..items_str..props_str..storage_str..repack_str..zip_status_str
+        return base_descr..contents_str..items_str..props_str..condition_str..storage_str..repack_str..zip_status_str
     end
     return build_string()
 end    
@@ -571,6 +628,17 @@ function get_medpack_type(id)
         end
     end
 end
+
+-- Medpack Condition
+
+
+
+
+
+
+
+
+
 
 -- Medpack Functionality
 
@@ -799,7 +867,7 @@ function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
         rpmk_utils.display_msg("st_full_medpack_item", lower(med_itm_name(itm:section())), get_medpack_type(medpack:id()))
         return 
     end
-
+    pr(false, strformat("medpack condition: %s", medpack:condition()))
     update_contents(medpack:id(), build_contents({itm:section()}))
     alife_release(itm)
 
@@ -832,10 +900,39 @@ local function actor_on_item_take(item)
     db.actor:iterate_inventory(search, nil)
 end
 
+local function on_item_drop(obj)
+    if not is_repackable_medpack(obj) then return end
+    local ray = geometry_ray({ray_range=10,
+                        contact_range=5,
+                        flags=1 + 2 + 4 + 8, 
+                        ignore_object=db.actor})
+    local res = ray:get(obj:position(), vector():set(0, -1, 0))
+
+    if res.result and res.result.material_name then
+        update_condition(obj, res.result)
+    end
+
+end
+
+function update_condition(medpack, result)
+    pr(true, strformat("Material %s, Flag %s", result.material_name, result.material_flags))
+    local surface
+    local reduction = 0
+    for i=1, #surfaces do
+        local start, _end = string.find(result.material_name, surfaces[i])
+        if start and _end then
+            reduction = damages[surfaces[i]] * damage_multi[get_medpack_type(medpack:id())]
+        end
+    end
+    set_conditon(medpack, medpack:condition() - reduction)
+    --update_contents_condition(medpack, reduction)
+end
+
 
 function on_game_start()
     pr(true, "registering callbacks")
     RegisterScriptCallback("actor_on_item_take", actor_on_item_take)
+    RegisterScriptCallback("actor_on_item_drop", on_item_drop)
     RegisterScriptCallback("save_state", save_table)
     RegisterScriptCallback("load_state", load_table)
     RegisterScriptCallback("ActorMenu_on_item_drag_drop", on_item_drag_dropped)
