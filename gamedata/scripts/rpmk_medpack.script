@@ -434,9 +434,9 @@ function create_new_medpack(obj, closed, zipped)
         local repack_sect = vanilla_to_repackable(obj:section(), closed)
         alife():release(alife_object(obj:id()), true)
         local medpack = alife_create_item(repack_sect, db.actor)
-        --alife_release(obj)
         pr(false, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
         mt_replace_entry(nil, medpack.id, repack_sect, contents, closed, zipped)
+        rax_stacking_control.register(function (x) return x == get_section(medpack.id) end , function(_obj) return false end)
     end
 end
 
@@ -450,6 +450,7 @@ function switch_medpack(obj, closed, zipped)
         alife():release(alife_object(obj:id()), true)
         pr(false, strformat("Switching medpack from %s to %s, with the contents: %s", sect, repack_sect, concat_pairs(contents)))
         mt_replace_entry(nil, medpack.id, repack_sect, contents, closed, zipped)
+        rax_stacking_control.register(function (x) return x == get_section(medpack.id) end , function(_obj) return false end)
     end
 end
 
@@ -1016,8 +1017,13 @@ local function on_item_drop(obj)
     if res.result and res.result.material_name then
         update_condition(obj, res.result)
     end
-
 end
+
+
+local function on_item_after_move(npc_id, obj, mode, bag_from)
+    pr(true, strformat("item:%s, npc_id:%s, mode:%s, bag from:%s", obj, npc_id, mode, bag_from))
+end
+
 
 local step = 5000
 local tmr = 0
@@ -1032,6 +1038,7 @@ function on_game_start()
     pr(true, "registering callbacks")
     RegisterScriptCallback("actor_on_item_take", on_item_take)
     RegisterScriptCallback("actor_on_item_drop", on_item_drop)
+    RegisterScriptCallback("ActorMenu_on_item_after_move", on_item_after_move)
     RegisterScriptCallback("actor_on_update", on_update)
     RegisterScriptCallback("save_state", save_table)
     RegisterScriptCallback("load_state", load_table)
