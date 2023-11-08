@@ -32,6 +32,18 @@ function sum(tbl)
     return sum
  end
 
+ function sum_nested(tbl)
+    local sum = 0
+    for sect, t in pairs(tbl) do
+        for k, v in pairs(t) do
+            if type(t[k]) == "number" then
+                sum = sum + v
+            end
+        end
+    end
+    return sum
+ end
+
  function concat_pairs(tbl)
     local result = ""
     for key, value in pairs(tbl) do

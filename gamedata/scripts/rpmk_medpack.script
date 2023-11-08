@@ -21,6 +21,7 @@ sum = rpmk_utils.sum
 concat_pairs = rpmk_utils.concat_pairs
 concat = rpmk_utils.concat
 index_of = rpmk_utils.index_of
+sum_nested = rpmk_utils.sum_nested
 lower = string.lower
 collect_section = utils_data.collect_section
 
@@ -231,7 +232,7 @@ function mt_new_entry(medpack)
     if is_medpack_in_table(_id) then return end
     local sect = medpack:section()
     local _contents =  default_contents(sect)
-    local ti = sum(_contents)
+    local ti = sum_nested(_contents)
     local bw = default_base_weight(sect)
     local tw = calculate_total_weight(_id, _contents, ti, bw)
     local mw = default_max_weight(sect)
@@ -259,7 +260,7 @@ function mt_remove_entry(id)
 end
 
 function mt_replace_entry(old_id, new_id, sect, _contents, _closed, _zipped)
-    local ti = sum(_contents)
+    local ti = sum_nested(_contents)
     local bw = default_base_weight(sect)
     local tw = calculate_total_weight(new_id, _contents, ti, bw)
     local mw = default_max_weight(sect)
@@ -402,9 +403,19 @@ function default_max_weight(sect)
     return ini_medpack:r_float_ex(sect, "max_weight")
 end
 
-function default_contents(sect)
-    pr(true, strformat("Getting contents for: %s", sect))
-    return build_contents(parse_list(ini_manager, "package_content", sect))
+function default_contents(section)
+    pr(true, strformat("Getting contents for: %s", section))
+    local contents = {}
+    local default_contents = parse_list(ini_manager, "package_content", section)
+    for idx, sect in ipairs(default_contents) do
+        if contents[sect] then
+            table.insert(contents[sect].uses,  get_item_uses(sect))
+            contents[sect].amount = contents[sect].amount + 1
+        else
+            contents[sect] = {uses = {get_item_uses(sect)}, amount = 1}
+        end
+    end
+    return contents
 end
 
 function default_base_weight(sect)
@@ -424,7 +435,7 @@ function create_new_medpack(obj, closed, zipped)
         alife():release(alife_object(obj:id()), true)
         local medpack = alife_create_item(repack_sect, db.actor)
         --alife_release(obj)
-        pr(true, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
+        pr(false, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
         mt_replace_entry(nil, medpack.id, repack_sect, contents, closed, zipped)
     end
 end
@@ -437,7 +448,7 @@ function switch_medpack(obj, closed, zipped)
         local medpack = alife_create_item(repack_sect, db.actor, {["cond"]=obj:condition()})
         --alife_release(obj)
         alife():release(alife_object(obj:id()), true)
-        pr(true, strformat("Switching medpack from %s to %s, with the contents: %s", sect, repack_sect, concat_pairs(contents)))
+        pr(false, strformat("Switching medpack from %s to %s, with the contents: %s", sect, repack_sect, concat_pairs(contents)))
         mt_replace_entry(nil, medpack.id, repack_sect, contents, closed, zipped)
     end
 end
@@ -456,14 +467,15 @@ function itms_manager.use_package_random(obj)
     create_new_medpack(obj, false, true)
 end
 
-function build_contents(contents)
+function build_contents(sect_list)
     local ordered_contents = {}
- 
-    for _, item in ipairs(contents) do
-        if ordered_contents[item] then
-            ordered_contents[item] = ordered_contents[item] + 1
+    
+    for _, sect in ipairs(sect_list) do
+        if ordered_contents[sect] then
+            ordered_contents[sect].amount = ordered_contents[sect].amount + 1
+            table.insert(ordered_contents[sect].uses, get_item_uses(sect))
         else
-            ordered_contents[item] = 1
+            ordered_contents[sect] = {uses={get_item_uses(sect)}, amount=1}
         end
     end
     return ordered_contents
@@ -585,12 +597,12 @@ function medpack_descr(obj, sect)
         local sect_colour = get_string("st_"..sect.."_descr_colour")
         local items_str = ""
         local itr = 1
-        for item, amount in pairs(contents) do
+        for item, details in pairs(contents) do
             if index_of(contents, item) == #contents then
                 end_char = "\\n \\n"
             end   
            
-            local amount_str = strformat("%s x%s", sect_colour, amount)         
+            local amount_str = strformat("%s x%s", sect_colour, details.amount)         
             items_str = items_str..strformat("%s %s %s %s %s %s", sect_colour, bullet_point, default_clr, med_itm_name(item), amount_str, end_char)
             
             itr = itr + 1
@@ -618,22 +630,26 @@ function med_itm_name(sect)
     end  
 end
 
+--fix
 function update_contents(id, new_contents)
     local contents = get_contents(id)
     pr(true, strformat("Updating medpack old contents %s", concat_pairs(contents)))
     pr(true, strformat("old total items %s, old total weight %s", get_total_itms(id), get_total_weight(id)))
-    for item, amount in pairs(new_contents) do
-        local cond, value = rpmk_utils.contains(contents, item)
-        if cond then
-                contents[item] = value + amount
+    
+    for sect, details in pairs(new_contents) do
+        if contents[sect] then
+            contents[sect].amount = contents[sect].amount + new_contents[sect].amount
+            table.insert(contents[sect].uses, unpack(new_contents[sect].uses))
         else
-            contents[item] = amount
+            contents[sect] = {uses={get_item_uses(sect)}, amount = 1}
         end
-        pr(true, strformat("adding %s %s to contents", amount, item))
+        pr(true, strformat("adding %s %s to contents", contents[sect].amount, sect))
     end
+       
+    
     pr(true, strformat("new contents %s", concat_pairs(contents)))
     set_contents(id, contents)
-    set_total_itms(id, sum(contents))
+    set_total_itms(id, sum_nested(contents))
     set_total_weight(id, calculate_total_weight(id, new_contents, get_total_itms(id), get_base_weight(id)))
     pr(true, strformat("new total items %s, new total weight %s", get_total_itms(id), get_total_weight(id)))
 end
@@ -642,12 +658,24 @@ function get_item_weight(item)
     return ini_drugs:r_float_ex(item, "inv_weight") or ini_medical:r_float_ex(item, "inv_weight") or ini_drink:r_float_ex(item, "inv_weight")
 end
 
+function get_item_uses(sect)
+    local med_objs, med_sects = get_medpack_comptible_items()
+    for _, obj in pairs(med_objs) do
+        pr(true, strformat("%s = %s with %s uses", obj:section(), sect, obj:get_remaining_uses()))
+        if obj:section() == sect then
+            return obj:get_remaining_uses()
+        end
+    end
+    return ini_drugs:r_float_ex(sect, "max_uses") or ini_medical:r_float_ex(sect, "max_uses") or ini_drink:r_float_ex(sect, "max_uses") or 1
+end
+
+
 function calculate_total_weight(id, contents, total_items, base_weight)
     if not total_items or total_items == 0 then return base_weight end    
     local total_weight = get_total_weight(id) or base_weight
     pr(true, strformat("total weight: %s", total_weight))
-    for item, amount in pairs(contents) do
-        for i=1, amount do
+    for item, details in pairs(contents) do
+        for i=1, details.amount do
             total_weight = total_weight + get_item_weight(item)
         end
     end
@@ -684,24 +712,25 @@ end
 
 base_item_degrade = utils_item.is_degradable
 function utils_item.is_degradable(obj, sec)
-    if sec and not mp_sects[sec] then
-        return base_item_degrade(obj, sec)
-    else
+    if sec and mp_sects[sec] then
         return true
     end
+    return base_item_degrade(obj, sec)
 end
 
 function drop_rand_itm(id)
     local med_items, med_sects = get_medpack_comptible_items()
     local rand_idx = math.random(1,#get_total_itms(id))
     local rand_itm = med_items[rand_idx]
-    local obj = db.actor:object(rand_itm:section())
-    news_manager.relocate_item(db.actor, "out", rand_itm:section())
-    db.actor:drop_item(obj)
+    
     local contents = get_contents(id)
-    for item, amount in pairs(contents) do
+    for item, details in pairs(contents) do
         if item == rand_itm:section() then
-            contents[item] = amount - 1
+            contents[item].amount = contents[item].amount - 1
+
+            local obj = db.actor:object(rand_itm:section())
+            news_manager.relocate_item(db.actor, "out", rand_itm:section())
+            db.actor:drop_item(obj)
         end
     end
     update_contents(id, contents)
@@ -728,9 +757,9 @@ function unpack_all(obj)
         return 
     end
     local contents = get_contents(obj:id())
-    for item, amount in pairs(contents) do
-        for i=1, amount do
-            alife_create_item(item, db.actor)
+    for item, details in pairs(contents) do
+        for i=1, details.amount do
+            alife_create_item(item, db.actor, {["uses"]=details.uses[i]})
             rpmk_utils.display_msg("st_unpacked_item", lower(med_itm_name(item)), get_medpack_type(obj:id()))
         end
         contents[index_of(contents, item, true)] = nil
@@ -969,7 +998,7 @@ local function load_table(mdata)
     copy_table(MEDPACK_TABLE, SAVE_TABLE)
 end
 
-local function actor_on_item_take(item)
+local function on_item_take(item)
     pr(true, "on take")
     if is_vanilla_medpack(item) then
         create_new_medpack(item, true, true)
@@ -1001,7 +1030,7 @@ end
 
 function on_game_start()
     pr(true, "registering callbacks")
-    RegisterScriptCallback("actor_on_item_take", actor_on_item_take)
+    RegisterScriptCallback("actor_on_item_take", on_item_take)
     RegisterScriptCallback("actor_on_item_drop", on_item_drop)
     RegisterScriptCallback("actor_on_update", on_update)
     RegisterScriptCallback("save_state", save_table)
