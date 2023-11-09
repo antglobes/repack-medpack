@@ -64,6 +64,16 @@ function concat(tbl)
     return result
 end
 
+function obj_to_sect_list(objs)
+    local sect_list = {}
+    for _, obj in ipairs(objs) do
+        sect_list[#sect_list + 1] = obj:section()
+    end
+    printf("sect list %s", table.concat(sect_list, ","))
+    return sect_list
+end
+
+
  function display_msg(text_string, values, medpack_type)
     printf("Displaying message: %s with icon for %s", get_translation(text_string, values), medpack_type)
     news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 1500)
