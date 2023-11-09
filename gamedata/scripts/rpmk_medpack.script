@@ -24,6 +24,8 @@ index_of = rpmk_utils.index_of
 sum_nested = rpmk_utils.sum_nested
 lower = string.lower
 collect_section = utils_data.collect_section
+trader_type = trader_autoinject.get_trader_type
+TraderUpdate = trader_autoinject.update
 
 -- Configs
 
@@ -485,10 +487,10 @@ end
 function get_medpack_comptible_items()
     local items_sects = {}
     
-    pr(true, strformat("med items sections: %s", concat(items_sects)))
+    pr(false, strformat("med items sections: %s", concat(items_sects)))
     local compatible_itms = {}
     local function search(temp, obj)
-        pr(true, strformat("Is %s a medpack compatible item?", obj:section()))
+        pr(false, strformat("Is %s a medpack compatible item?", obj:section()))
         if is_medpack_compatible(obj:section()) and not sect_to_exclude[obj:section()] then
             items_sects[#items_sects + 1] = obj:section()
             compatible_itms[#compatible_itms + 1] = obj
@@ -545,7 +547,7 @@ end
 base_obj_desc = ui_item.get_obj_desc
 function ui_item.get_obj_desc(obj)
     if is_repackable_medpack(obj) then
-        pr(true, strformat("updating description for: %s", obj:section()))
+        pr(false, strformat("updating description for: %s", obj:section()))
         return medpack_descr(obj, obj:section())
     end
 end
@@ -554,7 +556,7 @@ local ui_info_item_update = utils_ui.UIInfoItem.Update
 function utils_ui.UIInfoItem:Update(obj, sec, flags)
     ui_info_item_update(self, obj, sec, flags)
     if obj and is_repackable_medpack(obj) then
-        pr(true, strformat("Writing %s to medpack", get_total_weight(obj:id())))
+        pr(false, strformat("Writing %s to medpack", get_total_weight(obj:id())))
         --ini_medpack:w_value(obj:section(), "inv_weight", get_total_weight(obj:id()))
         self.weight:SetText(get_total_weight(obj:id()).." "..weight_unit)
     end
@@ -563,7 +565,7 @@ end
 local ui_inv_update_weight = ui_inventory.UIInventory.UpdateWeight
 function ui_inventory.UIInventory:UpdateWeight()
     ui_inv_update_weight(self)
-    pr(true, "has medpack in inv in order to update")
+    pr(false, "has medpack in inv in order to update")
     if not has_medpacks_in_inv() then return end
     local updated_weight = db.actor:get_total_weight() + sum_medpack_weight() or 0
     pr(true, strformat("Updating weight to %s", updated_weight))
@@ -740,6 +742,7 @@ end
 
 function on_medpack_above_threshold()
     for idx, medpack in pairs(get_medpacks()) do 
+        if not medpack or not is_medpack_in_table(medpack:id()) then return end
         if get_total_weight(medpack:id()) > get_max_weight(medpack:id()) and (is_medpack_open(medpack) and not is_medpack_zipped(medpack))then
             local item = drop_rand_itm(medpack:id())
             rpmk_utils.display_msg("st_drop_medpack_item", lower(item), get_medpack_type(medpack:id()))
@@ -748,6 +751,50 @@ function on_medpack_above_threshold()
         end
     end
 end
+
+-- Monkey-patching UIInventory for trader selling
+
+base_trader_sell = ui_inventory.UIInventory.TMode_Sell
+function ui_inventory.UIInventory.TMode_Sell(self)
+    local npc = self:GetPartner()
+    printf("trader type %s", trader_type(npc))
+    accepted_traders = {
+        [3] = true,
+        [4] = true
+    }
+    if not npc or not accepted_traders[trader_type(npc)] then
+        printf("normal trade")
+        base_trader_sell(self)    
+        return
+    end
+
+    local cc_sell = self.CC["actor_trade"]
+    if (not cc_sell) then
+        return
+    end
+    
+    
+
+    for id, _ in pairs(cc_sell.indx_id) do
+        local obj = get_object_by_id(id)
+        self:On_Item_Exchange(db.actor, npc, obj)
+    end
+
+    CreateTimeEvent("medpack_event"..npc:id(), "medpack_removal"..npc:id(), 0.01, function(npc)
+        printf("searching %s inv", npc:section())
+        local function search(owner, obj)
+            if is_repackable_medpack(obj) then
+                mt_remove_entry(obj:id())
+                alife():release(alife_object(obj:id()), true)
+            end
+        end
+        npc:iterate_inventory(search, npc)
+        return true 
+    end, npc)  
+end
+
+
+
 
 
 -- Medpack Functionality
@@ -1019,12 +1066,6 @@ local function on_item_drop(obj)
     end
 end
 
-
-local function on_item_after_move(npc_id, obj, mode, bag_from)
-    pr(true, strformat("item:%s, npc_id:%s, mode:%s, bag from:%s", obj, npc_id, mode, bag_from))
-end
-
-
 local step = 5000
 local tmr = 0
 function on_update()
@@ -1038,7 +1079,6 @@ function on_game_start()
     pr(true, "registering callbacks")
     RegisterScriptCallback("actor_on_item_take", on_item_take)
     RegisterScriptCallback("actor_on_item_drop", on_item_drop)
-    RegisterScriptCallback("ActorMenu_on_item_after_move", on_item_after_move)
     RegisterScriptCallback("actor_on_update", on_update)
     RegisterScriptCallback("save_state", save_table)
     RegisterScriptCallback("load_state", load_table)
