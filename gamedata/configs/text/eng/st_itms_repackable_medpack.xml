@@ -39,6 +39,9 @@
 	<string id="st_medpack_condition_descr">
 		<text> %s%</text>
 	</string>
+	<string id="st_medpack_max_weight_descr">
+		<text>Max Weight: %s</text>
+	</string>
 	<!--Item Amount colours-->
 	<string id="st_medpack_open_basic_descr_colour">
         <text>%c[d_red]</text>
