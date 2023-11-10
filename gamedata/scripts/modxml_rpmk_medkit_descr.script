@@ -1,0 +1,74 @@
+
+
+bullet_point = game.translate_string("st_medpack_descr_bullet_point")
+medkit_descrs = {"string[id=st_medkit_ai1_descr] > text", "string[id=st_medkit_ai2_descr] > text", "string[id=st_medkit_ai3_descr] > text"}
+text = {"A zipped basic medical package, containing a variety of equipment for treatment of minor injuries.\\n \\n.."..
+        "%c[ui_gray_3]CONTENTS:\\n"..
+        "%c[d_red] "..bullet_point.." %c[default] bandage x4\\n"..
+        "%c[d_red] "..bullet_point.." %c[default] diclofenac sodium x1\\n"..
+        "%c[d_red] "..bullet_point.." %c[default] improvised stimpack x1\\n"..
+        "%c[d_red] "..bullet_point.." %c[default] metamizole ampoule x1\\n".. 
+        "%c[d_red] "..bullet_point.." %c[default] mineral water x1\\n"..
+        "%c[d_red] "..bullet_point.." %c[default] sulfadimethoxine x1\\n"..
+        "%c[d_red] "..bullet_point.." %c[default] tourniquet x1\\n"..
+        "%c[d_red] "..bullet_point.." %c[default] yadulin x1\\n \\n"..
+        "%c[ui_gray_3]PROPERTIES:\\n"..
+        "%c[d_orange] "..bullet_point.." %c[ui_gray_2] Max Weight: 1.75 kg\\n"..
+        "%c[d_orange] "..bullet_point.." %c[ui_gray_2] Condition: 100%\\n"..
+        "%c[d_blue] "..bullet_point.." %c[ui_gray_2] Storage for medical equipment\n"..
+        "%c[d_blue] "..bullet_point.." %c[ui_gray_2] Repackable\\n"..
+        "%c[d_red] "..bullet_point.." %c[ui_gray_2] Zipped\\n",
+
+        "A zipped military-grade medical package, containing a large amount of stimulating medical drugs.\\n \\n"..
+        "%c[ui_gray_3]CONTENTS:\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] ampoule of morphine\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] anti-radiaton preparation\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] aquatab tablets\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] bandage x4\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] caffeine tablets\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] diclofenac sodium\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] harness x2\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] military stimulant\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] mineral water\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] 027 R pill\\n"..
+        "%c[d_blue] "..bullet_point.." %c[default] tetanus vaccine\\n \\n"..
+        "%c[ui_gray_3]PROPERTIES:\\n"..
+        "%c[d_orange] "..bullet_point.." %c[ui_gray_2] Max Weight: 2 kg\\n"..
+        "%c[d_orange] "..bullet_point.." %c[ui_gray_2] Condition: 100%\\n"..
+        "%c[d_blue] "..bullet_point.." %c[ui_gray_2] Storage for medical equipment\\n"..
+        "%c[d_blue] "..bullet_point.." %c[ui_gray_2] Repackable\\n"..
+        "%c[d_red] "..bullet_point.." %c[ui_gray_2] Zipped\\n",
+
+        "A zipped scientific medical package, designed for use specifically in the Zone. It contains a large amount of drugs for the purposes of countering chemical, psy- and radioactive hazards.\\n \\n"..
+        "%c[ui_gray_3]CONTENTS:\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] anti-radiation drugs x2\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] antioxidant IP2\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] big glucose shot\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] cystamine x2\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] diclofenac sodium\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] epinephrine\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] harness\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] indralin-B190\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] mineral water\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] psi-block\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] scientific stimulant x2\\n"..
+        "%c[pda_yellow] "..bullet_point.." %c[default] sulfadimethoxine\\n \\n"..
+        "%c[ui_gray_3]PROPERTIES:\\n"..
+        "%c[d_orange] "..bullet_point.." %c[ui_gray_2] Max Weight: 3.5 kg\\n"..
+        "%c[d_orange] "..bullet_point.." %c[ui_gray_2] Condition: 100%\\n"..
+        "%c[d_blue] "..bullet_point.." %c[ui_gray_2] Storage for medical equipment\\n"..
+        "%c[d_blue] "..bullet_point.." %c[ui_gray_2] Repackable\\n"..
+        "%c[d_red] "..bullet_point.." %c[ui_gray_2] Zipped\\n"}
+
+function on_xml_read()
+    RegisterScriptCallback("on_xml_read", function(xml_file_name, xml_obj)
+        if xml_file_name == [[text\eng\st_items_medical.xml]] then
+            for i=1, #medkit_descrs do
+                local res = xml_obj:query(medkit_descrs[i])
+                if res[1] then
+                    xml_obj:setText(res[1], text[i])
+                end
+            end
+        end
+    end)
+end

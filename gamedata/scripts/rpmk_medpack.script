@@ -130,6 +130,24 @@ damage_multi ={
     ["sci"] = 2
 }
 
+-- If you want to include an item in the medpack, put it's section here
+compat_medpack_sects = {
+    "bandage_israeli",
+    "bio_bandage",
+    "medkit_elite",
+    "surginst",
+    "cms",
+    "splint",
+    "alu_splint",
+    "morphine",
+    "adrenalin",
+    "propital",
+    "zagustin",
+    "sj6",
+    "etg",
+    "analgin",
+    "sj1",
+}
 
 mp_sects = {
     ["medpack_open_basic"] = true,
@@ -191,7 +209,7 @@ function is_repackable_medpack(obj)
 end
 
 function is_medpack_compatible(itm_sect)
-    if ini_drugs:section_exist(itm_sect) or ini_medical:section_exist(itm_sect) or ini_drink:section_exist(itm_sect) then
+    if ini_drugs:section_exist(itm_sect) or ini_medical:section_exist(itm_sect) or ini_drink:section_exist(itm_sect) or compat_medpack_sects[itm_sect] then
         return true
     end
     return false
