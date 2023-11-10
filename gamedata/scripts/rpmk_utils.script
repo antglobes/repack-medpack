@@ -1,4 +1,11 @@
-
+--[[    
+   Repackable Medpacks
+   Author: AntGlobes
+   Source: https://www.moddb.com/mods/repackable-medpacks
+   Version: v1.0
+   Last Modified: 10/11/23
+   Purpose: Utility functions, some reused from past addons. Credited if not authored by AG
+--]]
 
 function contains(tbl, key)
     for k, v in pairs(tbl) do

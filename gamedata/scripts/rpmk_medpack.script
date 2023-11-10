@@ -1,4 +1,11 @@
-
+--[[    
+   Repackable Medpacks
+   Author: AntGlobes
+   Source: https://www.moddb.com/mods/repackable-medpacks
+   Version: v1.0
+   Last Modified: 10/11/23
+   Purpose: Main Functionality of medpacks, unpack/repack, zip/unzip, var calculation etc
+--]]
 
 function pr(debug, ...)
     if debug then
@@ -88,16 +95,19 @@ local repack_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_str
 -- Tables
 -------------------------------
 
+--Returns colour string depending on the zipped status
 zip_colour = {
     ["zipped"] = get_colour_string("d_green"),
     ["unzipped"] = get_colour_string("d_red")
 }
 
+-- Convert zipped status from bool to string
 closed_to_zip_status = {
     [true] = "zipped",
     [false] = "unzipped"
 }
 
+-- Returns common non-item and vanilla medkits to exclude when searching for medpack compat items 
 sect_to_exclude = {
     ["identity_immunities"] = true,
     ["booster"] = true,
@@ -108,11 +118,13 @@ sect_to_exclude = {
 
 }
 
+-- Common surface types
 surfaces = {
     "grass", "earth", "tin", "water", "wood", "metal", "soft", "gravel", "bushes", "default",
     "glass", "concrete", "dirt", "sand", "tree", "clothes", "tile", "asphalt", "furniture"
 }
 
+-- Condition reduction based on the surface type
 damages = {
     ["grass"] = 0.001,
     ["tin"] = 0.001,
@@ -135,6 +147,7 @@ damages = {
     ["gravel"] = 0.02,
 }
 
+-- Damage multiplier based  on medpack type
 damage_multi ={
     ["basic"] = 10,
     ["army"] = 6,
@@ -160,6 +173,7 @@ compat_medpack_sects = {
     "sj1",
 }
 
+-- Repackable Medpack sections
 mp_sects = {
     ["medpack_open_basic"] = true,
     ["medpack_open_army"] = true,
@@ -173,6 +187,9 @@ mp_sects = {
 -- Table Functions
 -------------------------------
 
+--- Convert vanilla medpack to repackable medpack section
+---@param sect string
+---@param closed boolean
 function vanilla_to_repackable(sect, closed)
     local closed_sects = {
         ["medkit_ai1"] = "medpack_closed_basic",
@@ -190,6 +207,8 @@ function vanilla_to_repackable(sect, closed)
     return open_sects[sect]
 end
 
+--- Switch zipped status of the medpack
+---@param sect string
 function switch_status(sect)
     local medpack_sect = {
         ["medpack_closed_basic"] = "medpack_open_basic",
@@ -206,6 +225,8 @@ end
 -- Bools
 -------------------------------
 
+--- Check if obj is a vanilla medpack
+---@param obj game_object
 function is_vanilla_medpack(obj)
     local v_m_sects = {
         ["medkit_ai1"] = true,
@@ -215,10 +236,14 @@ function is_vanilla_medpack(obj)
     return v_m_sects[obj:section()]
 end
 
+--- Check if obj is repackable medpack
+---@param obj game_object
 function is_repackable_medpack(obj)
     return mp_sects[obj:section()]
 end
 
+--- Check if item section can go into a medpack
+---@param itm_sect string
 function is_medpack_compatible(itm_sect)
     if ini_drugs:section_exist(itm_sect) or ini_medical:section_exist(itm_sect) or ini_drink:section_exist(itm_sect) or compat_medpack_sects[itm_sect] then
         return true
@@ -226,29 +251,40 @@ function is_medpack_compatible(itm_sect)
     return false
 end
 
+--- Alternative check if medpack is unzipped
+---@param medpack game_object
 function is_medpack_open(medpack)
     return not get_closed_status(medpack:id())
 end
 
+--- Alternative check if medpack is zipped
+---@param medpack game_object
 function is_medpack_closed(medpack)
     return get_closed_status(medpack:id())
 end
 
+--- Check if medpack's condition is above set limit
+---@param medpack game_object
 function is_medpack_useable(medpack)
     local condition = medpack:condition()
     printf("medpack condition: %s:%s", medpack:section(), condition)
     return math.ceil(condition * 100) > 25
 end
 
+--- Check if medpack has zipped status
+---@param medpack game_object
 function is_medpack_zipped(medpack)
     return get_zipped_status(medpack:id())
 end
 
-
+--- Check if medpack has no contents
+---@param medpack game_object
 function is_medpack_empty(medpack)
     return get_total_itms(medpack:id()) <= get_base_weight(medpack:id())
 end
 
+--- Check if medpack is at max weight/contents is full
+---@param medpack game_object
 function is_medpack_full(medpack)
     local tw = get_total_weight(medpack:id())
     local mw = get_max_weight(medpack:id())
@@ -260,6 +296,8 @@ end
 -- Track medpacks through table
 -------------------------------
 
+--- Add new medpack to medpack table
+---@param medpack game_object
 function mt_new_entry(medpack)
     local _id = medpack:id()
     if is_medpack_in_table(_id) then return end
@@ -274,6 +312,8 @@ function mt_new_entry(medpack)
     pr(true, strformat("new entry: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max_weight=%s, base weight=%s, closed=%s, zipped=%s", _id, sect, _contents, ti, tw, mw, bw, true, true))
 end
 
+--- Get the index of a medpack table entry
+---@param id number
 function get_entry_index(id)
     for idx, entry in ipairs(MEDPACK_TABLE) do
         if id == entry["id"] then
@@ -283,6 +323,8 @@ function get_entry_index(id)
     end
 end
 
+--- Removes an entry from the medpack table
+---@param id number
 function mt_remove_entry(id)
     for idx, entry in ipairs(MEDPACK_TABLE) do
         if id == entry["id"] then
@@ -292,6 +334,13 @@ function mt_remove_entry(id)
     end
 end
 
+--- Replace an existing entry with a new entry at the same index
+---@param old_id number
+---@param new_id number
+---@param sect string
+---@param _contents table
+---@param _closed boolean
+---@param _zipped boolean
 function mt_replace_entry(old_id, new_id, sect, _contents, _closed, _zipped)
     local ti = sum_nested(_contents)
     local bw = default_base_weight(sect)
@@ -302,6 +351,10 @@ function mt_replace_entry(old_id, new_id, sect, _contents, _closed, _zipped)
     MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed, zipped=_zipped}
 end
 
+--- Change an var's value in a certain entry by id
+---@param id number
+---@param var string
+---@param value any
 function mt_set_var(id, var, value)
     for idx, entry in ipairs(MEDPACK_TABLE) do
         if id == entry["id"] and entry[var] and type(var) == "string" then
@@ -310,6 +363,9 @@ function mt_set_var(id, var, value)
     end
 end
 
+--- Get an var's value from a certain entry by id
+---@param id number
+---@param var any
 function mt_get_var(id, var)
     for idx, entry in ipairs(MEDPACK_TABLE) do
         if id == entry["id"] then
@@ -318,6 +374,9 @@ function mt_get_var(id, var)
     end
 end
 
+--- Change all the contents of an entry, if the ids match
+---@param id number
+---@param tbl table
 function mt_update_vars(id, tbl)
     for idx, entry in ipairs(MEDPACK_TABLE) do
         if id == entry["id"] then
@@ -330,6 +389,9 @@ function mt_update_vars(id, tbl)
     end
 end
 
+--- Debugging function, returns all vars in an entry
+---@param id number
+---@param unpck boolean
 function mt_all_vars(id, unpck)
     for idx, entry in ipairs(MEDPACK_TABLE) do
         if id == entry["id"] then
@@ -341,6 +403,8 @@ function mt_all_vars(id, unpck)
     end
 end
 
+--- Check if the current id already exists in the medpack table
+---@param id number
 function is_medpack_in_table(id)
     for _, entry in pairs(MEDPACK_TABLE) do
         if id == entry["id"] then
@@ -350,6 +414,7 @@ function is_medpack_in_table(id)
     return false
 end
 
+--- Checks if there are medpack compatible items in the actor's inventory
 function has_med_items()
     local med_items = 0
     local function search(temp, obj)
@@ -361,43 +426,59 @@ function has_med_items()
     return med_items > 0
 end
 
+--- Alternative "has_med_items()"
 function has_medpacks_in_inv()
     return #get_medpacks() > 0
 end
 
--- Getters and Setters for medpack variables: "contents, capacity, total_weight, max_weight"
-
 -------------------------------
 -- Getters
 -------------------------------
+
+--- Get a Medpack's section
+---@param id number
 function get_section(id)
     return mt_get_var(id, "section")
 end
 
+--- Get a Medpack's contents
+---@param id number
 function get_contents(id)
     return mt_get_var(id, "contents")
 end
 
+--- Get a Medpack's total number of items
+---@param id number
 function get_total_itms(id)
     return mt_get_var(id, "total_itms")
 end
 
+--- Get a Medpack's weight
+---@param id number
 function get_total_weight(id)
     return mt_get_var(id, "total_weight") or 0
 end
 
+--- Get a Medpack's max weight
+---@param id number
 function get_max_weight(id)
     return mt_get_var(id, "max_weight")
 end
 
+--- Get a Medpack's base weight i.e weight of the bag
+---@param id number
 function get_base_weight(id)
     return mt_get_var(id, "base_weight")
 end
 
+--- Get a Medpack's closed status
+---@param id number
 function get_closed_status(id)
     return mt_get_var(id, "closed")
 end
 
+--- Get a Medpack's zipped status
+---@param id number
 function get_zipped_status(id)
     return mt_get_var(id, "zipped")
 end
@@ -406,22 +487,37 @@ end
 -- Setters
 -------------------------------
 
+--- Change the contents of a Medpack
+---@param id number
+---@param contents table
 function set_contents(id, contents)
     mt_set_var(id, "contents", contents)
 end
 
+--- Change the total number of items for a Medpack
+---@param id number
+---@param total_itms number
 function set_total_itms(id, total_itms)
     mt_set_var(id, "total_itms", total_itms)
 end
 
+--- Change total weight of a Medpack
+---@param id number
+---@param total_weight number
 function set_total_weight(id, total_weight)
     mt_set_var(id, "total_weight", total_weight)
 end
 
+--- Change zipped status of a Medpack
+---@param id number
+---@param zipped boolean
 function set_zipped_status(id, zipped)
     mt_set_var(id, "zipped", zipped)
 end
 
+--- Change the condition of a Medpack
+---@param medpack game_object
+---@param condition number
 function set_conditon(medpack, condition)
     if not is_medpack_in_table(medpack:id()) then return end
     medpack:set_condition(condition)
@@ -431,11 +527,15 @@ end
 -- Default Medpack vars
 -------------------------------
 
+--- Get the section defined max weight of a medpack
+---@param sect string
 function default_max_weight(sect)
     pr(true, strformat("Getting max weight for: %s", sect))
     return ini_medpack:r_float_ex(sect, "max_weight")
 end
 
+--- Get the section defined contents of a medpack from "items_manager.ltx"
+---@param section string
 function default_contents(section)
     pr(true, strformat("Getting contents for: %s", section))
     local contents = {}
@@ -451,6 +551,8 @@ function default_contents(section)
     return contents
 end
 
+--- Get the section defined empty medpack weight
+---@param sect string
 function default_base_weight(sect)
     pr(true, strformat("Getting max weight for: %s", sect))
     return ini_medpack:r_float_ex(sect, "inv_weight")
@@ -460,6 +562,10 @@ end
 -- Common Medpack Functions
 -------------------------------
 
+--- Create a new repackable medpack from a vanilla medpack
+---@param obj game_object
+---@param closed boolean
+---@param zipped boolean
 function create_new_medpack(obj, closed, zipped)
     if is_vanilla_medpack(obj) and not is_medpack_in_table(obj:id()) then
         local contents = default_contents(obj:section())
@@ -473,6 +579,10 @@ function create_new_medpack(obj, closed, zipped)
     end
 end
 
+--- Create a repackable medpack of the opposite status
+---@param obj game_object
+---@param closed boolean
+---@param zipped boolean
 function switch_medpack(obj, closed, zipped)
     if is_repackable_medpack(obj) and is_medpack_in_table(obj:id()) then
         local contents = get_contents(obj:id())
@@ -501,6 +611,8 @@ function itms_manager.use_package_random(obj)
     create_new_medpack(obj, false, true)
 end
 
+--- Build a ordered list of contents from a list of sections, holding amount of items and each ones uses
+---@param sect_list table
 function build_contents(sect_list)
     local ordered_contents = {}
     
@@ -515,6 +627,7 @@ function build_contents(sect_list)
     return ordered_contents
 end
 
+--- Get a list of objs that are medpack compatible items
 function get_inv_medpack_itms()
     local items = {}
     local function search(temp, obj)
@@ -528,6 +641,7 @@ function get_inv_medpack_itms()
     return items
 end
 
+--- Get all medpacks in actor's inventory
 function get_medpacks()
     local medpacks = {}
     local function search(temp, obj)
@@ -539,6 +653,7 @@ function get_medpacks()
     return medpacks
 end
 
+--- Get sum of all medpacks total weight
 function sum_medpack_weight()
     local medpack_weight = 0
     if not has_medpacks_in_inv() then return medpack_weight end
@@ -552,10 +667,13 @@ end
 
 -- Colour Related
 
+-- Get xml defined colour
 function get_colour(name)
     return utils_xml.get_color(name)
 end
 
+--- Get colour based on medpack's condition
+---@param condition number
 function get_condition_colour(condition)
     condition = math.floor(condition * 100)
     if condition > 75 then
@@ -602,7 +720,9 @@ end
 
 
 
-
+--- Build Custom description for vanilla medpacks
+---@param obj game_object
+---@param sect string
 function vanilla_medpack_descr(obj, sect)
     local contents = default_contents(sect)
     sect = vanilla_to_repackable(sect)
@@ -635,7 +755,9 @@ function vanilla_medpack_descr(obj, sect)
 end
 
 
-
+--- Dynamic Description based on medpack type, contents and weight
+---@param obj game_object
+---@param sect string
 function medpack_descr(obj, sect)
     if not is_repackable_medpack(obj) then return end
     local descr = ""
@@ -677,6 +799,8 @@ end
 
 -- Medpack Info
 
+--- Convert medical section to item name
+---@param sect string
 function med_itm_name(sect)
     if ini_drugs:section_exist(sect) then
         return get_string(ini_drugs:r_value(sect, "inv_name"))
@@ -687,6 +811,9 @@ function med_itm_name(sect)
     end  
 end
 
+--- Combine match items from current and new contents
+---@param contents table
+---@param new_contents table
 function combine_contents(contents, new_contents)
     for sect, details in pairs(new_contents) do
         printf(#contents)
@@ -706,15 +833,15 @@ function combine_contents(contents, new_contents)
     return contents
 end
 
---fix
+--- Update the main medpack vars
+---@param id number
+---@param new_contents table
 function update_contents(id, new_contents)
     local contents = get_contents(id)
-    --pr(true, strformat("Updating medpack old contents %s", concat_pairs(contents)))
-    --pr(true, strformat("old total items %s, old total weight %s", get_total_itms(id), get_total_weight(id)))
+    pr(true, strformat("Updating medpack old contents %s", concat_pairs(contents)))
+    pr(true, strformat("old total items %s, old total weight %s", get_total_itms(id), get_total_weight(id)))
     
     new_contents = combine_contents(contents, new_contents)
-   
-    
     pr(true, strformat("new contents %s", concat_pairs(new_contents)))
     set_contents(id, new_contents)
     set_total_itms(id, sum_nested(new_contents))
@@ -722,10 +849,14 @@ function update_contents(id, new_contents)
     pr(true, strformat("new total items %s, new total weight %s", get_total_itms(id), get_total_weight(id)))
 end
 
+--- Get weight of item by section
+---@param item string
 function get_item_weight(item)
     return ini_drugs:r_float_ex(item, "inv_weight") or ini_medical:r_float_ex(item, "inv_weight") or ini_drink:r_float_ex(item, "inv_weight")
 end
 
+--- Get the uses of an item by section
+---@param sect string
 function get_item_uses(sect)
     local med_objs = get_inv_medpack_itms()
     for _, obj in pairs(med_objs) do
@@ -737,7 +868,12 @@ function get_item_uses(sect)
     return ini_drugs:r_float_ex(sect, "max_uses") or ini_medical:r_float_ex(sect, "max_uses") or ini_drink:r_float_ex(sect, "max_uses") or 1
 end
 
-
+--- Calculate total weight of medpack based on the weight of each item
+---@param id number
+---@param sect string
+---@param contents table
+---@param total_items number
+---@param base_weight number
 function calculate_total_weight(id, sect, contents, total_items, base_weight)
     if not total_items or total_items == 0 then return base_weight end    
     local total_weight = get_total_weight(id) or base_weight
@@ -749,10 +885,12 @@ function calculate_total_weight(id, sect, contents, total_items, base_weight)
         end
     end
 
-    
     return round_idp(total_weight, 2)
 end
   
+--- Get the type of medpack by section
+---@param id number
+---@param sect string
 function get_medpack_type(id, sect)
     local section = get_section(id) or sect
     for _, pattern in pairs({"(medpack_closed_)", "(medpack_open_)"}) do
@@ -765,6 +903,9 @@ end
 
 -- Medpack Condition
 
+--- Change the medpack's condition by on the surface it hit
+---@param medpack game_object
+---@param result table
 function update_condition(medpack, result)
     pr(true, strformat("Material %s, Flag %s", result.material_name, result.material_flags))
     if not medpack or not result or not is_medpack_in_table(medpack:id()) then return end
@@ -788,6 +929,8 @@ function utils_item.is_degradable(obj, sec)
     return base_item_degrade(obj, sec)
 end
 
+--- Drop a random item from the medpacks contents
+---@param id number
 function drop_rand_itm(id)
     local med_items =  get_inv_medpack_itms()
     local rand_idx = math.random(1,#get_total_itms(id))
@@ -809,6 +952,7 @@ function drop_rand_itm(id)
     return rand_itm:section()
 end
 
+--- Time based check to see if any medpack is below the medpack threshold
 function on_medpack_condition_below_threshold()
     for idx, medpack in pairs(get_medpacks()) do 
         if not medpack or not is_medpack_in_table(medpack:id()) then return end
@@ -822,7 +966,8 @@ function on_medpack_condition_below_threshold()
 end
 
 -- Monkey-patching UIInventory for trader selling
---- NLTP wg_trade_eur_usd 
+---@author:NLTP-ashes 
+
 base_trader_sell = ui_inventory.UIInventory.TMode_Sell
 function ui_inventory.UIInventory.TMode_Sell(self)
     local npc = self:GetPartner()
@@ -868,6 +1013,8 @@ end
 
 -- Medpack Functionality
 
+--- Remove all items from the medpack into the actor's inventory
+---@param obj game_object
 function unpack_all(obj)
     if is_medpack_empty(obj) then
         rpmk_utils.display_msg("st_empty_medpack", nil, get_medpack_type(obj:id()))
@@ -884,6 +1031,8 @@ function unpack_all(obj)
     update_contents(obj:id(), build_contents(contents))
 end
 
+--- Move all items under the max weight of a medpack into the specified medpack from actor inventory
+---@param obj game_object
 function repack_all(obj)
     pr(true, "repacking items")
     local medpack_type = get_medpack_type(obj:id())
@@ -934,14 +1083,6 @@ function repack_all(obj)
             end
         end
     end
-
-    --[[
-    for item, details in pairs(contents) do
-        printf("section %s, amount %s, uses %s", item, details.amount, table.concat(details.uses, ","))
-    end
-   ]]--
-
-
 
     -- get the weight of each item add to total weight,
     -- if total weight exceeds actual total weight then end loop, 
