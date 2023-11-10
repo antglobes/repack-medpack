@@ -1,0 +1,85 @@
+-- Adapted from @NLTP_ASHES
+--- Function used to get a given setting defined in MCM.
+--- If MCM isn't installed, it will default back to a value in defaults table.
+--- @param id string
+--- @param opt string
+--- @return any
+function get_config(id, opt)
+    if ui_mcm then return ui_mcm.get("beo/"..id.."/"..opt)	else return defaults[id][opt] end
+end
+
+-- Adapted from @NLTP_ASHES
+--- Function used to set the value of a given setting defined in MCM.
+--- If MCM isn't installed, it will temporarily change the value of the setting in the defaults table.
+--- @param id string
+--- @param opt string
+--- @param value any
+--- @return any
+function set_config(id, opt, value)
+    if ui_mcm then return ui_mcm.set("beo/"..id.."/"..opt, value) else defaults[id][opt] = value end
+end
+
+function on_mcm_load()
+    op = { id="rpmk", gr={
+            { id="main", sh=true, gr={
+                    {id="header", type="slide", link="ui_rpmk_mcm_slider_main", size={812, 50}, stretch=true},
+                    {type="title", text="ui_mcm_rpmk_main_dam_multi"},
+                    {id="dam_multi_basic", type="track", val=2, min=0.5, max=10.0, step=0.5, def=10},
+                    {id="dam_multi_army", type="track", val=2, min=0.5, max=10.0, step=0.5, def=6},
+                    {id="dam_multi_sci", type="track", val=2, min=0.5, max=10.0, step=0.5, def=2},
+                    {id="divider", type="line"},
+                    {type="title", text="ui_mcm_rpmk_main_itm_clr"},
+                    {id="itm_clr_basic", type="list", val=0, def=0,
+                        content={
+                            {0, "b_red"},
+                            {1, "b_blue"},
+                            {2, "b_yellow"},
+                            {3, "b_green"},
+                            {4, "b_orange"},
+                            {5, "b_purple"},
+                            {6, "b_grey"},
+                            {7, "b_black"},
+                            {8, "b_white"}
+                        }
+                    },
+                    {id="itm_clr_army", type="list", val=0, def=1,
+                        content={
+                            {0, "a_red"},
+                            {1, "a_blue"},
+                            {2, "a_yellow"},
+                            {3, "a_green"},
+                            {4, "a_orange"},
+                            {5, "a_purple"},
+                            {6, "a_grey"},
+                            {7, "a_black"},
+                            {8, "a_white"}
+                        }
+                    },
+                    {id="itm_clr_sci", type="list", val=0, def=2,
+                        content={
+                            {0, "s_red"},
+                            {1, "s_blue"},
+                            {2, "s_yellow"},
+                            {3, "s_green"},
+                            {4, "s_orange"},
+                            {5, "s_purple"},
+                            {6, "s_grey"},
+                            {7, "s_black"},
+                            {8, "s_white"}
+                        }
+                    },
+                    {id="divider", type="line"},
+                    {id="cond_limit", type="track", val=2, min=0, max=100, step=1, def=25},
+                    {id="display_msg", type="radio_h", val=2, def=0,
+                        content={
+                            {0, "dm_yes"},
+                            {1, "dm_no"}
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+    return op
+end

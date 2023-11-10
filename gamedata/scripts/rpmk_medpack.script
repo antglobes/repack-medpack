@@ -43,6 +43,9 @@ ini_drugs = ini_file_ex("items\\items\\items_drugs.ltx")
 ini_drink = ini_file_ex("items\\items\\items_drink.ltx")
 ini_manager = ini_file_ex("items\\settings\\itms_manager.ltx")
 
+-- Add config file in here to convert section to name
+config_list = {ini_medical, ini_drugs, ini_drink}
+
 -- Other
 
 bullet_point = get_string("st_medpack_descr_bullet_point")
@@ -802,13 +805,11 @@ end
 --- Convert medical section to item name
 ---@param sect string
 function med_itm_name(sect)
-    if ini_drugs:section_exist(sect) then
-        return get_string(ini_drugs:r_value(sect, "inv_name"))
-    elseif ini_medical:section_exist(sect) then
-        return get_string(ini_medical:r_value(sect, "inv_name"))
-    elseif ini_drink:section_exist(sect) then
-        return get_string(ini_drink:r_value(sect, "inv_name"))
-    end  
+    for _, config in pairs(config_list) do
+        if config:section_exist(sect) then
+            return get_string(config:r_value(sect, "inv_name"))
+        end
+    end
 end
 
 --- Combine match items from current and new contents
