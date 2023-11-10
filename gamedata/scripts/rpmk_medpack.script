@@ -48,6 +48,17 @@ function get_colour_string(name)
     return strformat("%c[%s]", name)
 end
 
+local default_clr = get_colour_string("default")
+local blue_clr = get_colour_string("d_blue")
+local title_grey_clr = get_colour_string("ui_gray_3")
+local text_grey_clr = get_colour_string("ui_gray_2")
+local cyan_clr = get_colour_string("d_cyan")
+local orange_clr = get_colour_string("d_orange")
+local red_clr = get_colour_string("d_red")
+local contents_str = title_grey_clr.."CONTENTS:\\n"
+local props_str = title_grey_clr.."PROPERTIES:\\n"
+local storage_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_storage_descr").."\\n"
+local repack_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_repack_descr").."\\n"
 -- Once a medpack enters the player's inv add to table
 -- Store section, id, package contents, capacity, each item weight + medpack weight, max weight threshold
 -- if unpacking decrease only package contents
@@ -565,6 +576,8 @@ function ui_item.get_obj_desc(obj)
     if is_repackable_medpack(obj) then
         pr(false, strformat("updating description for: %s", obj:section()))
         return medpack_descr(obj, obj:section())
+    elseif is_vanilla_medpack(obj) then
+        return vanilla_medpack_descr(obj, obj:section())
     end
 end
 
@@ -573,7 +586,6 @@ function utils_ui.UIInfoItem:Update(obj, sec, flags)
     ui_info_item_update(self, obj, sec, flags)
     if obj and is_repackable_medpack(obj) then
         pr(false, strformat("Writing %s to medpack", get_total_weight(obj:id())))
-        --ini_medpack:w_value(obj:section(), "inv_weight", get_total_weight(obj:id()))
         self.weight:SetText(get_total_weight(obj:id()).." "..weight_unit)
     end
 end
@@ -588,29 +600,53 @@ function ui_inventory.UIInventory:UpdateWeight()
     self.player_weight:SetText(strformat("%s %s", round_idp(updated_weight, 1), weight_unit))
 end
 
+
+
+
+function vanilla_medpack_descr(obj, sect)
+    local contents = default_contents(sect)
+    sect = vanilla_to_repackable(sect)
+    local base_descr = get_string("st_"..sect.."_base_descr")        
+    local condition_clr = get_condition_colour(obj:condition())
+    local max_weight_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." "..get_translation("st_medpack_max_weight_descr", default_max_weight(sect)).." "..weight_unit.."\\n"
+    local condition_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." ".."Condition:"..condition_clr.." "..get_translation("st_medpack_condition_descr", math.floor(obj:condition() * 100)).."\\n"
+    local zip_status = closed_to_zip_status[true]
+    local zip_status_str = zip_colour[zip_status].." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_"..zip_status.."_descr").."\\n"
+    local end_char = "\\n"
+    local sect_colour = get_string("st_"..sect.."_descr_colour")
+    local items_str = ""
+    
+    
+    for item, details in pairs(contents) do
+        if index_of(contents, item) == #contents then
+            end_char = "\\n \\n"
+        end   
+       
+        local amount_str = strformat("%s x%s", sect_colour, details.amount)         
+        items_str = items_str..strformat("%s %s %s %s %s %s", sect_colour, bullet_point, default_clr, med_itm_name(item), amount_str, end_char)
+        
+       
+    end
+    if #items_str <= 0 then
+        items_str = "\\n"
+    end
+
+    return base_descr..contents_str..items_str..props_str..max_weight_str..condition_str..storage_str..repack_str..zip_status_str
+end
+
+
+
 function medpack_descr(obj, sect)
     if not is_repackable_medpack(obj) then return end
     local descr = ""
-    local default_clr = get_colour_string("default")
-    local blue_clr = get_colour_string("d_blue")
-    local title_grey_clr = get_colour_string("ui_gray_3")
-    local text_grey_clr = get_colour_string("ui_gray_2")
-    local cyan_clr = get_colour_string("d_cyan")
-    local orange_clr = get_colour_string("d_orange")
-    local red_clr = get_colour_string("d_red")
     local condition_clr = get_condition_colour(obj:condition())
-
     local total_items = get_total_itms(obj:id())
     local contents = get_contents(obj:id())
 
     local function build_string()
-        local base_descr = get_string("st_"..sect.."_base_descr")
-        local contents_str = title_grey_clr.."CONTENTS:\\n"
-        local props_str = title_grey_clr.."PROPERTIES:\\n"
-        local storage_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_storage_descr").."\\n"
+        local base_descr = get_string("st_"..sect.."_base_descr")        
         local max_weight_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." "..get_translation("st_medpack_max_weight_descr", get_max_weight(obj:id())).." "..weight_unit.."\\n"
         local condition_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." ".."Condition:"..condition_clr.." "..get_translation("st_medpack_condition_descr", math.floor(obj:condition() * 100)).."\\n"
-        local repack_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_repack_descr").."\\n"
         local closed_status = get_closed_status(obj:id())
         local zip_status = closed_to_zip_status[closed_status]
         local zip_status_str = zip_colour[zip_status].." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_"..zip_status.."_descr").."\\n"

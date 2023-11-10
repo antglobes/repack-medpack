@@ -33,7 +33,7 @@
 	</string>
 
 	<string id="st_medpack_storage_descr">
-		<text>storage for medical equipment</text>
+		<text>Storage for medical equipment</text>
 	</string>
 	
 	<string id="st_medpack_condition_descr">
@@ -64,7 +64,7 @@
     </string>
 
 	<string id="st_medpack_repack_descr">
-		<text>repackable</text>
+		<text>Repackable</text>
 	</string>
 
     <!--Unzipped Medpack Titles-->
