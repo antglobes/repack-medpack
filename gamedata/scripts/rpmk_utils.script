@@ -7,6 +7,8 @@
    Purpose: Utility functions, some reused from past addons. Credited if not authored by AG
 --]]
 
+show_msg = get_config("main", "display_msg")
+
 function contains(tbl, key)
     for k, v in pairs(tbl) do
         if k == key then
@@ -82,6 +84,7 @@ end
 
 
  function display_msg(text_string, values, medpack_type)
+    if not show_msg then return end
     printf("Displaying message: %s with icon for %s", get_translation(text_string, values), medpack_type)
     news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 1500)
 end
@@ -117,4 +120,21 @@ function get_translation(str,...)
     end
 
     return string
+end
+
+function load_settings()
+    show_msg = get_config("main", "display_msg")
+end
+
+function on_first_update()
+    load_settings()
+end
+
+function on_option_change()
+    load_settings()
+end
+
+function on_game_load()
+    RegisterScriptCallback("actor_on_first_update", on_first_update)
+    RegisterScriptCallback("on_option_change", on_option_change)
 end

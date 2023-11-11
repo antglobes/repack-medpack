@@ -1,3 +1,19 @@
+
+local defaults = {
+    ["main"] = {
+        ["dam_multi_basic"] = 10,
+        ["dam_multi_army"] = 6,
+        ["dam_multi_sci"] = 2,
+        ["itm_clr_basic"] = "red",
+        ["itm_clr_army"] = "blue",
+        ["itm_clr_sci"] = "yellow",
+        ["cond_limit"] = 25,
+        ["display_msg"] = true
+    }
+}
+
+
+
 -- Adapted from @NLTP_ASHES
 --- Function used to get a given setting defined in MCM.
 --- If MCM isn't installed, it will default back to a value in defaults table.
@@ -5,7 +21,7 @@
 --- @param opt string
 --- @return any
 function get_config(id, opt)
-    if ui_mcm then return ui_mcm.get("beo/"..id.."/"..opt)	else return defaults[id][opt] end
+    if ui_mcm then return ui_mcm.get("rpmk/"..id.."/"..opt)	else return defaults[id][opt] end
 end
 
 -- Adapted from @NLTP_ASHES
@@ -16,7 +32,7 @@ end
 --- @param value any
 --- @return any
 function set_config(id, opt, value)
-    if ui_mcm then return ui_mcm.set("beo/"..id.."/"..opt, value) else defaults[id][opt] = value end
+    if ui_mcm then return ui_mcm.set("rpmk/"..id.."/"..opt, value) else defaults[id][opt] = value end
 end
 
 function on_mcm_load()

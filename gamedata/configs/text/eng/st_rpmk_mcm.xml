@@ -39,85 +39,85 @@
         <text>Scientific Medpack Items</text>
     </string>
     <string id="ui_mcm_lst_b_red">
-        <text>Red</text>
+        <text>red</text>
     </string>
     <string id="ui_mcm_lst_a_red">
-        <text>Red</text>
+        <text>red</text>
     </string>
     <string id="ui_mcm_lst_s_red">
-        <text>Red</text>
+        <text>red</text>
     </string>
     <string id="ui_mcm_lst_b_blue">
-        <text>Blue</text>
+        <text>blue</text>
     </string>
     <string id="ui_mcm_lst_a_blue">
-        <text>Blue</text>
+        <text>blue</text>
     </string>
     <string id="ui_mcm_lst_s_blue">
-        <text>Blue</text>
+        <text>blue</text>
     </string>
     <string id="ui_mcm_lst_b_yellow">
-        <text>Yellow</text>
+        <text>yellow</text>
     </string>
     <string id="ui_mcm_lst_a_yellow">
-        <text>Yellow</text>
+        <text>yellow</text>
     </string>
     <string id="ui_mcm_lst_s_yellow">
-        <text>Yellow</text>
+        <text>yellow</text>
     </string>
     <string id="ui_mcm_lst_b_green">
-        <text>Green</text>
+        <text>green</text>
     </string>
     <string id="ui_mcm_lst_a_green">
-        <text>Green</text>
+        <text>green</text>
     </string>
     <string id="ui_mcm_lst_s_green">
-        <text>Green</text>
+        <text>green</text>
     </string>
     <string id="ui_mcm_lst_b_orange">
-        <text>Orange</text>
+        <text>orange</text>
     </string>
     <string id="ui_mcm_lst_a_orange">
-        <text>Orange</text>
+        <text>orange</text>
     </string>
     <string id="ui_mcm_lst_s_orange">
-        <text>Orange</text>
+        <text>orange</text>
     </string>
     <string id="ui_mcm_lst_b_purple">
-        <text>Purple</text>
+        <text>purple</text>
     </string>
     <string id="ui_mcm_lst_a_purple">
-        <text>Purple</text>
+        <text>purple</text>
     </string>
     <string id="ui_mcm_lst_s_purple">
-        <text>Purple</text>
+        <text>purple</text>
     </string>
     <string id="ui_mcm_lst_b_grey">
-        <text>Grey</text>
+        <text>grey</text>
     </string>
     <string id="ui_mcm_lst_a_grey">
-        <text>Grey</text>
+        <text>grey</text>
     </string>
     <string id="ui_mcm_lst_s_grey">
-        <text>Grey</text>
+        <text>grey</text>
     </string>
     <string id="ui_mcm_lst_b_black">
-        <text>Black</text>
+        <text>black</text>
     </string>
     <string id="ui_mcm_lst_a_black">
-        <text>Black</text>
+        <text>black</text>
     </string>
     <string id="ui_mcm_lst_s_black">
-        <text>Black</text>
+        <text>black</text>
     </string>
     <string id="ui_mcm_lst_b_white">
-        <text>White</text>
+        <text>white</text>
     </string>
     <string id="ui_mcm_lst_a_white">
-        <text>White</text>
+        <text>white</text>
     </string>
     <string id="ui_mcm_lst_s_white">
-        <text>White</text>
+        <text>white</text>
     </string>
     <string id="ui_mcm_lst_dm_yes">
         <text>Yes</text>

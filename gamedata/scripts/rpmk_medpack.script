@@ -34,7 +34,8 @@ collect_section = utils_data.collect_section
 trader_type = trader_autoinject.get_trader_type
 TraderUpdate = trader_autoinject.update
 obj_to_sect_list = rpmk_utils.obj_to_sect_list
-
+get_config = rpmk_mcm.get_config
+set_config = rpmk_mcm.set_config
 -- Configs
 
 ini_medpack = ini_file_ex("items\\items\\items_repackable_medpack.ltx", true)
@@ -53,6 +54,14 @@ weight_unit = get_string("st_kg")
 
 -- Globals & Constants
 MEDPACK_TABLE = {}
+
+damage_multi_basic = get_config("main","dam_multi_basic")
+damage_multi_army = get_config("main", "dam_multi_army")
+damage_multi_sci = get_config("main", "dam_multi_sci")
+itm_clr_basic = get_config("main", "itm_clr_basic")
+itm_clr_army = get_config("main", "itm_clr_army")
+itm_clr_sci = get_config("main", "itm_clr_sci")
+cond_limit = get_config("main", "cond_limit")
 
 function get_colour_string(name)
     return strformat("%c[%s]", name)
@@ -152,9 +161,15 @@ damages = {
 
 -- Damage multiplier based  on medpack type
 damage_multi ={
-    ["basic"] = 10,
-    ["army"] = 6,
-    ["sci"] = 2
+    ["basic"] = damage_multi_basic or 10,
+    ["army"] = damage_multi_army or 6,
+    ["sci"] = damage_multi_basic or 2
+}
+
+sect_to_clr_string = {
+    ["basic"] = get_colour_string("d_"..itm_clr_basic),
+    ["army"] = get_colour_string("d_"..itm_clr_army),
+    ["sci"] = get_colour_string("d_"..itm_clr_sci)
 }
 
 -- If you want to include an item in the medpack, put it's section here
@@ -271,7 +286,7 @@ end
 function is_medpack_useable(medpack)
     local condition = medpack:condition()
     printf("medpack condition: %s:%s", medpack:section(), condition)
-    return math.ceil(condition * 100) > 25
+    return math.ceil(condition * 100) > cond_limit
 end
 
 --- Check if medpack has zipped status
@@ -731,8 +746,9 @@ function vanilla_medpack_descr(obj, sect)
     sect = vanilla_to_repackable(sect)
     local base_descr = get_string("st_"..sect.."_base_descr")        
     local condition_clr = get_condition_colour(obj:condition())
-    local max_weight_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." "..get_translation("st_medpack_max_weight_descr", default_max_weight(sect)).." "..weight_unit.."\\n"
-    local condition_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." ".."Condition:"..condition_clr.." "..get_translation("st_medpack_condition_descr", math.floor(obj:condition() * 100)).."\\n"
+    
+    local max_weight_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." "..strformat(get_string("st_medpack_max_weight_descr"),default_max_weight(sect)).." "..weight_unit.."\\n"
+    local condition_str = orange_clr.." "..bullet_point.." "..text_grey_clr.." ".."Condition:"..condition_clr.." "..strformat(get_string("st_medpack_condition_descr"), math.floor(obj:condition() * 100)).."\\n"
     local zip_status = closed_to_zip_status[true]
     local zip_status_str = zip_colour[zip_status].." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_"..zip_status.."_descr").."\\n"
     local end_char = "\\n"
@@ -741,7 +757,7 @@ function vanilla_medpack_descr(obj, sect)
     
     
     for item, details in pairs(contents) do
-        if index_of(contents, item) == #contents then
+        if item == contents[#contents] then
             end_char = "\\n \\n"
         end   
        
@@ -776,7 +792,10 @@ function medpack_descr(obj, sect)
         local zip_status = closed_to_zip_status[closed_status]
         local zip_status_str = zip_colour[zip_status].." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_"..zip_status.."_descr").."\\n"
         local end_char = "\\n"
-        local sect_colour = get_string("st_"..sect.."_descr_colour")
+        printf("itm color basic %s", itm_clr_basic)
+        local sect_colour = sect_to_clr_string[get_medpack_type(nil, sect)] or get_string("st_"..sect.."_descr_colour")
+        printf("sect %s medpack type %s sect colour %s", sect, get_medpack_type(nil, sect), sect_colour)
+
         local items_str = ""
         local itr = 1
         for item, details in pairs(contents) do
@@ -1320,8 +1339,28 @@ function on_update()
     on_medpack_condition_below_threshold()
 end
 
+function load_settings()
+    damage_multi_basic = get_config("main","dam_multi_basic")
+    damage_multi_army = get_config("main", "dam_multi_army")
+    damage_multi_sci = get_config("main", "dam_multi_sci")
+    itm_clr_basic = get_config("main", "itm_clr_basic")
+    itm_clr_army = get_config("main", "itm_clr_army")
+    itm_clr_sci = get_config("main", "itm_clr_sci")
+    cond_limit = get_config("main", "cond_limit")
+    printf("itm color basic %s", itm_clr_basic)
+end
+
+function on_first_update()
+    load_settings()
+end
+
+function on_option_change()
+    load_settings()
+end
+
 function on_game_start()
     pr(true, "registering callbacks")
+    RegisterScriptCallback("actor_on_first_update", on_first_update)
     RegisterScriptCallback("actor_on_item_take", on_item_take)
     RegisterScriptCallback("actor_on_item_drop", on_item_drop)
     RegisterScriptCallback("actor_on_update", on_update)
