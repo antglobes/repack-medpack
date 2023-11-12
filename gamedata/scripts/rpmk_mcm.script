@@ -4,9 +4,9 @@ local defaults = {
         ["dam_multi_basic"] = 10,
         ["dam_multi_army"] = 6,
         ["dam_multi_sci"] = 2,
-        ["itm_clr_basic"] = "red",
-        ["itm_clr_army"] = "blue",
-        ["itm_clr_sci"] = "yellow",
+        ["itm_clr_basic"] = "0",
+        ["itm_clr_army"] = "1",
+        ["itm_clr_sci"] = "2",
         ["cond_limit"] = 25,
         ["display_msg"] = true
     }
@@ -45,53 +45,48 @@ function on_mcm_load()
                     {id="dam_multi_sci", type="track", val=2, min=0.5, max=10.0, step=0.5, def=2},
                     {id="divider", type="line"},
                     {type="title", text="ui_mcm_rpmk_main_itm_clr"},
-                    {id="itm_clr_basic", type="list", val=0, def=0,
+                    {id="itm_clr_basic", type="list", val=0, def="red",
                         content={
-                            {0, "b_red"},
-                            {1, "b_blue"},
-                            {2, "b_yellow"},
-                            {3, "b_green"},
-                            {4, "b_orange"},
-                            {5, "b_purple"},
-                            {6, "b_grey"},
-                            {7, "b_black"},
-                            {8, "b_white"}
+                            {"b_red", "b_red"},
+                            {"b_blue", "b_blue"},
+                            {"b_yellow", "b_yellow"},
+                            {"b_green", "b_green"},
+                            {"b_orange", "b_orange"},
+                            {"b_purple", "b_purple"},
+                            {"b_grey", "b_grey"},
+                            {"b_black", "b_black"},
+                            {"b_white", "b_white"}
                         }
                     },
-                    {id="itm_clr_army", type="list", val=0, def=1,
+                    {id="itm_clr_army", type="list", val=0, def="a_blue",
                         content={
-                            {0, "a_red"},
-                            {1, "a_blue"},
-                            {2, "a_yellow"},
-                            {3, "a_green"},
-                            {4, "a_orange"},
-                            {5, "a_purple"},
-                            {6, "a_grey"},
-                            {7, "a_black"},
-                            {8, "a_white"}
+                            {"a_red", "a_red"},
+                            {"a_blue", "a_blue"},
+                            {"a_yellow", "a_yellow"},
+                            {"a_green", "a_green"},
+                            {"a_orange", "a_orange"},
+                            {"a_purple", "a_purple"},
+                            {"a_grey", "a_grey"},
+                            {"a_black", "a_black"},
+                            {"a_white", "a_white"}
                         }
                     },
-                    {id="itm_clr_sci", type="list", val=0, def=2,
+                    {id="itm_clr_sci", type="list", val=0, def="s_yellow",
                         content={
-                            {0, "s_red"},
-                            {1, "s_blue"},
-                            {2, "s_yellow"},
-                            {3, "s_green"},
-                            {4, "s_orange"},
-                            {5, "s_purple"},
-                            {6, "s_grey"},
-                            {7, "s_black"},
-                            {8, "s_white"}
+                            {"s_red", "s_red"},
+                            {"s_blue", "s_blue"},
+                            {"s_yellow", "s_yellow"},
+                            {"s_green", "s_green"},
+                            {"s_orange", "s_orange"},
+                            {"s_purple", "s_purple"},
+                            {"s_grey", "s_grey"},
+                            {"s_black", "s_black"},
+                            {"s_white", "s_white"}
                         }
                     },
                     {id="divider", type="line"},
                     {id="cond_limit", type="track", val=2, min=0, max=100, step=1, def=25},
-                    {id="display_msg", type="radio_h", val=2, def=0,
-                        content={
-                            {0, "dm_yes"},
-                            {1, "dm_no"}
-                        }
-                    }
+                    {id="display_msg", type="check", val=1, def=true,}
                 }
 
             }

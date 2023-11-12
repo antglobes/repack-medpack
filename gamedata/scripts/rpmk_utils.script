@@ -7,7 +7,9 @@
    Purpose: Utility functions, some reused from past addons. Credited if not authored by AG
 --]]
 
-show_msg = get_config("main", "display_msg")
+get_config = rpmk_mcm.get_config
+set_config = rpmk_mcm.set_config
+
 
 function contains(tbl, key)
     for k, v in pairs(tbl) do
@@ -84,7 +86,7 @@ end
 
 
  function display_msg(text_string, values, medpack_type)
-    if not show_msg then return end
+    if not get_config("display_msg") then return end
     printf("Displaying message: %s with icon for %s", get_translation(text_string, values), medpack_type)
     news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 1500)
 end
@@ -122,19 +124,19 @@ function get_translation(str,...)
     return string
 end
 
-function load_settings()
-    show_msg = get_config("main", "display_msg")
+function mcm_to_itm_clr(itm_clr)
+    local start, _end = string.find(itm_clr, "_")
+    return "d_"..string.sub(itm_clr, _end+1, #itm_clr)
 end
 
-function on_first_update()
-    load_settings()
-end
-
-function on_option_change()
-    load_settings()
-end
-
-function on_game_load()
-    RegisterScriptCallback("actor_on_first_update", on_first_update)
-    RegisterScriptCallback("on_option_change", on_option_change)
+function alt_itm_clr(itm_clr)
+    if string.find(itm_clr, "yellow") then
+        return "pda_yellow"
+    elseif string.find(itm_clr, "white") then
+        return "pda_white"
+    elseif string.find(itm_clr, "black") then
+        return GetARGB(255, 0, 0, 0)
+    else
+        return itm_clr
+    end
 end
