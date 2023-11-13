@@ -136,7 +136,7 @@ function alt_itm_clr(itm_clr)
     elseif string.find(itm_clr, "white") then
         return "pda_white"
     elseif string.find(itm_clr, "black") then
-        return GetARGB(255, 0, 0, 0)
+        return GetARGB(1, 1, 1, 1)
     else
         return itm_clr
     end

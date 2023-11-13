@@ -43,11 +43,11 @@ ini_medical = ini_file_ex("items\\items\\items_medical.ltx")
 ini_drugs = ini_file_ex("items\\items\\items_drugs.ltx")
 ini_drink = ini_file_ex("items\\items\\items_drink.ltx")
 ini_manager = ini_file_ex("items\\settings\\itms_manager.ltx")
-ini_bhsro_meds = ini_file_ex("items\\items\\mod_animations_settings_othermeds_bhsro.ltx")
-ini_eft_meds = ini_file_ex("items\\items\\mod_animations_settings_z_eftmeds_bhsro.ltx")
+ini_eft_meds = ini_file_ex("mod_system_eftmeds_bhsro.ltx")
 
+-- If you want to include an item in the medpack, put it's section here
 -- Add config file in here to convert section to name
-config_list = {ini_medical, ini_drugs, ini_drink, ini_bhsro_meds, ini_eft_meds}
+config_list = {ini_medical, ini_drugs, ini_drink, ini_eft_meds}
 
 -- Other
 bullet_point = get_string("st_medpack_descr_bullet_point")
@@ -175,11 +175,9 @@ damage_multi ={
     ["sci"] = get_config("main","dam_multi_basic") 
 }
 
--- If you want to include an item in the medpack, put it's section here
-compat_medpack_sects = {
-    ["bandage_israeli"] = 0,
-    ["bio_bandage"] = 0,
-    ["medkit_elite"] = 0,
+
+bhs_item_weight = {
+    ["bandage_army"] = 0,
     ["surginst"] = 0.15,
     ["cms"] = 0.7,
     ["splint"] = 0.2,
@@ -189,9 +187,11 @@ compat_medpack_sects = {
     ["propital"] = 0.01,
     ["zagustin"] = 0.01,
     ["sj6"] = 0.01,
-    ["etg"] = 0.01,
-    ["analgin"] = 0,
     ["sj1"] = 0.01,
+    ["etg"] = 0.01,
+    ["analgin"] = 0.011,
+    ["rebirth"] = 0.08,
+    ["survival_kit"] = 0.18
 }
 
 -- Repackable Medpack sections
@@ -267,7 +267,7 @@ end
 ---@param itm_sect string
 function is_medpack_compatible(itm_sect)
     for _, config in pairs(config_list) do
-        if config:section_exist(itm_sect) then
+        if config:section_exist(itm_sect) or bhs_item_weight[itm_sect] then
             return true
         end
     end
@@ -883,7 +883,7 @@ function get_item_weight(item)
             return config:r_float_ex(item, "inv_weight")
         end
     end
-    --return ini_drugs:r_float_ex(item, "inv_weight") or ini_medical:r_float_ex(item, "inv_weight") or ini_drink:r_float_ex(item, "inv_weight")
+    return 0.01
 end
 
 --- Get the uses of an item by section
@@ -896,7 +896,11 @@ function get_item_uses(sect)
             return obj:get_remaining_uses()
         end
     end
-    return ini_drugs:r_float_ex(sect, "max_uses") or ini_medical:r_float_ex(sect, "max_uses") or ini_drink:r_float_ex(sect, "max_uses") or 1
+    local uses
+    for _, config in pairs(config_list)  do
+        uses = config:r_float_ex(sect, "max_uses")
+    end
+    return uses or 1
 end
 
 --- Calculate total weight of medpack based on the weight of each item
