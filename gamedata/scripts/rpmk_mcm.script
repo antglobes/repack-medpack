@@ -45,7 +45,7 @@ function on_mcm_load()
                     {id="dam_multi_sci", type="track", val=2, min=0.5, max=10.0, step=0.5, def=2},
                     {id="divider", type="line"},
                     {type="title", text="ui_mcm_rpmk_main_itm_clr"},
-                    {id="itm_clr_basic", type="list", val=0, def="red",
+                    {id="itm_clr_basic", type="list", val=0, def="b_red",
                         content={
                             {"b_red", "b_red"},
                             {"b_blue", "b_blue"},

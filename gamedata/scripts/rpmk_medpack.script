@@ -43,9 +43,11 @@ ini_medical = ini_file_ex("items\\items\\items_medical.ltx")
 ini_drugs = ini_file_ex("items\\items\\items_drugs.ltx")
 ini_drink = ini_file_ex("items\\items\\items_drink.ltx")
 ini_manager = ini_file_ex("items\\settings\\itms_manager.ltx")
+ini_bhsro_meds = ini_file_ex("items\\items\\mod_animations_settings_othermeds_bhsro.ltx")
+ini_eft_meds = ini_file_ex("items\\items\\mod_animations_settings_z_eftmeds_bhsro.ltx")
 
 -- Add config file in here to convert section to name
-config_list = {ini_medical, ini_drugs, ini_drink}
+config_list = {ini_medical, ini_drugs, ini_drink, ini_bhsro_meds, ini_eft_meds}
 
 -- Other
 bullet_point = get_string("st_medpack_descr_bullet_point")
@@ -175,21 +177,21 @@ damage_multi ={
 
 -- If you want to include an item in the medpack, put it's section here
 compat_medpack_sects = {
-    "bandage_israeli",
-    "bio_bandage",
-    "medkit_elite",
-    "surginst",
-    "cms",
-    "splint",
-    "alu_splint",
-    "morphine",
-    "adrenalin",
-    "propital",
-    "zagustin",
-    "sj6",
-    "etg",
-    "analgin",
-    "sj1",
+    ["bandage_israeli"] = 0,
+    ["bio_bandage"] = 0,
+    ["medkit_elite"] = 0,
+    ["surginst"] = 0.15,
+    ["cms"] = 0.7,
+    ["splint"] = 0.2,
+    ["alu_splint"] = 0.4,
+    ["morphine"] = 0.07,
+    ["adrenalin"] = 0.05,
+    ["propital"] = 0.01,
+    ["zagustin"] = 0.01,
+    ["sj6"] = 0.01,
+    ["etg"] = 0.01,
+    ["analgin"] = 0,
+    ["sj1"] = 0.01,
 }
 
 -- Repackable Medpack sections
@@ -264,8 +266,10 @@ end
 --- Check if item section can go into a medpack
 ---@param itm_sect string
 function is_medpack_compatible(itm_sect)
-    if ini_drugs:section_exist(itm_sect) or ini_medical:section_exist(itm_sect) or ini_drink:section_exist(itm_sect) or compat_medpack_sects[itm_sect] then
-        return true
+    for _, config in pairs(config_list) do
+        if config:section_exist(itm_sect) then
+            return true
+        end
     end
     return false
 end
@@ -752,7 +756,7 @@ function vanilla_medpack_descr(obj, sect)
     local medpack_type = get_medpack_type(nil, sect)
     local itm_clr = mcm_to_itm_clr(get_config("main", "itm_clr_"..medpack_type))
     itm_clr = alt_itm_clr(itm_clr)
-    local sect_colour = get_colour_string(itm_clr) --or get_string("st_"..sect.."_descr_colour")
+    local sect_colour = get_colour_string(itm_clr)
     printf("%s", sect_colour)
     for item, details in pairs(contents) do
         if item == contents[#contents] then
@@ -874,7 +878,12 @@ end
 --- Get weight of item by section
 ---@param item string
 function get_item_weight(item)
-    return ini_drugs:r_float_ex(item, "inv_weight") or ini_medical:r_float_ex(item, "inv_weight") or ini_drink:r_float_ex(item, "inv_weight")
+    for _, config in pairs(config_list) do
+        if config:section_exist(item) then
+            return config:r_float_ex(item, "inv_weight")
+        end
+    end
+    --return ini_drugs:r_float_ex(item, "inv_weight") or ini_medical:r_float_ex(item, "inv_weight") or ini_drink:r_float_ex(item, "inv_weight")
 end
 
 --- Get the uses of an item by section

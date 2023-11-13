@@ -86,7 +86,7 @@ end
 
 
  function display_msg(text_string, values, medpack_type)
-    if not get_config("display_msg") then return end
+    if not get_config("main", "display_msg") then return end
     printf("Displaying message: %s with icon for %s", get_translation(text_string, values), medpack_type)
     news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 1500)
 end
@@ -126,6 +126,7 @@ end
 
 function mcm_to_itm_clr(itm_clr)
     local start, _end = string.find(itm_clr, "_")
+    printf("%s %s %s", itm_clr, start, _end)
     return "d_"..string.sub(itm_clr, _end+1, #itm_clr)
 end
 
