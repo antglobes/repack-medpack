@@ -1,26 +1,31 @@
 <w>
     <file name="ui\ui_medpack_btns">
         <texture id="ui_medpack_btn_d" x="0" y="0" width="40" height="10"/>
-        <texture id="ui_medpack_btn_e" x="0" y="40" width="40" height="10"/>
-        <texture id="ui_medpack_btn_h" x="0" y="80" width="40" height="10"/>
-        <texture id="ui_medpack_btn_t" x="0" y="120" width="40" height="10"/>
+        <texture id="ui_medpack_btn_e" x="0" y="10" width="40" height="10"/>
+        <texture id="ui_medpack_btn_h" x="0" y="20" width="40" height="10"/>
+        <texture id="ui_medpack_btn_t" x="0" y="30" width="40" height="10"/>
     </file>
 
     <file name="ui\ui_medpack_menu_0">
-        <texture id="ui_medpack_menu_basic" x="34" y="29" width="189" height="186" />
+        <texture id="ui_medpack_menu_basic" x="34" y="29" width="189" height="186" stretch="1"/>
     </file>
 
     <file name="ui\ui_medpack_menu_1">
-        <texture id="ui_medpack_menu_army" x="34" y="27" width="189" height="186" />
+        <texture id="ui_medpack_menu_army" x="34" y="27" width="189" height="186" stretch="1" />
     </file>
 
     <file name="ui\ui_medpack_menu_2">
-        <texture id="ui_medpack_menu_scic" x="34" y="30" width="189" height="186" />
+        <texture id="ui_medpack_menu_sci" x="34" y="30" width="189" height="186" stretch="1"/>
     </file>
 
     <file name="ui\ui_medpack_side_menus">
-        <texture id="ui_medpack_side_menu_basic" x="0" y="0" width="100" height="200" stretch="1"/>
-        <texture id="ui_medpack_side_menu_army" x="50" y="0" width="100" height="200" stretch="1"/>
-        <texture id="ui_medpack_side_menu_sci" x="50" y="0" width="100" height="200" stretch="1"/>
+        <texture id="ui_medpack_side_menu_basic" x="0" y="0" width="159" height="330" stretch="1"/>
+        <texture id="ui_medpack_side_menu_army" x="159" y="0" width="157" height="330" stretch="1"/>
+        <texture id="ui_medpack_side_menu_sci" x="317" y="0" width="161" height="330" stretch="1"/>
+    </file>
+
+    <file name="ui\ui_medpack_frames">
+        <texture id="ui_medpack_menu_frame" x="0" y="0" width="157" height="154" stretch="1"/>
+        <texture id="ui_medpack_side_menu_frame" x="158" y="0" width="98" height="190" stretch="1"/>
     </file>
 </w>

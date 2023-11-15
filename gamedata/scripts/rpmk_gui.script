@@ -15,16 +15,17 @@ side_menu_names = {
 local weight_unit = game.translate_string("st_kg")
 ---------------------------------------
 
-local medpack_obj = nil
-function display_medpack_gui(unpck, fill, medpack)
-    hide_hud_inventory()
 
+function display_medpack_gui(medpack_obj)
+    hide_hud_inventory()
+	printf("Showing UI")
     if not GUI then
-        GUI = MPG()
+        GUI = MPG(medpack_obj)
     end
 
     if GUI and not GUI:IsShown() then
-		medpack_obj = medpack
+		Unregister_UI("MPG", "medpack_gui")
+		GUI = MPG(medpack_obj)
         GUI:Reset()
         GUI:ShowDialog(true)
         Register_UI("MPG", "medpack_gui")
@@ -34,10 +35,19 @@ end
 
 class "MPG" (CUIScriptWnd)
 
-function MPG:__init() super()
+function MPG:__init(medpack) super()
+    self.medpack = medpack
+	self.medpack_type = rpmk_medpack.get_medpack_type(self.medpack:id())
+	self.medpack_props = rpmk_medpack.mt_all_vars(self.medpack:id())
+	self.medpack_contents = self.medpack_props["contents"]
+	self.total_items = self.medpack_props["total_itms"]
+	self.total_weight = self.medpack_props["total_weight"]
+	--local med_items = rpmk_medpack.get_inv_medpack_itms()
+	--local sect_list = rpmk_medpack.obj_to_sect_list(med_items)
+	--`local inv_contents = rpmk_medpack.build_contents(sect_list)
+	self.player_med_items = rpmk_medpack.get_inv_medpack_itms()
 	self:InitControls()
     self:InitCallBacks()
-    
 end    
 
 function MPG:__finalize()
@@ -51,8 +61,7 @@ function MPG:InitControls()
     local xml = self.xml
     xml:ParseFile("ui_rmpk_gui.xml")
 
-	self.medpack = medpack_obj
-	self.medpack_type = rpmk_medpack.get_medpack_type(medpack:id())
+	
 	self.active_menu = self.medpack_type.."_menu"
 	self.active_side_menu = self.medpack_type.."_side_menu"
 
@@ -69,86 +78,79 @@ function MPG:InitControls()
 	self.tg_hint_step    = 1000 --[ms]
 	self.tg_m1		     = 0
     
-	-- Cell Contaniers
-    self.basic_menu = xml:InitStatic("basic_menu", self)
-    self.menus["basic_menu"] = utils_ui.UICellContainer("basic_menu", self, nil, nil, self.basic_menu, false)
-    self.menus["basic_menu"].sort_method = "props"
-    self.menus["basic_menu"].disable_callback["On_CC_Add"] = true
-    self.menus["basic_menu"].disable_callback["On_CC_Remove"] = true
-    self.menus["basic_menu"].scroll:SetWndPos(vector2():set( 10 , 0 ))
-    --self.menus["basic_menu"]:SetGridSpecs(10,1)
-    self.menus["basic_menu"]:Show(false)
 
-	self.basic_side_menu = xml:InitStatic("basic_side_menu", self)
-	self.side_menus["basic_side_menu"] = utils_ui.UICellContainer("basic_side_cont", self, nil, nil, self.basic_side_menu, false)
-	self.side_menus["basic_side_menu"].sort_method = "props"
-	self.side_menus["basic_side_menu"].disable_callback["On_CC_Add"] = true
-	self.side_menus["basic_side_menu"].disable_callback["On_CC_Remove"] = true
-	self.side_menus["basic_side_menu"].scroll:SetWndPos(vector2():set( 10 , 0 ))
-	self.side_menus["basic_side_menu"].can_select = "inventory"
-	self.side_menus["basic_side_menu"]:Show(false)
+	self.medpack_menu = xml:InitStatic(self.active_menu, self)
+	self.player_menu = xml:InitStatic(self.active_side_menu, self)
 
-    self.army_menu = xml:InitStatic("army_menu", self)
-    self.menus["army_menu"] = utils_ui.UICellContainer("army_menu", self, nil, nil, self.army_menu, false)
-    self.menus["army_menu"].sort_method = "props"
-    self.menus["army_menu"].disable_callback["On_CC_Add"] = true
-    self.menus["army_menu"].disable_callback["On_CC_Remove"] = true
-    self.menus["army_menu"].scroll:SetWndPos(vector2():set( 10 , 0 ))
-    --self.menus["army_menu"]:SetGridSpecs(10,1)
-    self.menus["army_menu"]:Show(false)
+	-- Cell containers
+    self.menus[self.active_menu] = utils_ui.UICellContainer(self.medpack_type.."_cont", self, nil, self.active_menu.."_frame", self)
+	self.menus[self.active_menu].side_menu = utils_ui.UICellContainer(self.medpack_type.."_side_cont", self, nil, self.active_side_menu.."_frame", self)
 
-	self.army_side_menu = xml:InitStatic("army_side_menu", self)
-	self.side_menus["army_side_menu"] = utils_ui.UICellContainer("army_side_cont", self, nil, nil, self.army_side_menu, false)
-	self.side_menus["army_side_menu"].sort_method = "props"
-	self.side_menus["army_side_menu"].disable_callback["On_CC_Add"] = true
-	self.side_menus["army_side_menu"].disable_callback["On_CC_Remove"] = true
-	self.side_menus["army_side_menu"].scroll:SetWndPos(vector2():set( 10 , 0 ))
-	self.side_menus["army_side_menu"]:Show(false)
+	-- CC Properties 
+	--[[
+	self.menus[self.active_menu].sort_method = "props"
+    self.menus[self.active_menu].disable_callback["On_CC_Add"] = true
+    self.menus[self.active_menu].disable_callback["On_CC_Remove"] = true
+    self.menus[self.active_menu].scroll:SetWndPos(vector2():set( 671 , 198 ))
+	]]--
+	self.menus[self.active_menu].can_select = true
+	self.menus[self.active_menu].sort_method = "kind"
+	self.menus[self.active_menu].side_menu.can_select = true
+	self.menus[self.active_menu].side_menu.sort_method = "kind"
+	self.menus[self.active_menu]:SetGridSpecs(39, 2)
+	self.menus[self.active_menu]:SetGridSpecs(39, 2)
+	--self.menus[self.active_menu].side_menu.scroll:SetWndPos(vector2():set( 831 , 283 ))
+	
+	
 
-    self.sci_menu = xml:InitStatic("sci_menu", self)
-    self.menus["sci_menu"] = utils_ui.UICellContainer("sci_menu", self, nil, nil, self.sci_menu, false)
-    self.menus["sci_menu"].sort_method = "props"
-    self.menus["sci_menu"].disable_callback["On_CC_Add"] = true
-    self.menus["sci_menu"].disable_callback["On_CC_Remove"] = true
-    self.menus["sci_menu"].scroll:SetWndPos(vector2():set( 10 , 0 ))
-    --self.menus["basic_menu"]:SetGridSpecs(10,1)
-    self.menus["sci_menu"]:Show(false)
+	-- Text wnd
+	self.medpack_weight = xml:InitTextWnd("weight", self)
+	self.medpack_total_items = xml:InitTextWnd("total_items", self)
+	
+	-- Btns
+	self.menus[self.active_menu].unpack_all_btn = xml:Init3tButton("unpack_all_btn", self)
+    self.menus[self.active_menu].fill_all_btn = xml:Init3tButton("fill_all_btn", self)
+	self.menus[self.active_menu].close_btn = xml:Init3tButton("close_btn", self)
 
-	self.sci_side_menu = xml:InitStatic("sci_side_menu", self)
-	self.side_menus["sci_side_menu"] = utils_ui.UICellContainer("sci_side_cont", self, nil, nil, self.sci_side_menu, false)
-	self.side_menus["sci_side_menu"].sort_method = "props"
-	self.side_menus["sci_side_menu"].disable_callback["On_CC_Add"] = true
-	self.side_menus["sci_side_menu"].disable_callback["On_CC_Remove"] = true
-	self.side_menus["sci_side_menu"].scroll:SetWndPos(vector2():set( 10 , 0 ))
-	self.side_menus["sci_side_menu"]:Show(false)
-    
+	self:Register(self.menus[self.active_menu].unpack_all_btn, "unpack_all_btn")
+	self:Register(self.menus[self.active_menu].fill_all_btn, "fill_all_btn")
+	self:Register(self.menus[self.active_menu].close_btn, "close_btn")
+
 	-- Info box
 	self.item_info = utils_ui.UIInfoItem(self)
 
 	-- Item Properties
 	self.item_props = utils_ui.UICellProperties(self)
-
-	self.unpack_all_btn = xml:Init3tButton("unpack_all_btn", self)
-	self:Register(self.unpack_all_btn, "unpack_all")
-
-    self.fill_all_btn = xml:Init3tButton("fill_all_btn", self)
-	self:Register(self.fill_all_btn, "fill_all")
-
-    self.close_btn = xml:Init3tButton("close_btn", self)
-	self:Register(self.close_btn, "close")
-
-	self.medpack_weight = xml:InitTextwnd("weight", self)
-	self.medpack_weight:Show(false)
-
-	self.medpack_total_items = xml:InitTextwnd("total_items", self)
-	self.medpack_total_items:Show(false)
 end
 
 function MPG:InitCallBacks()
-    self:AddCallback("unpack_all", ui_events.BUTTON_CLICKED, self.UnpackAll, self)
-    self:AddCallback("fill_all", ui_events.BUTTON_CLICKED, self.FillAll, self)
-    self:AddCallback("close", ui_events.BUTTON_CLICKED, self.Close, self)
+    self:AddCallback("unpack_all_btn", ui_events.BUTTON_CLICKED, self.UnpackAll, self)
+    self:AddCallback("fill_all_btn", ui_events.BUTTON_CLICKED, self.FillAll, self)
+    self:AddCallback("close_btn", ui_events.BUTTON_CLICKED, self.Close, self)
 end
+
+function MPG:Reset(medpack)
+	self.medpack_menu:Show(true)
+	self.player_menu:Show(true)
+	self.menus[self.active_menu]:Show(true)
+	self.menus[self.active_menu].side_menu:Show(true)
+	--self.menus[self.active_menu].unpack_all_btn:Show(true)
+	--self.menus[self.active_menu].fill_all_btn:Show(true)
+	--self.menus[self.active_menu].close_btn:Show(true)
+	
+
+	self:SetMedpackDetails()
+	self.medpack_weight:Show(true)
+	self.medpack_total_items:Show(true)
+
+	self:ShowMenuContents()
+end
+
+function MPG:SetMedpackDetails(total_weight, total_items)
+	self.medpack_weight:SetText(rpmk_utils.get_translation("ui_rpmk_text_weight", total_weight or self.total_weight))
+	self.medpack_total_items:SetText(rpmk_utils.get_translation("ui_rpmk_text_total_items", total_items or self.total_items))
+end
+
 
 function MPG:UnpackAll()
 end
@@ -157,8 +159,55 @@ function MPG:FillAll()
 end
 
 function MPG:Close()
+	utils_obj.play_sound("interface\\inv_close")
+    self:HideDialog()
+    self:Show(false)
+    Unregister_UI("MPG")
 end
 
+function MPG:GetMedpackMedItems()
+	local state = {}
+	local items = {}
+	local ids = {}
+	local j = 1
+	for item, details in pairs(self.medpack_contents) do
+		for i=1, details.amount do
+			printf("item %s", item)
+			local se_obj = alife_create_item(item, db.actor, {["uses"]=details.uses[i]})
 
+			CreateTimeEvent("medpack_event"..se_obj.id, "medpack_se_to_obj"..se_obj.id, 0.5, function()
+				local obj = level.object_by_id(se_obj.id)
+				if obj ~= nil then
+					printf("Obj:%s", obj:section())
+					items[#items + 1] = obj
+					state[#state + 1] = true
+				end
+				return true
+			end)
+		end
+	end
 
+	CreateTimeEvent("medpack_event"..math.random(10000), "medpack_display_contents"..math.random(10000), 0.6, function()
+		printf("%s", #items)
+		for _, obj in ipairs(items) do
+			printf("%s", obj:section())
+		end
+		self.menus[self.active_menu]:Reinit(items, state)
+		return true
+	end)
+	
+end
 
+function MPG:GetPlayerMedItems()
+	local state = {}
+	for i=1, #self.player_med_items do
+		state[i] = true
+	end
+	self.menus[self.active_menu].side_menu:Reinit(self.player_med_items, state)
+
+end
+
+function MPG:ShowMenuContents()
+	self:GetPlayerMedItems()
+	self:GetMedpackMedItems()
+end

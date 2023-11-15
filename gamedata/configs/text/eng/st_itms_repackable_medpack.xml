@@ -215,7 +215,7 @@
         %c[d_red] • %c[ui_gray_2] Zipped\n</text>
     </string>
 
-	<!--GUI Button Text-->
+	<!--GUI Text-->
 	<string id="ui_rpmk_btn_unpack_all">
 		<text>Unpack All</text>
 	</string>
@@ -226,6 +226,14 @@
 
 	<string id="ui_rpmk_btn_fill_all">
 		<text>Fill All</text>
+	</string>
+	
+	<string id="ui_rpmk_text_weight">
+		<text>Weight: %s kg</text>
+	</string>
+	
+	<string id="ui_rpmk_text_total_items">
+		<text>Total Items: %s</text>
 	</string>
 
 	<!--Functor Strings-->
@@ -242,6 +250,9 @@
 	</string>
 	<string id="st_rpmk_menu_unzip">
 		<text>unzip</text>
+	</string>
+	<string id="st_rpmk_menu_open">
+		<text>open</text>
 	</string>
 	
 	<!--News Manager Strings-->

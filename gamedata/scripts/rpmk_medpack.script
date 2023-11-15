@@ -36,7 +36,7 @@ TraderUpdate = trader_autoinject.update
 obj_to_sect_list = rpmk_utils.obj_to_sect_list
 mcm_to_itm_clr = rpmk_utils.mcm_to_itm_clr
 alt_itm_clr = rpmk_utils.alt_itm_clr
-
+display_gui = rpmk_gui.display_medpack_gui
 -- Configs
 ini_medpack = ini_file_ex("items\\items\\items_repackable_medpack.ltx", true)
 ini_medical = ini_file_ex("items\\items\\items_medical.ltx")
@@ -1272,7 +1272,37 @@ end
 local add_functor = custom_functor_autoinject.add_functor
 add_functor("rpmk_medpack_unzip", unzip_condition_function, unzip_menu_function, nil, unzip_action)
 
+-- open
 
+function open_condition_met(obj)
+    if obj and is_medpack_useable(obj) and not is_medpack_empty(obj) then
+        return true
+    end
+    return false
+end
+
+function open_condition_function(obj, bag, mode)
+    local p = obj:parent()
+	if not (p and p:id() == AC_ID) then return end
+    if not is_repackable_medpack(obj) then return end
+
+    return open_condition_met(obj)
+end
+
+function open_menu_function(obj, bag, mode)
+    return get_string("st_rpmk_menu_open")
+end
+
+function open_action(obj, bag, mode)
+    local medpack = is_repackable_medpack(obj) and obj
+    if not medpack then return end
+    printf("loading UI")
+    display_gui(medpack)
+    printf("closing UI")
+end
+
+local add_functor = custom_functor_autoinject.add_functor
+add_functor("rpmk_medpack_open", open_condition_function, open_menu_function, nil, open_action)
 -------------------------------
 -- Drag/Drop repack
 -------------------------------
