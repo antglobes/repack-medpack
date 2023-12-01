@@ -1,5 +1,5 @@
 GUI = nil
-
+DEBUG = true
 menu_names = {
 	[1] = "basic_menu",
 	[2] = "army_menu",
@@ -13,6 +13,29 @@ side_menu_names = {
 }
 
 local weight_unit = game.translate_string("st_kg")
+local K_Timer   = false
+local K_M1      = DIK_keys.MOUSE_1
+local K_M2      = DIK_keys.MOUSE_2
+local K_CTRL    = DIK_keys.DIK_LCONTROL
+local K_SHFT    = DIK_keys.DIK_LSHIFT
+local E_PRESS   = ui_events.WINDOW_KEY_PRESSED
+local E_RELEASE = ui_events.WINDOW_KEY_RELEASED
+
+function keybind_pass()
+	-- I added this to prevent inventory closing after starting because of release keybind
+	if (K_Timer and (time_global() > K_Timer + 200)) or (not K_Timer) then
+		K_Timer = time_global()
+		return true
+	end
+	return false
+end
+
+function dbg_pr(str, ...)
+	if DEBUG then
+		printf("Repackable Medpack|GUI %s", strformat(str, ...))
+	end
+end
+
 ---------------------------------------
 
 
@@ -36,6 +59,8 @@ end
 class "MPG" (CUIScriptWnd)
 
 function MPG:__init(medpack) super()
+
+	-- Medpack
     self.medpack = medpack
 	self.medpack_type = rpmk_medpack.get_medpack_type(self.medpack:id())
 	self.medpack_props = rpmk_medpack.mt_all_vars(self.medpack:id())
@@ -46,6 +71,24 @@ function MPG:__init(medpack) super()
 	--local sect_list = rpmk_medpack.obj_to_sect_list(med_items)
 	--`local inv_contents = rpmk_medpack.build_contents(sect_list)
 	self.player_med_items = rpmk_medpack.get_inv_medpack_itms()
+
+	-- Technical
+	self.hover = {idx=false, bag=false, tg=0}
+	self.holding_ctrl    = false
+	self.holding_shift   = false
+	self.properties = {
+		["use"]             = { index= 1 ,  name= "st_use",                    			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},                    precondition1= {"Cond_Use"},                                               	       action= {"Action_Use"} },
+		["move"]            = { index= 2 ,  name_func= {"Name_Move"},          			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},   				  precondition1= {"Cond_Move"},                                                        action= {"Action_Move"} },
+		["move_all"]        = { index= 3 ,  name= "st_move_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},   				  precondition1= {"Cond_Childs"},         precondition2= {"Cond_Move"},          	   action= {"Action_Move_All"} },
+		["drop"]            = { index= 4,  name= "st_drop",                  			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},        			 precondition1= {"Cond_NotQuest"},                                                     action= {"Action_Drop"} },
+		["drop_all"]        = { index= 5,  name= "st_drop_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},                   precondition1= {"Cond_Childs"}, 	      precondition2= {"Cond_NotQuest"},            action= {"Action_Drop_All"} },
+	}
+
+	for _,props in pairs(self.properties) do
+		if props.cont then t2k_table(props.cont) end
+	end
+
+	-- UI
 	self:InitControls()
     self:InitCallBacks()
 end    
@@ -77,6 +120,8 @@ function MPG:InitControls()
 	self.tg_hint         = nil
 	self.tg_hint_step    = 1000 --[ms]
 	self.tg_m1		     = 0
+
+	self.update_info = false
     
 
 	self.medpack_menu = xml:InitStatic(self.active_menu, self)
@@ -86,23 +131,30 @@ function MPG:InitControls()
     self.menus[self.active_menu] = utils_ui.UICellContainer(self.medpack_type.."_cont", self, nil, self.active_menu.."_frame", self)
 	self.menus[self.active_menu].side_menu = utils_ui.UICellContainer(self.medpack_type.."_side_cont", self, nil, self.active_side_menu.."_frame", self)
 
+	self.active_window = self.menus[self.active_menu]
+	self.prev_window = false
+	self.dragging = false
+
 	-- CC Properties 
 	--[[
-	self.menus[self.active_menu].sort_method = "props"
+		self.windows = {
+		["main"] = self.menus[self.active_menu],
+		["side"] = self.menus[self.active_menu].side_menu
+	}
     self.menus[self.active_menu].disable_callback["On_CC_Add"] = true
     self.menus[self.active_menu].disable_callback["On_CC_Remove"] = true
-    self.menus[self.active_menu].scroll:SetWndPos(vector2():set( 671 , 198 ))
 	]]--
+
 	self.menus[self.active_menu].can_select = true
 	self.menus[self.active_menu].sort_method = "kind"
+	--self.menus[self.active_menu]:SetGridSpecs(39, 2)
+	--self.menus[self.active_menu].scroll:SetWndPos(vector2():set( 490 , 230 ))
+
 	self.menus[self.active_menu].side_menu.can_select = true
 	self.menus[self.active_menu].side_menu.sort_method = "kind"
-	self.menus[self.active_menu]:SetGridSpecs(39, 2)
-	self.menus[self.active_menu]:SetGridSpecs(39, 2)
-	--self.menus[self.active_menu].side_menu.scroll:SetWndPos(vector2():set( 831 , 283 ))
+	--self.menus[self.active_menu].side_menu:SetGridSpecs(39, 2)
+	--self.menus[self.active_menu].side_menu.scroll:SetWndPos(vector2():set( 820 , 290 ))
 	
-	
-
 	-- Text wnd
 	self.medpack_weight = xml:InitTextWnd("weight", self)
 	self.medpack_total_items = xml:InitTextWnd("total_items", self)
@@ -115,6 +167,10 @@ function MPG:InitControls()
 	self:Register(self.menus[self.active_menu].unpack_all_btn, "unpack_all_btn")
 	self:Register(self.menus[self.active_menu].fill_all_btn, "fill_all_btn")
 	self:Register(self.menus[self.active_menu].close_btn, "close_btn")
+
+	-- Cell Item
+	self.menu_item = utils_ui.UICellItem({path="container", xml=xml}, {path="box_item", base=self.medpack_menu})
+	self.side_menu_item = utils_ui.UICellItem({path="container", xml=xml}, {path="box_item", base=self.player_menu})
 
 	-- Info box
 	self.item_info = utils_ui.UIInfoItem(self)
@@ -144,11 +200,207 @@ function MPG:Reset(medpack)
 	self.medpack_total_items:Show(true)
 
 	self:ShowMenuContents()
+
+	self.item_info:Update()
+	if self.item_props:IsShown() then
+		self.item_props:OnHide()
+	end
+
+	self.menu_item:Reset()
+	self.side_menu_item:Reset()
+
+	self.hover = {idx = false, bag=false, tg = 0}
+	self.holding_ctrl    = false
+	self.holding_shift   = false
+end
+
+
+function MPG:SetActiveWindow()
+	if self.dragging then return end
+
+	local main_menu = self.menus[self.active_menu]
+	local side_menu = self.menus[self.active_menu].side_menu
+
+	
+	if self.active_window and not self.active_window == main_menu then
+		if main_menu:IsShown() and main_menu:IsCursorOverWindow() then
+			self.active_window = main_menu
+			self.active_window_name = "main_menu"
+		end
+
+	elseif self.active_window and not self.active_window == side_menu then	
+		if side_menu:IsShown() and side_menu:IsCursorOverWindow() then
+			self.active_window = side_menu
+			--dbg_pr("active Window = side menu")
+			self.active_window_name = "side_menu"
+		end
+	end
+end
+
+function MPG:Update()
+	CUIScriptWnd.Update(self)
+	
+
+	self:SetActiveWindow()
+
+	if (self.menu_item and self.menu_item:IsCursorOverWindow()) or (self.side_menu_item and self.side_menu_item:IsCursorOverWindow()) then
+		local item = self:GetMedItem()
+		local sect = item:section()
+		if sect then
+			self.item_info:Update(nil, sect)
+			return
+		end
+
+		self.item_info:Update()
+	end
+
+	self.found_cell = false
+	local no_info = self.item_props:IsShown() or (self.item_in_hold and true or false)
+	self.found_cell = self.active_window:Update(self.item_info, no_info) or self.found_cell
+
+	if self.found_cell then
+		return
+	else
+		self.item_info:Update()
+		self:UnHighlight_All()
+	end
+
+end
+
+function MPG:On_Item_Update()
+	self.tg_inv = time_global() - 30
+	self.update_info = true
+end
+
+function MPG:InitProperties(obj, cont)
+	if not (obj and cont) then return end
+	local id = obj:id()
+	local context_str = {}
+	local context_action = {}
+	local context_params = {}
+
+	for n, props in spairs(self.properties, ui_inventory.func_index) do
+		local bag_allowed = true
+		dbg_pr("Cont:%s Props Cont:%s Props Cont Exists:%s", cont, props.cont, props.cont[cont])
+		if props.cont then
+			bag_allowed = props.cont[cont] and true or false
+		end
+		dbg_pr("bag allowed? %s", bag_allowed)
+		if bag_allowed then
+			local cond = true
+			local k = 1
+			while cond and props["precondition"..k] do
+				local precond = props["precondition" .. k]
+				if precond[1] and self[precond[1]] then
+					cond = self[precond[1]](self, obj, cont, unpack(precond)) and true or false
+				else
+					cond = false
+				end
+				k = k + 1
+			end
+			dbg_pr("Precondition met? %s", cond)
+			if cond then
+				local name = props.name or ""
+				local func_name = props.name_func
+				if func_name and func_name[1] and self[func_name[1]] then
+					name = self[func_name[1]](self, id, cont, unpack(func_name)) or name
+				end
+				table.insert(context_str, name)
+				
+				local func_action = props.action
+				if func_action and func_action[1] and self[func_action[1]] then
+					table.insert(context_action, func_action[1])
+					table.insert(context_params, {id, cont, unpack(func_action)})
+				end
+			end
+		
+		end
+	end
+	dbg_pr("is Context tables empty? %s %s", #context_action > 0, #context_str > 0)
+	print_table(context_action)
+	print_table(context_str)
+	if is_not_empty(context_action) and is_not_empty(context_str) then
+		dbg_pr("Resetting item properties")
+		self.item_props:Reset(GetCursorPosition(), context_action, context_str, context_params)
+	else
+		dbg_pr("Not Showing item properties")
+	end
+
+end
+
+function MPG:GetMedItem()
+	local idx = self.active_window.selected
+	local ci = idx and self.active_window.cell[idx]
+	local section = ci and ci.section
+	for ix, obj in ipairs(self.medpack_objs) do
+		if obj:section() == section then
+			return obj
+		end
+	end
+end
+
+function MPG:GetMedpackMedItems()
+	local state = {}
+	local items = {}
+	local ids = {}
+	local j = 1
+	for item, details in pairs(self.medpack_contents) do
+		for i=1, details.amount do
+			local se_obj = alife_create_item(item, db.actor, {["uses"]=details.uses[i]})
+
+			CreateTimeEvent("medpack_event"..se_obj.id, "medpack_se_to_obj"..se_obj.id, 0.5, function()
+				local obj = level.object_by_id(se_obj.id)
+				if obj ~= nil then
+					items[#items + 1] = obj
+					state[#state + 1] = true
+				end
+				return true
+			end)
+		end
+	end
+
+	self.medpack_objs = items
+
+	CreateTimeEvent("medpack_event"..math.random(10000), "medpack_display_contents"..math.random(10000), 0.6, function()
+		self.menus[self.active_menu]:Reinit(items, state)
+		return true
+	end)
+	
+end
+
+function MPG:GetPlayerMedItems()
+	local state = {}
+	for i=1, #self.player_med_items do
+		state[i] = true
+	end
+	self.menus[self.active_menu].side_menu:Reinit(self.player_med_items, state)
+end
+
+function MPG:ShowMenuContents()
+	self:GetPlayerMedItems()
+	self:GetMedpackMedItems()
 end
 
 function MPG:SetMedpackDetails(total_weight, total_items)
 	self.medpack_weight:SetText(rpmk_utils.get_translation("ui_rpmk_text_weight", total_weight or self.total_weight))
 	self.medpack_total_items:SetText(rpmk_utils.get_translation("ui_rpmk_text_total_items", total_items or self.total_items))
+end
+
+
+function MPG:UnHighlight_All()
+	local main_menu = self.menus[self.active_menu]
+	local side_menu = self.menus[self.active_menu].side_menu
+
+	for idx,ci in pairs(main_menu.cell) do
+		if (main_menu.selected ~= idx) then
+			ci:Highlight(false)
+		end
+	end
+	for idx,ci in pairs(side_menu.cell) do
+		if (side_menu.selected ~= idx) then
+			ci:Highlight(false)
+		end
+	end
 end
 
 
@@ -165,49 +417,299 @@ function MPG:Close()
     Unregister_UI("MPG")
 end
 
-function MPG:GetMedpackMedItems()
-	local state = {}
-	local items = {}
-	local ids = {}
-	local j = 1
-	for item, details in pairs(self.medpack_contents) do
-		for i=1, details.amount do
-			printf("item %s", item)
-			local se_obj = alife_create_item(item, db.actor, {["uses"]=details.uses[i]})
+function MPG:OnKeyboard(dik, keyboard_action)
+	local res = CUIScriptWnd.OnKeyboard(self, dik, keyboard_action)
+	if (res == false) then
+		self.active_window:OnKeyboard(dik, keyboard_action)
 
-			CreateTimeEvent("medpack_event"..se_obj.id, "medpack_se_to_obj"..se_obj.id, 0.5, function()
-				local obj = level.object_by_id(se_obj.id)
-				if obj ~= nil then
-					printf("Obj:%s", obj:section())
-					items[#items + 1] = obj
-					state[#state + 1] = true
+		--dbg_pr("dik: %s, Keyboard action: %s", dik, keyboard_action)
+		if keyboard_action == E_RELEASE then
+			if dik == K_CTRL then
+				self.holding_ctrl = false
+			elseif dik == K_SHFT then
+				self.holding_shift = false
+			end
+		
+		elseif keyboard_action == E_PRESS then
+			local bind = dik_to_bind(dik)
+
+			if (bind == key_bindings.kINVENTORY) or (bind == key_bindings.kUSE) then
+				if keybind_pass() then
+					self:Close()
 				end
-				return true
-			end)
+
+			elseif dik == DIK_keys.DIK_ESCAPE then
+				self:Close()
+			elseif dik == K_CTRL then
+				self.holding_ctrl = false
+			elseif dik == K_SHFT then
+				self.holding_shift = false
+			end
 		end
 	end
+	return res
+end
 
-	CreateTimeEvent("medpack_event"..math.random(10000), "medpack_display_contents"..math.random(10000), 0.6, function()
-		printf("%s", #items)
-		for _, obj in ipairs(items) do
-			printf("%s", obj:section())
+-- Callbacks
+
+function MPG:On_CC_Mouse1(cont, idx)
+	dbg_pr("CC MOUSE 1 %s %s", cont, idx)
+	local ci = self.active_window.cell[idx]
+	if not ci then return end
+
+	local sect = ci.section
+	local med_item = self:GetMedItem()
+	if not med_item then return end
+
+	local item_boxes = {["main_menu"] = self.menu_item, ["side_menu"] = self.side_menu_item}
+	item_boxes[self.active_window_name]:Set(med_item)
+
+end
+
+function MPG:On_CC_Mouse1_DB(cont, idx)
+	dbg_pr("CC MOUSE 1 DB %s %s", cont, idx)
+	local obj = self.active_window:GetObj(idx)
+	if not obj then return end
+
+	if self:Cond_Use(obj, cont) then
+		self:Action_Use(obj, cont)
+
+	elseif self:Cond_Move(obj, cont) then
+		if self.holding_ctrl and self:Cond_Childs(obj, cont) then
+			self:Action_Move_All(obj, cont)
+		else
+			self:Action_Move(obj, cont)
 		end
-		self.menus[self.active_menu]:Reinit(items, state)
-		return true
-	end)
+		return true -- continue double clicking!
+		
+	-- Execute first custom property that support double-click
+	else
+		local i = 1
+		while (self.properties["custom_" .. i] ~= nil) do
+			
+			-- Check if double-click is enabled
+			if self:DB_Custom(obj, cont, nil, i) then
+				local props = self.properties["custom_" .. i]
+				
+				-- Check if prop is aimed for active container
+				local bag_allowed = true
+				if props.cont then
+					bag_allowed = props.cont[cont] and true or false
+				end
+				if props.cont_func and props.cont_func[1] and self[props.cont_func[1]] then
+					bag_allowed = self[props.cont_func[1]](self, obj, cont, unpack(props.cont_func)) and true or false
+				end
+				
+				if bag_allowed then
+				
+					local cond = true
+					local k = 1
+					while cond and props["precondition" .. k] do
+						local precond = props["precondition" .. k]
+						if precond[1] and self[precond[1]] then
+							cond = self[precond[1]](self, obj, cont, unpack(precond)) and true or false
+						else
+							cond = false
+						end
+						k = k + 1
+					end
+					if cond then
+						local id = obj:id()
+						
+						local name = props.name
+						local func_name = props.name_func
+						if func_name and func_name[1] and self[func_name[1]] then
+							name = self[func_name[1]](self, id, cont, unpack(func_name)) or name
+						end
+						if name then
+						
+							local func_action = props.action
+							if func_action and func_action[1] and self[func_action[1]] then
+								self[func_action[1]](self, id, cont, unpack(func_action))
+								break
+							end
+						end
+					end
+					
+				end
+			end
+		
+			i = i + 1
+		end
+	end 
+end
+
+function MPG:On_CC_Mouse2(cont, idx)
+	dbg_pr("CC MOUSE 2 %s %s", cont, idx)
+	local obj = self.active_window:GetObj(idx)
+	if not obj then return end
+	dbg_pr("Showing Properties for %s", obj:section())
+	self:InitProperties(obj, cont)
+end
+
+function MPG:On_CC_DragDrop(cont_from, idx_from)
+	dbg_pr("CC Drag %s %s", cont_from, idx_from)
+	self.dragging = true
+	if not cont_from or not idx_from then self.dragging = false return end
+	local obj_from = self.active_window:GetObj(idx_from)
+	if not obj_from then self.dragging = false return end
+
+	local main_menu = self.menus[self.active_menu]
+	local side_menu = self.menus[self.active_menu].side_menu
+	if (not main_menu:IsCursorOverWindow() and not side_menu:IsCursorOverWindow()) then
+		if self:Cond_NotQuest(obj_from, cont_from) then
+			self:Action_Drop(obj_from, cont_from)
+			self.dragging = false
+			return
+		end
+	else
+		local cont_to, idx_to, obj_to
+		cont_to, idx_to, obj_to = self.active_window:GetCell_Focused()
+		dbg_pr("Cont to:%s index to:%s obj_to:%s", cont_to, idx_to, obj_to)
+		
+		if cont_to then
+			if self:Cond_Move(obj_from, cont_from, nil, cont_to) then
+				if self.holding_ctrl and self:Cond_Childs(obj_from, cont_from) then
+					self:Action_Move_All(obj_from, cont_from)
+				else
+					self:Action_Move(obj_from, cont_from)
+				end
+			end
+		end
+
+		self:On_Item_Update()
+		self.dragging = false
+	end
+end
+
+function MPG:On_CC_Trasfer(cont_from, cont_to, idx_from, idx_to, obj)
+	dbg_pr("CC Transfer %s %s %s %s", cont_from, cont_to, idx_from, idx_to, obj:section())
+	if self.active_window:IsShown() then
+		self.active_window:RemoveItem(obj)
+	end
+	self.update_info = true
+end
+
+function MPG:On_CC_Hover(cont, idx)
+	local prev_idx = self.hover.idx
+	local prev_cont = self.hover.bag
+	self.hover.bag = cont
+	self.hover.idx = idx
+	self.hover.tg = time_global()
+
+	if (cont ~= prev_cont) or (idx ~= prev_idx) then self:UnHighlight_All() end
+
+	if cont and idx then
+		local ci = self.active_window.cell[idx]
+		if ci and ci:IsShown() then
+			ci:Highlight(true, "def", true)
+		end
+	end
+end
+
+function MPG:On_CC_Add(cont, idx, on_area)
+	dbg_pr("CC Add %s %s %s", cont, idx, on_area)
+	self.update_info = true
+end
+
+function MPG:On_CC_Remove(cont, idx, on_area)
+	dbg_pr("CC Remove %s %s %s", cont, idx, on_area)
+	self.update_info = true
+end
+
+-- Functionality
+
+function MPG:SelectItem()
+end
+
+function MPG:MoveItem()
+end
+
+function MPG:DragItem()
+end
+
+function MPG:ShowItemDetails()
+end
+
+function MPG:ShowItemActions()
+end
+
+function MPG:UpdateWeight()
+end
+
+function MPG:UpdateTotalItems()
+end
+
+-- Right Click Functors
+
+function MPG:DB_Custom(obj, cont, temp, i)
+	return SYS_GetParam(1, obj:section(), "use"..i.."_allow_db", false)
+end
+
+function MPG:Name_Move(obj, cont)
+	local op_cont = {[self.medpack_type.."_cont"] = "side_menu", [self.medpack_type.."_side_cont"] = "medpack_menu"}
+	return "st_rpmk_move_to_"..op_cont[cont]
+end
+
+function MPG:Cond_Use(obj, cont)
+	return IsItem("consumable", obj:section()) and true or false
+end
+
+function MPG:Action_Use(obj, cont)
+	if (CInventory__eat(obj) == false) then return end
+	db.actor:eat(obj)
+	--self:PlaySND(snd_item_use)
+	self:On_Item_Update()
+end
+
+function MPG:Cond_Move(obj, cont, temp, cont_to)
+	if not (obj) then return false end
+	if cont == cont_to then return end
+	if self:Cond_Quest(obj, cont) then return false end
+	return true
+end
+
+function MPG:Action_Move(obj, cont)
+	local op_cont = {[ self.medpack_type.."cont"] = self.menus[self.active_menu], [self.medpack_type.."side_cont"] = self.menus[self.active_menu].side_menu}
+	self.active_window:TransferItem(op_cont[cont], obj)
+	self:On_Item_Update()
+end
+
+function MPG:Cond_Childs(obj, cont)
+	local ci = self.active_window:GetCell_ID(obj:id())
+	return ci.ID == obj:id() and ci:HasChild()
+end
+
+function MPG:Action_Move_All(obj, cont)
+	local ci = self.active_window:GetCell_ID(obj:id())
+	for id, _ in pairs (ci.childs) do
+		self:Action_Move(level.object_by_id(id), cont)
+	end
+	self:Action_Move(obj, cont)
+end
+
+function MPG:Cond_Quest(obj, cont)	
+	return (SYS_GetParam(1,obj:section(),"quest_item") == true)
+end
+
+function MPG:Cond_NotQuest(obj, cont)
+	return (SYS_GetParam(1, obj:section(), "quest_item") ~= true)
+end
+
+function MPG:Action_Drop(obj, cont)
+	db.actor:drop_item(obj)
+	--self:PlaySND(snd_drop_item)
+end
+
+function MPG:Action_Drop_All(obj, cont)
+	local ci = self.active_window:GetCell_ID(obj:id())
+	for id,_ in pairs(ci.childs) do
+		local obj_c = level.object_by_id(id)
+		if obj_c then
+			db.actor:drop_item(obj_c)
+		end
+	end
+	db.actor:drop_item(obj)
 	
-end
-
-function MPG:GetPlayerMedItems()
-	local state = {}
-	for i=1, #self.player_med_items do
-		state[i] = true
-	end
-	self.menus[self.active_menu].side_menu:Reinit(self.player_med_items, state)
-
-end
-
-function MPG:ShowMenuContents()
-	self:GetPlayerMedItems()
-	self:GetMedpackMedItems()
+	--self:PlaySND(snd_drop_item)
 end

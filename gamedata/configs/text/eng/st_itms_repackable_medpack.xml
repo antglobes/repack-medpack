@@ -235,6 +235,14 @@
 	<string id="ui_rpmk_text_total_items">
 		<text>Total Items: %s</text>
 	</string>
+	
+	<string id="st_rpmk_move_to_medpack_menu">
+		<text>Move to Medpack</text>
+	</string>
+	
+	<string id="st_rpmk_move_to_side_menu">
+		<text>Move to Inventory</text>
+	</string>
 
 	<!--Functor Strings-->
 	<string id="st_rpmk_menu_unpack">
