@@ -141,9 +141,11 @@ function MPG:InitControls()
 		["main"] = self.menus[self.active_menu],
 		["side"] = self.menus[self.active_menu].side_menu
 	}
+	]]--
     self.menus[self.active_menu].disable_callback["On_CC_Add"] = true
     self.menus[self.active_menu].disable_callback["On_CC_Remove"] = true
-	]]--
+	self.menus[self.active_menu].side_menu.disable_callback["On_CC_Add"] = true
+	self.menus[self.active_menu].side_menu.disable_callback["On_CC_Remove"] = true
 
 	self.menus[self.active_menu].can_select = true
 	self.menus[self.active_menu].sort_method = "kind"
@@ -640,9 +642,23 @@ end
 function MPG:UpdateTotalItems()
 end
 
--- Right Click Functors
+
+
+-- Right Click/Properties Functors
+
+function MPG:CheckItem(obj)
+	if type(obj) == "number" then
+		obj = level.object_by_id(obj)
+	end
+	if not obj then
+		callstack()
+		printe("!ERROR Can't get item game object!")
+	end
+	return obj
+end
 
 function MPG:DB_Custom(obj, cont, temp, i)
+	obj = self:CheckItem(obj)
 	return SYS_GetParam(1, obj:section(), "use"..i.."_allow_db", false)
 end
 
@@ -652,10 +668,12 @@ function MPG:Name_Move(obj, cont)
 end
 
 function MPG:Cond_Use(obj, cont)
+	obj = self:CheckItem(obj)
 	return IsItem("consumable", obj:section()) and true or false
 end
 
 function MPG:Action_Use(obj, cont)
+	obj = self:CheckItem(obj)
 	if (CInventory__eat(obj) == false) then return end
 	db.actor:eat(obj)
 	--self:PlaySND(snd_item_use)
@@ -665,22 +683,26 @@ end
 function MPG:Cond_Move(obj, cont, temp, cont_to)
 	if not (obj) then return false end
 	if cont == cont_to then return end
+	obj = self:CheckItem(obj)
 	if self:Cond_Quest(obj, cont) then return false end
 	return true
 end
 
 function MPG:Action_Move(obj, cont)
-	local op_cont = {[ self.medpack_type.."cont"] = self.menus[self.active_menu], [self.medpack_type.."side_cont"] = self.menus[self.active_menu].side_menu}
+	local op_cont = {[ self.medpack_type.."_cont"] = self.menus[self.active_menu], [self.medpack_type.."_side_cont"] = self.menus[self.active_menu].side_menu}
+	obj = self:CheckItem(obj)
 	self.active_window:TransferItem(op_cont[cont], obj)
 	self:On_Item_Update()
 end
 
 function MPG:Cond_Childs(obj, cont)
+	obj = self:CheckItem(obj)
 	local ci = self.active_window:GetCell_ID(obj:id())
 	return ci.ID == obj:id() and ci:HasChild()
 end
 
 function MPG:Action_Move_All(obj, cont)
+	obj = self:CheckItem(obj)
 	local ci = self.active_window:GetCell_ID(obj:id())
 	for id, _ in pairs (ci.childs) do
 		self:Action_Move(level.object_by_id(id), cont)
@@ -688,20 +710,40 @@ function MPG:Action_Move_All(obj, cont)
 	self:Action_Move(obj, cont)
 end
 
-function MPG:Cond_Quest(obj, cont)	
+function MPG:Cond_Quest(obj, cont)
+	obj = self:CheckItem(obj)	
 	return (SYS_GetParam(1,obj:section(),"quest_item") == true)
 end
 
 function MPG:Cond_NotQuest(obj, cont)
+	obj = self:CheckItem(obj)
 	return (SYS_GetParam(1, obj:section(), "quest_item") ~= true)
 end
 
 function MPG:Action_Drop(obj, cont)
+	obj = self:CheckItem(obj)
 	db.actor:drop_item(obj)
+	self.active_window:RemoveItem(obj)
+	for sect, details in pairs(self.medpack_contents) do
+		if sect == obj:section() then
+			if details.amount > 0 then
+				for i=1, #details.uses do
+					if obj:get_remaining_uses() == details.uses[i] then
+						table.remove(details.uses, i)
+					end
+				end
+				details.amount = details.amount - 1
+				
+			elseif details.amount == 1 then
+				table.remove(self.medpack_contents, sect)
+			end
+		end
+	end
 	--self:PlaySND(snd_drop_item)
 end
 
 function MPG:Action_Drop_All(obj, cont)
+	obj = self:CheckItem(obj)
 	local ci = self.active_window:GetCell_ID(obj:id())
 	for id,_ in pairs(ci.childs) do
 		local obj_c = level.object_by_id(id)
