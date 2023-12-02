@@ -1,5 +1,6 @@
 GUI = nil
 DEBUG = true
+index_of = rpmk_utils.index_of
 menu_names = {
 	[1] = "basic_menu",
 	[2] = "army_menu",
@@ -77,11 +78,11 @@ function MPG:__init(medpack) super()
 	self.holding_ctrl    = false
 	self.holding_shift   = false
 	self.properties = {
-		["use"]             = { index= 1 ,  name= "st_use",                    			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},                    precondition1= {"Cond_Use"},                                               	       action= {"Action_Use"} },
-		["move"]            = { index= 2 ,  name_func= {"Name_Move"},          			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},   				  precondition1= {"Cond_Move"},                                                        action= {"Action_Move"} },
-		["move_all"]        = { index= 3 ,  name= "st_move_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},   				  precondition1= {"Cond_Childs"},         precondition2= {"Cond_Move"},          	   action= {"Action_Move_All"} },
-		["drop"]            = { index= 4,  name= "st_drop",                  			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},        			 precondition1= {"Cond_NotQuest"},                                                     action= {"Action_Drop"} },
-		["drop_all"]        = { index= 5,  name= "st_drop_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."side_cont"},                   precondition1= {"Cond_Childs"}, 	      precondition2= {"Cond_NotQuest"},            action= {"Action_Drop_All"} },
+		["use"]             = { index= 1 ,  name= "st_use",                    			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},                    precondition1= {"Cond_Use"},                                               	       action= {"Action_Use"} },
+		["move"]            = { index= 2 ,  name_func= {"Name_Move"},          			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},   				  precondition1= {"Cond_Move"},                                                        action= {"Action_Move"} },
+		["move_all"]        = { index= 3 ,  name= "st_move_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},   				  precondition1= {"Cond_Childs"},         precondition2= {"Cond_Move"},          	   action= {"Action_Move_All"} },
+		["drop"]            = { index= 4,  name= "st_drop",                  			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},        			 precondition1= {"Cond_NotQuest"},                                                     action= {"Action_Drop"} },
+		["drop_all"]        = { index= 5,  name= "st_drop_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},                   precondition1= {"Cond_Childs"}, 	      precondition2= {"Cond_NotQuest"},            action= {"Action_Drop_All"} },
 	}
 
 	for _,props in pairs(self.properties) do
@@ -132,6 +133,7 @@ function MPG:InitControls()
 	self.menus[self.active_menu].side_menu = utils_ui.UICellContainer(self.medpack_type.."_side_cont", self, nil, self.active_side_menu.."_frame", self)
 
 	self.active_window = self.menus[self.active_menu]
+	self.active_window_name = "default"
 	self.prev_window = false
 	self.dragging = false
 
@@ -222,20 +224,21 @@ function MPG:SetActiveWindow()
 
 	local main_menu = self.menus[self.active_menu]
 	local side_menu = self.menus[self.active_menu].side_menu
+	local prev_window_name = self.active_window_name
 
-	
-	if self.active_window and not self.active_window == main_menu then
+	if self.active_window then
 		if main_menu:IsShown() and main_menu:IsCursorOverWindow() then
 			self.active_window = main_menu
 			self.active_window_name = "main_menu"
-		end
 
-	elseif self.active_window and not self.active_window == side_menu then	
-		if side_menu:IsShown() and side_menu:IsCursorOverWindow() then
+		elseif side_menu:IsShown() and side_menu:IsCursorOverWindow() then
 			self.active_window = side_menu
-			--dbg_pr("active Window = side menu")
 			self.active_window_name = "side_menu"
 		end
+	end
+
+	if prev_window_name ~= self.active_window_name then
+		dbg_pr("Setting active window to: %s", self.active_window_name)
 	end
 end
 
@@ -283,11 +286,11 @@ function MPG:InitProperties(obj, cont)
 
 	for n, props in spairs(self.properties, ui_inventory.func_index) do
 		local bag_allowed = true
-		dbg_pr("Cont:%s Props Cont:%s Props Cont Exists:%s", cont, props.cont, props.cont[cont])
+		dbg_pr("Conatiner: %s, Exists in properties: %s", cont, props.cont[cont])
 		if props.cont then
 			bag_allowed = props.cont[cont] and true or false
 		end
-		dbg_pr("bag allowed? %s", bag_allowed)
+		dbg_pr("Bag Allowed: %s", bag_allowed)
 		if bag_allowed then
 			local cond = true
 			local k = 1
@@ -300,7 +303,7 @@ function MPG:InitProperties(obj, cont)
 				end
 				k = k + 1
 			end
-			dbg_pr("Precondition met? %s", cond)
+			dbg_pr("Precondtion Exists: %s", cond)
 			if cond then
 				local name = props.name or ""
 				local func_name = props.name_func
@@ -318,9 +321,7 @@ function MPG:InitProperties(obj, cont)
 		
 		end
 	end
-	dbg_pr("is Context tables empty? %s %s", #context_action > 0, #context_str > 0)
-	print_table(context_action)
-	print_table(context_str)
+	dbg_pr("Is Context Action and Context str not empty: %s", is_not_empty(context_action) and is_not_empty(context_str))
 	if is_not_empty(context_action) and is_not_empty(context_str) then
 		dbg_pr("Resetting item properties")
 		self.item_props:Reset(GetCursorPosition(), context_action, context_str, context_params)
@@ -599,11 +600,15 @@ function MPG:On_CC_Hover(cont, idx)
 	self.hover.idx = idx
 	self.hover.tg = time_global()
 
-	if (cont ~= prev_cont) or (idx ~= prev_idx) then self:UnHighlight_All() end
+	if (cont ~= prev_cont) or (idx ~= prev_idx) then
+		--dbg_pr("Unhighlighting all menus")	
+		self:UnHighlight_All() 
+	end
 
 	if cont and idx then
 		local ci = self.active_window.cell[idx]
 		if ci and ci:IsShown() then
+			--dbg_pr("Highlighting a cell in %s", self.active_window_name)
 			ci:Highlight(true, "def", true)
 		end
 	end
@@ -691,7 +696,8 @@ end
 function MPG:Action_Move(obj, cont)
 	local op_cont = {[ self.medpack_type.."_cont"] = self.menus[self.active_menu], [self.medpack_type.."_side_cont"] = self.menus[self.active_menu].side_menu}
 	obj = self:CheckItem(obj)
-	self.active_window:TransferItem(op_cont[cont], obj)
+	op_cont[cont]:AddItem(obj)
+	self.active_window:RemoveItem(obj)
 	self:On_Item_Update()
 end
 
@@ -726,16 +732,16 @@ function MPG:Action_Drop(obj, cont)
 	self.active_window:RemoveItem(obj)
 	for sect, details in pairs(self.medpack_contents) do
 		if sect == obj:section() then
-			if details.amount > 0 then
+			if details.amount > 1 then
 				for i=1, #details.uses do
 					if obj:get_remaining_uses() == details.uses[i] then
 						table.remove(details.uses, i)
 					end
 				end
 				details.amount = details.amount - 1
-				
+
 			elseif details.amount == 1 then
-				table.remove(self.medpack_contents, sect)
+				self.medpack_contents[sect] = nil
 			end
 		end
 	end
@@ -748,10 +754,10 @@ function MPG:Action_Drop_All(obj, cont)
 	for id,_ in pairs(ci.childs) do
 		local obj_c = level.object_by_id(id)
 		if obj_c then
-			db.actor:drop_item(obj_c)
+			self:Action_Drop(obj_c)
 		end
 	end
-	db.actor:drop_item(obj)
+	self:Action_Drop(obj)
 	
 	--self:PlaySND(snd_drop_item)
 end
