@@ -91,6 +91,10 @@ end
     news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 1500)
 end
 
+function display_screen_msg(message, values, delay, colour)
+    actor_menu.set_msg(1, get_translation(message, values), delay, colour)
+end
+
 --- @author NLTP_ASHES
 --- Function used to know if there exists a translation for a given game string.
 --- @param str string
@@ -139,5 +143,19 @@ function alt_itm_clr(itm_clr)
         return GetARGB(1, 1, 1, 1)
     else
         return itm_clr
+    end
+end
+
+function print_table(tbl, msg)
+    if msg  then
+        printf("%s", msg)
+    end
+    for k, v in pairs(tbl) do
+        printf("Key: %s", k)
+        if type(v) ~= "table" then            
+            printf("Value: %s", v)
+        else
+            print_table(v, "Showing nested table")
+        end
     end
 end

@@ -1297,8 +1297,7 @@ function open_action(obj, bag, mode)
     local medpack = is_repackable_medpack(obj) and obj
     if not medpack then return end
     printf("loading UI")
-    display_gui(medpack)
-    printf("closing UI")
+    rpmk_gui.display_medpack_gui(medpack)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
