@@ -9,6 +9,10 @@ index_of = rpmk_utils.index_of
 get_item_weight = rpmk_medpack.get_item_weight
 dbg_pr_tbl = rpmk_utils.print_table
 display_screen_msg = rpmk_utils.display_screen_msg
+compare_tables = rpmk_utils.compare_tables
+get_sect_list = rpmk_utils.obj_to_sect_list
+build_contents = rpmk_medpack.build_contents
+contains_sect = rpmk_utils.contains_sect
 
 -- Constants
 
@@ -88,10 +92,10 @@ function MPG:__init(medpack) super()
 	self.medpack_contents = self.medpack_props["contents"]
 	self.total_items = self.medpack_props["total_itms"]
 	self.total_weight = self.medpack_props["total_weight"]
-	dbg_pr("Total Itms:%s Total Weight:%s", self.total_items, self.total_weight)
 	self.player_med_items = rpmk_medpack.get_inv_medpack_itms()
 	self.medpack_objs = {}
-	
+	self.original_contents = {}
+	self.new_player_items = {}
 
 	-- Technical
 	self.item_moved = false
@@ -238,7 +242,29 @@ function MPG:Close()
 	CloseAll_UI()
 end
 
+function MPG:ActorInvNewItems()
+	local current_contents = self:GetCurrentContents("actor")
+	local original_contents = self.orginal_contents
+	dbg_pr("Current contents:%s", table.concat(get_sect_list(current_contents), ","))
+	dbg_pr("Original contents:%s", table.concat(get_sect_list(original_contents), ","))
+
+	
+	for idx, curr_obj in pairs(current_contents) do
+		-- if current obj not in orginal contents then add to new player items
+		if not contains_sect(original_contents, curr_obj:section()) then
+			dbg_pr("Orginal contents does not contain %s", curr_obj:section())
+			self.new_player_items[#self.new_player_items + 1] = curr_obj
+		else
+			dbg_pr("Orginal contents contains %s", curr_obj:section())
+		end
+	end
+	dbg_pr("Is New player items empty %s", is_not_empty(get_sect_list(self.new_player_items)))
+	dbg_pr("New Actor Items:%s", table.concat(get_sect_list(self.new_player_items), ","))
+	return not compare_tables(get_sect_list(current_contents), get_sect_list(original_contents))
+end -- update actor objs list 
+
 function MPG:Cleanup()
+
 	local function search(temp, item)
 		for idx, obj in pairs(self.medpack_objs) do
 			if item:section() == obj:section() then
@@ -250,15 +276,14 @@ function MPG:Cleanup()
 	dbg_pr("Removing Medpack Container Items (Duplicates)")
 	db.actor:iterate_inventory(search, nil)
 
-	if self.item_moved then -- and current_contents("actor") ~= orginal_contents
+	-- If new items have been moved into the actor inv
+	if self:ActorInvNewItems() then
 		dbg_pr("Adding Side Container Items to Inventory")
-		for idx,ci in pairs(self.menus[self.active_menu].side_menu.cell) do
-			local obj = self.menus[self.active_menu].side_menu:GetObj(idx)
-			obj = self:CheckItem(obj)
-			-- if current_item_count > orginal_item_count[obj] then
-			printf("Object %s", obj:section())
-			alife_create_item(obj, db.actor, {["uses"]=obj:get_remaining_uses()})
-			dbg_pr("Created:%s with %s uses in inventory", obj:section(), obj:get_remaining_uses())
+		for sect, details in pairs(build_contents(get_sect_list(self.new_player_items))) do
+			for i=1, details.amount do
+				alife_create_item(sect, db.actor, {["uses"]=details.uses[i]})
+				dbg_pr("Created:%s with %s uses in inventory", sect, details.uses[i])
+			end
 		end
 	end
 
@@ -377,11 +402,15 @@ end
 
 -- Getters
 
-function MPG:GetCurrentContents(menu)
+function MPG:GetCurrentContents(inv_type)
+	dbg_pr("Gettting Current for %s", inv_type)
 	local contents = {}
 	local menus = {["actor"]=self.menus[self.active_menu].side_menu, ["medpack"]=self.menus[self.active_menu]}
-	for idx, obj in pairs(menus[menu]) do
-		contents[idx] = obj
+	local window = menus[inv_type]
+	for i=1, window.idxer do
+		local obj = window:GetObj(i)
+		contents[i] = obj
+		dbg_pr("Found %s", obj:section())
 	end
 	return contents
 end
@@ -432,6 +461,7 @@ function MPG:GetPlayerMedItems()
 		state[i] = true
 	end
 	self.menus[self.active_menu].side_menu:Reinit(self.player_med_items, state)
+	self.orginal_contents = self.player_med_items 
 end
 
 -- Button Funcs
@@ -631,7 +661,7 @@ function MPG:On_CC_DragDrop(cont_from, idx_from)
 end
 
 function MPG:On_CC_Trasfer(cont_from, cont_to, idx_from, idx_to, obj)
-	dbg_pr("CC Transfer %s %s %s %s", cont_from, cont_to, idx_from, idx_to, obj:section())
+	dbg_pr("CC Transfer %s %s %s %s %s", cont_from, cont_to, idx_from, idx_to, obj:section())
 	if self.active_window:IsShown() then
 		self.active_window:RemoveItem(obj)
 	end
@@ -796,15 +826,35 @@ function MPG:Cond_Move(obj, cont, temp, cont_to)
 end
 
 function MPG:Action_Move(obj, cont)
-	local op_cont = {[ self.medpack_type.."_cont"] = self.menus[self.active_menu].side_menu, [self.medpack_type.."_side_cont"] = self.menus[self.active_menu]}
+	local medpack_cont = self.medpack_type.."_cont"
+	local inventory_cont = self.medpack_type.."_side_cont"
+	local op_cont = {[medpack_cont] = self.menus[self.active_menu].side_menu, [inventory_cont] = self.menus[self.active_menu]}
+
 	obj = self:CheckItem(obj)
-	if self.total_weight + get_item_weight(obj:section()) > self.medpack_props["max_weight"] then
+
+	-- When moving to medpack container display at medpack full message 
+	if cont == medpack_cont and self.total_weight + get_item_weight(obj:section()) > self.medpack_props["max_weight"] then
 		display_screen_msg("st_full_medpack_item", obj:section(), 1.3, clr01_RedOrange)
 		return
-	 end
+	end
+
+	-- Move Obj to specific container,
 	self.active_window:TransferItem(op_cont[cont], obj)
-	self.item_moved = true
-	local cont_to = self.medpack_type.."_cont"
+
+	-- if moving to inventory container add obj
+	if cont == medpack_cont then
+		dbg_pr("Adding %s to inventory", obj:section())
+		self.new_player_items[#self.new_player_items] = obj
+	-- if moving to medpack container remove obj
+	elseif cont == inventory_cont then
+		for idx, _obj in pairs(self.new_player_items) do
+			if obj:id() == _obj:id() then
+				dbg_pr("Removing %s from inventory", obj:section())
+				self.new_player_items[idx] = nil
+			end
+		end
+	end
+
 	local cond = cont == self.medpack_type.."_side_cont" and true or false
 	self:UpdateMedpackProps({obj=obj, flags={add=cond, remove=not cond}})
 	self:On_Item_Update()
