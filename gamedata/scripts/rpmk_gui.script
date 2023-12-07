@@ -13,6 +13,7 @@ compare_tables = rpmk_utils.compare_tables
 get_sect_list = rpmk_utils.obj_to_sect_list
 build_contents = rpmk_medpack.build_contents
 contains_sect = rpmk_utils.contains_sect
+combine_contents = rpmk_medpack.combine_contents
 
 -- Constants
 
@@ -59,6 +60,15 @@ function dbg_pr(str, ...)
 	if DEBUG then
 		printf("Repackable Medpack|GUI %s", strformat(str, ...))
 	end
+end
+
+function sect_index_of(tbl, value)
+    for k, v in pairs(tbl) do
+		if v:section() == value then
+			return k
+		end
+    end
+    return false
 end
 
 -- UI 
@@ -253,12 +263,12 @@ function MPG:ActorInvNewItems()
 		-- if current obj not in orginal contents then add to new player items
 		if not contains_sect(original_contents, curr_obj:section()) then
 			dbg_pr("Orginal contents does not contain %s", curr_obj:section())
-			self.new_player_items[#self.new_player_items + 1] = curr_obj
+			--self.new_player_items[#self.new_player_items + 1] = curr_obj
 		else
 			dbg_pr("Orginal contents contains %s", curr_obj:section())
 		end
 	end
-	dbg_pr("Is New player items empty %s", is_not_empty(get_sect_list(self.new_player_items)))
+	dbg_pr("Is New player items not empty %s", is_not_empty(get_sect_list(self.new_player_items)))
 	dbg_pr("New Actor Items:%s", table.concat(get_sect_list(self.new_player_items), ","))
 	return not compare_tables(get_sect_list(current_contents), get_sect_list(original_contents))
 end -- update actor objs list 
@@ -286,6 +296,15 @@ function MPG:Cleanup()
 			end
 		end
 	end
+
+	-- if items from the inventory have been moved into the medpack then remove said items
+	for sect, details in pairs(self.medpack_contents) do
+		if contains_sect(self.player_med_items, sect) then
+			local obj = self.player_med_items[sect_index_of(self.player_med_items, sect)]
+			alife():release(alife_object(obj:id()), true)			
+		end
+	end
+
 
 	self.medpack_objs = {}
 	self.player_med_items = {}
@@ -328,6 +347,7 @@ function MPG:On_Item_Update()
 end
 
 function MPG:UpdateMedpackProps(props)
+	dbg_pr("Updating Medpack Properties")
 	local obj = props.obj
 	local flags = props.flags
 	local itm_weight = get_item_weight(obj:section())
@@ -335,32 +355,34 @@ function MPG:UpdateMedpackProps(props)
 	if flags.add then
 		self.total_weight =  self.total_weight + itm_weight
 		self.total_items = self.total_items + 1
+		self.medpack_contents = combine_contents(self.medpack_contents, build_contents({obj:section()}))
+		dbg_pr("Adding %s to medpack contents", obj:section())
 		
 	elseif flags.remove then
 		self.total_weight =  self.total_weight - itm_weight
 		self.total_items = self.total_items - 1
-	end
-
-	for sect, details in pairs(self.medpack_contents) do
-		if sect == obj:section() then
-			if flags.add then
-				self.medpack_contents = combine_contents(self.medpack_contents, build_contents(sect))
-			
-			elseif flags.remove then
-				if details.amount > 1 then
+		for sect, details in pairs(self.medpack_contents) do
+			if sect == obj:section() then
+				if details.amount > 0 and #details.uses > 0 then
 					for i=1, #details.uses do
 						if obj:get_remaining_uses() == details.uses[i] then
+							dbg_pr("Removing 1 %s from medpack contents, total amount %s", obj:section(), details.amount - 1)
 							table.remove(details.uses, i)
+							details.amount = details.amount - 1
+							if details.amount == 0 then
+								dbg_pr("Deleting %s from medpack contents", obj:section())
+								self.medpack_contents[sect] = nil
+							end
 							break
 						end
-					end
-					details.amount = details.amount - 1
-
-				elseif details.amount == 1 then
-					self.medpack_contents[sect] = nil
+					end					
 				end
 			end
 		end
+	end
+
+	if self.total_items < 0 then
+		self.total_items = 0
 	end
 
 	rpmk_medpack.set_total_weight(self.medpack:id(), round_idp(self.total_weight, 2))
@@ -396,7 +418,7 @@ function MPG:SetActiveWindow()
 end
 
 function MPG:SetMedpackDetails(total_weight, total_items)
-	self.medpack_weight:SetText(rpmk_utils.get_translation("ui_rpmk_text_weight", total_weight or self.total_weight))
+	self.medpack_weight:SetText(rpmk_utils.get_translation("ui_rpmk_text_weight", round_idp(total_weight or self.total_weight, 2)))
 	self.medpack_total_items:SetText(rpmk_utils.get_translation("ui_rpmk_text_total_items", total_items or self.total_items))
 end
 
@@ -407,10 +429,13 @@ function MPG:GetCurrentContents(inv_type)
 	local contents = {}
 	local menus = {["actor"]=self.menus[self.active_menu].side_menu, ["medpack"]=self.menus[self.active_menu]}
 	local window = menus[inv_type]
-	for i=1, window.idxer do
-		local obj = window:GetObj(i)
-		contents[i] = obj
-		dbg_pr("Found %s", obj:section())
+	for id, idx in pairs(window.indx_id) do
+		local obj = get_object_by_id(id)
+		contents[#contents + 1 ] = obj
+
+		if is_not_empty(get_sect_list(contents)) then
+			dbg_pr("Found %s", obj:section())
+		end
 	end
 	return contents
 end
@@ -826,14 +851,16 @@ function MPG:Cond_Move(obj, cont, temp, cont_to)
 end
 
 function MPG:Action_Move(obj, cont)
+	obj = self:CheckItem(obj)
+	dbg_pr("Moving %s to %s", obj:section(), cont)
 	local medpack_cont = self.medpack_type.."_cont"
 	local inventory_cont = self.medpack_type.."_side_cont"
 	local op_cont = {[medpack_cont] = self.menus[self.active_menu].side_menu, [inventory_cont] = self.menus[self.active_menu]}
-
-	obj = self:CheckItem(obj)
+	local cond
+	
 
 	-- When moving to medpack container display at medpack full message 
-	if cont == medpack_cont and self.total_weight + get_item_weight(obj:section()) > self.medpack_props["max_weight"] then
+	if cont == inventory_cont and self.total_weight + get_item_weight(obj:section()) > self.medpack_props["max_weight"] then
 		display_screen_msg("st_full_medpack_item", obj:section(), 1.3, clr01_RedOrange)
 		return
 	end
@@ -841,21 +868,26 @@ function MPG:Action_Move(obj, cont)
 	-- Move Obj to specific container,
 	self.active_window:TransferItem(op_cont[cont], obj)
 
-	-- if moving to inventory container add obj
+	--if moving to inventory container add obj
 	if cont == medpack_cont then
 		dbg_pr("Adding %s to inventory", obj:section())
-		self.new_player_items[#self.new_player_items] = obj
+		self.new_player_items[#self.new_player_items + 1] = obj
+		
+		cond = false
+
 	-- if moving to medpack container remove obj
 	elseif cont == inventory_cont then
 		for idx, _obj in pairs(self.new_player_items) do
-			if obj:id() == _obj:id() then
+			if obj:section() == _obj:section() then
 				dbg_pr("Removing %s from inventory", obj:section())
 				self.new_player_items[idx] = nil
+				break				
 			end
 		end
+		cond = true
 	end
 
-	local cond = cont == self.medpack_type.."_side_cont" and true or false
+	-- Moving to medpack add, moving to inventory remove
 	self:UpdateMedpackProps({obj=obj, flags={add=cond, remove=not cond}})
 	self:On_Item_Update()
 end

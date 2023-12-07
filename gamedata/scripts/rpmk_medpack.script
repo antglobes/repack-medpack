@@ -7,9 +7,10 @@
    Purpose: Main Functionality of medpacks, unpack/repack, zip/unzip, var calculation etc
 --]]
 
-function pr(debug, ...)
-    if debug then
-        printf("Repackable Medpacks: %s",...)
+DEBUG = true
+function pr(str, ...)
+    if DEBUG then
+        printf("Repackable Medpacks|Script: %s",strformat(str, ...))
     end
 end
 
@@ -311,7 +312,7 @@ end
 function is_medpack_full(medpack)
     local tw = get_total_weight(medpack:id())
     local mw = get_max_weight(medpack:id())
-    pr(false, strformat("total weight: %s type %s max weight: %s type %s", tw, type(tw),mw, type(mw) ))
+    pr("total weight: %s type %s max weight: %s type %s", tw, type(tw),mw, type(mw))
     return tw >= mw
 end
 
@@ -332,7 +333,7 @@ function mt_new_entry(medpack)
     local mw = default_max_weight(sect)
     
     MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=true, zipped=true}
-    pr(false, strformat("new entry: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max_weight=%s, base weight=%s, closed=%s, zipped=%s", _id, sect, _contents, ti, tw, mw, bw, true, true))
+    pr("new entry: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max_weight=%s, base weight=%s, closed=%s, zipped=%s", _id, sect, _contents, ti, tw, mw, bw, true, true)
 end
 
 --- Get the index of a medpack table entry
@@ -340,7 +341,7 @@ end
 function get_entry_index(id)
     for idx, entry in ipairs(MEDPACK_TABLE) do
         if id == entry["id"] then
-            pr(false, strformat("found entry at %s", idx))
+            pr("found entry at %s", idx)
             return idx
         end
     end
@@ -351,7 +352,7 @@ end
 function mt_remove_entry(id)
     for idx, entry in ipairs(MEDPACK_TABLE) do
         if id == entry["id"] then
-            pr(false, strformat("removing entry at %s", id))
+            pr("removing entry at %s", id)
             MEDPACK_TABLE[idx] = nil
         end
     end
@@ -370,7 +371,7 @@ function mt_replace_entry(old_id, new_id, sect, _contents, _closed, _zipped)
     local tw = calculate_total_weight(new_id, sect, _contents, ti, bw)
     local mw = default_max_weight(sect)
     local idx = get_entry_index(old_id) or #MEDPACK_TABLE + 1
-    pr(false, strformat("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s, zipped=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, _closed, _zipped))
+    pr("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s, zipped=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, _closed, _zipped)
     MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed, zipped=_zipped}
 end
 
@@ -449,7 +450,7 @@ function has_med_items()
     return med_items > 0
 end
 
---- Alternative "has_med_items()"
+--- Check if repackable medpacks in inv
 function has_medpacks_in_inv()
     return #get_medpacks() > 0
 end
@@ -553,23 +554,23 @@ end
 --- Get the section defined max weight of a medpack
 ---@param sect string
 function default_max_weight(sect)
-    pr(false, strformat("Getting max weight for: %s", sect))
+    pr("Getting max weight for: %s", sect)
     return ini_medpack:r_float_ex(sect, "max_weight")
 end
 
 --- Get the section defined contents of a medpack from "items_manager.ltx"
 ---@param section string
 function default_contents(section)
-    pr(true, strformat("Getting contents for: %s", section))
+    pr("Getting contents for: %s", section)
     local default_contents = build_contents(parse_list(ini_manager, "package_content", section))
-    pr(true, strformat("Contents of %s: %s", section, default_contents))
+    pr("Contents of %s: %s", section, default_contents)
     return default_contents
 end
 
 --- Get the section defined empty medpack weight
 ---@param sect string
 function default_base_weight(sect)
-    pr(false, strformat("Getting max weight for: %s", sect))
+    pr("Getting max weight for: %s", sect)
     return ini_medpack:r_float_ex(sect, "inv_weight")
 end
 
@@ -589,7 +590,7 @@ function create_new_medpack(obj, closed, zipped)
         local repack_sect = vanilla_to_repackable(obj:section(), closed)
         alife():release(alife_object(obj:id()), true)
         local medpack = alife_create_item(repack_sect, db.actor)
-        pr(false, strformat("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents)))
+        pr("Creating %s , with the contents: %s", repack_sect, concat_pairs(contents))
         mt_replace_entry(nil, medpack.id, repack_sect, contents, closed, zipped)
         rax_stacking_control.register(function (x) return x == get_section(medpack.id) end , function(_obj) return false end)
     end
@@ -607,7 +608,7 @@ function switch_medpack(obj, closed, zipped)
         local medpack = alife_create_item(repack_sect, db.actor, {["cond"]=obj:condition()})
         --alife_release(obj)
         alife():release(alife_object(obj:id()), true)
-        pr(false, strformat("Switching medpack from %s to %s, with the contents: %s", sect, repack_sect, concat_pairs(contents)))
+        pr("Switching medpack from %s to %s, with the contents: %s", sect, repack_sect, concat_pairs(contents))
         mt_replace_entry(nil, medpack.id, repack_sect, contents, closed, zipped)
         rax_stacking_control.register(function (x) return x == get_section(medpack.id) end , function(_obj) return false end)
     end
@@ -647,7 +648,6 @@ end
 function get_inv_medpack_itms()
     local items = {}
     local function search(temp, obj)
-        pr(false, strformat("Is %s a medpack compatible item?", obj:section()))
         if is_medpack_compatible(obj:section()) and not sect_to_exclude[obj:section()] then
             items[#items + 1] = obj
         end
@@ -708,7 +708,6 @@ end
 base_obj_desc = ui_item.get_obj_desc
 function ui_item.get_obj_desc(obj)
     if is_repackable_medpack(obj) then
-        pr(false, strformat("updating description for: %s", obj:section()))
         return medpack_descr(obj, obj:section())
     elseif is_vanilla_medpack(obj) then
         return vanilla_medpack_descr(obj, obj:section())
@@ -719,7 +718,6 @@ local ui_info_item_update = utils_ui.UIInfoItem.Update
 function utils_ui.UIInfoItem:Update(obj, sec, flags)
     ui_info_item_update(self, obj, sec, flags)
     if obj and is_repackable_medpack(obj) then
-        pr(false, strformat("Writing %s to medpack", get_total_weight(obj:id())))
         self.weight:SetText(get_total_weight(obj:id()).." "..weight_unit)
     end
 end
@@ -727,10 +725,9 @@ end
 local ui_inv_update_weight = ui_inventory.UIInventory.UpdateWeight
 function ui_inventory.UIInventory:UpdateWeight()
     ui_inv_update_weight(self)
-    pr(false, "has medpack in inv in order to update")
+    pr("has medpack in inv in order to update")
     if not has_medpacks_in_inv() then return end
     local updated_weight = db.actor:get_total_weight() + sum_medpack_weight() or 0
-    pr(false, strformat("Updating weight to %s", updated_weight))
     self.player_weight:SetText(strformat("%s %s", round_idp(updated_weight, 1), weight_unit))
 end
 
@@ -757,7 +754,7 @@ function vanilla_medpack_descr(obj, sect)
     local itm_clr = mcm_to_itm_clr(get_config("main", "itm_clr_"..medpack_type))
     itm_clr = alt_itm_clr(itm_clr)
     local sect_colour = get_colour_string(itm_clr)
-    printf("%s", sect_colour)
+
     for item, details in pairs(contents) do
         if item == contents[#contents] then
             end_char = "\\n \\n"
@@ -800,7 +797,7 @@ function medpack_descr(obj, sect)
         itm_clr = alt_itm_clr(itm_clr)
         local sect_colour = get_colour_string(itm_clr) --or get_string("st_"..sect.."_descr_colour")
         
-        printf("sect %s medpack type %s sect colour %s", sect, medpack_type, sect_colour)
+        --printf("sect %s medpack type %s sect colour %s", sect, medpack_type, sect_colour)
 
         local items_str = ""
         local itr = 1
@@ -845,14 +842,14 @@ function combine_contents(contents, new_contents)
         -- printf(#contents)
        
             if contents[sect]  then
-                pr(false, strformat("adding %s %s %s to contents", sect, table.concat(contents[sect].uses,","), contents[sect].amount))
+                pr("adding %s %s %s to contents", sect, table.concat(contents[sect].uses,","), contents[sect].amount)
                 contents[sect].amount = contents[sect].amount + new_contents[sect].amount
                 for i=1, #new_contents[sect].uses do
                     table.insert(contents[sect].uses, new_contents[sect].uses[i])
                 end
             else
                 contents[sect] = {uses=new_contents[sect].uses, amount=new_contents[sect].amount}
-                pr(false, strformat("default %s %s %s to contents", sect, table.concat(contents[sect].uses,","), contents[sect].amount))
+                pr("default %s %s %s to contents", sect, table.concat(contents[sect].uses,","), contents[sect].amount)
             end
        
     end
@@ -864,15 +861,15 @@ end
 ---@param new_contents table
 function update_contents(id, new_contents)
     local contents = get_contents(id)
-    pr(true, strformat("Updating medpack old contents %s", concat_pairs(contents)))
-    pr(true, strformat("old total items %s, old total weight %s", get_total_itms(id), get_total_weight(id)))
+    pr("Updating medpack old contents %s", concat_pairs(contents))
+    pr("old total items %s, old total weight %s", get_total_itms(id), get_total_weight(id))
     
     new_contents = combine_contents(contents, new_contents)
-    pr(true, strformat("new contents %s", concat_pairs(new_contents)))
+    pr("new contents %s", concat_pairs(new_contents))
     set_contents(id, new_contents)
     set_total_itms(id, sum_nested(new_contents))
     set_total_weight(id, calculate_total_weight(id, nil, new_contents, get_total_itms(id), get_base_weight(id)))
-    pr(true, strformat("new total items %s, new total weight %s", get_total_itms(id), get_total_weight(id)))
+    pr("new total items %s, new total weight %s", get_total_itms(id), get_total_weight(id))
 end
 
 --- Get weight of item by section
@@ -891,7 +888,7 @@ end
 function get_item_uses(sect)
     local med_objs = get_inv_medpack_itms()
     for _, obj in pairs(med_objs) do
-        pr(false, strformat("%s = %s with %s uses", obj:section(), sect, obj:get_remaining_uses()))
+        pr("%s = %s with %s uses", obj:section(), sect, obj:get_remaining_uses())
         if obj:section() == sect then
             return obj:get_remaining_uses()
         end
@@ -911,9 +908,9 @@ end
 ---@param base_weight number
 function calculate_total_weight(id, sect, contents, total_items, base_weight)
     if not total_items or total_items == 0 then return base_weight end    
-    local total_weight = get_total_weight(id) or base_weight
+    local total_weight = 0 --get_total_weight(id) or base_weight
     local medpack_type = get_medpack_type(id, sect)
-    pr(false, strformat("total weight: %s", total_weight))
+    pr("total weight: %s", total_weight)
     for item, details in pairs(contents) do
         for i=1, details.amount do
             total_weight = (total_weight + get_item_weight(item)) 
@@ -942,7 +939,7 @@ end
 ---@param medpack game_object
 ---@param result table
 function update_condition(medpack, result)
-    pr(false, strformat("Material %s, Flag %s", result.material_name, result.material_flags))
+    pr("Material %s, Flag %s", result.material_name, result.material_flags)
     if not medpack or not result or not is_medpack_in_table(medpack:id()) then return end
     local surface
     local reduction = 0
@@ -1070,7 +1067,7 @@ end
 --- Move all items under the max weight of a medpack into the specified medpack from actor inventory
 ---@param obj game_object
 function repack_all(obj)
-    pr(false, "repacking items")
+    pr("repacking items")
     local medpack_type = get_medpack_type(obj:id())
     if is_medpack_full(obj) then
         rpmk_utils.display_msg("st_full_medpack", nil, medpack_type)
@@ -1092,7 +1089,7 @@ function repack_all(obj)
         contents = combine_contents(old_contents)
     end
     
-    pr(false, strformat("Starting Total Weight: %s, Max Weight: %s", total_weight, max_weight))
+    pr("Starting Total Weight: %s, Max Weight: %s", total_weight, max_weight)
     
     -- printf("med item sections")
     for i=1, #med_items do
@@ -1101,10 +1098,10 @@ function repack_all(obj)
                 -- printf("section %s, amount %s, uses %s",med_items[i]:section(), details.amount, table.concat(details.uses, ","))
                 local item_weight = get_item_weight(item)
                 total_weight = total_weight + item_weight
-                pr(false, strformat("New total weight:%s", total_weight))
+                pr("New total weight:%s", total_weight)
                 
                 if total_weight >= max_weight then
-                    pr(false, strformat("%s is greater or equal to %s", total_weight, max_weight))
+                    pr("%s is greater or equal to %s", total_weight, max_weight)
                     details.amount = details.amount - 1
                     table.remove(details.uses, #details.uses)
                     total_weight = total_weight - item_weight
@@ -1112,7 +1109,7 @@ function repack_all(obj)
                         contents[item] = nil
                     end
                 elseif total_weight < max_weight then
-                    pr(false, strformat("%s is less than %s", total_weight, max_weight))
+                    pr("%s is less than %s", total_weight, max_weight)
                     alife():release(alife_object(med_items[i]:id()), true)
                 
                 end
@@ -1275,7 +1272,7 @@ add_functor("rpmk_medpack_unzip", unzip_condition_function, unzip_menu_function,
 -- open
 
 function open_condition_met(obj)
-    if obj and is_medpack_useable(obj) and not is_medpack_empty(obj) then
+    if obj and is_medpack_useable(obj) and not is_medpack_zipped(obj) then
         return true
     end
     return false
@@ -1296,7 +1293,7 @@ end
 function open_action(obj, bag, mode)
     local medpack = is_repackable_medpack(obj) and obj
     if not medpack then return end
-    printf("loading UI")
+    pr("loading UI")
     rpmk_gui.display_medpack_gui(medpack)
 end
 
@@ -1310,13 +1307,13 @@ function drop_condition_met(item, medpack)
     local total_weight = get_total_weight(medpack:id())
     local item_weight = get_item_weight(item:section())
     local max_weight = get_max_weight(medpack:id())
-    pr(true, strformat("medpack weight at %s, is %s's weight %s over %s", total_weight, item:section(), item_weight, max_weight))
+    pr("medpack weight at %s, is %s's weight %s over %s", total_weight, item:section(), item_weight, max_weight)
     return item_weight + total_weight < max_weight
     
 end
 
 function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
-    pr(true, "on item drag dropped")
+    pr("on item drag dropped")
     local p_1, p_2 = obj_1:parent(), obj_2:parent()
 
     if not ((p_1 and p_1:id() == AC_ID) and (p_2 and p_2:id() == AC_ID)) then
@@ -1332,7 +1329,7 @@ function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
         rpmk_utils.display_msg("st_full_medpack_item", lower(med_itm_name(itm:section())), get_medpack_type(medpack:id()))
         return 
     end
-    pr(false, strformat("medpack condition: %s", medpack:condition()))
+    pr("medpack condition: %s", medpack:condition())
     
 
     set_contents(combine_contents(get_contents(medpack:id()),  build_contents({itm:section()})))
@@ -1359,7 +1356,7 @@ local function load_table(mdata)
 end
 
 local function on_item_take(item)
-    pr(false, "on take")
+    pr("on take")
     if is_vanilla_medpack(item) then
         create_new_medpack(item, true, true)
     end
@@ -1389,7 +1386,7 @@ function on_update()
 end
 
 function on_game_start()
-    pr(false, "registering callbacks")
+    pr("registering callbacks")
     RegisterScriptCallback("actor_on_item_take", on_item_take)
     RegisterScriptCallback("actor_on_item_drop", on_item_drop)
     RegisterScriptCallback("actor_on_update", on_update)
