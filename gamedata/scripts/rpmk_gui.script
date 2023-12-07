@@ -308,6 +308,7 @@ function MPG:Cleanup()
 
 	self.medpack_objs = {}
 	self.player_med_items = {}
+	rpmk_medpack.set_contents(self.medpack:id(), self.medpack_contents)
 end
 
 function MPG:Update()
