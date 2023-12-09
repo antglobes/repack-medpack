@@ -192,12 +192,7 @@ function MPG:InitControls()
 	self.medpack_total_items = xml:InitTextWnd("total_items", self)
 	
 	-- Btns
-	self.menus[self.active_menu].unpack_all_btn = xml:Init3tButton("unpack_all_btn", self)
-    self.menus[self.active_menu].fill_all_btn = xml:Init3tButton("fill_all_btn", self)
 	self.menus[self.active_menu].close_btn = xml:Init3tButton("close_btn", self)
-
-	self:Register(self.menus[self.active_menu].unpack_all_btn, "unpack_all_btn")
-	self:Register(self.menus[self.active_menu].fill_all_btn, "fill_all_btn")
 	self:Register(self.menus[self.active_menu].close_btn, "close_btn")
 
 	-- Cell Item
@@ -490,13 +485,6 @@ function MPG:GetPlayerMedItems()
 	self.orginal_contents = self.player_med_items 
 end
 
--- Button Funcs
-
-function MPG:UnpackAll()
-end
-
-function MPG:FillAll()
-end
 
 -- Display
 
@@ -575,72 +563,14 @@ function MPG:On_CC_Mouse1_DB(cont, idx)
 	local obj = self.active_window:GetObj(idx)
 	if not obj then return end
 
-	if self:Cond_Use(obj, cont) then
-		self:Action_Use(obj, cont)
-
-	elseif self:Cond_Move(obj, cont) then
+	if self:Cond_Move(obj, cont) then
 		if self.holding_ctrl and self:Cond_Childs(obj, cont) then
 			self:Action_Move_All(obj, cont)
 		else
 			self:Action_Move(obj, cont)
 		end
 		return true -- continue double clicking!
-		
-	-- Execute first custom property that support double-click
-	else
-		local i = 1
-		while (self.properties["custom_" .. i] ~= nil) do
-			
-			-- Check if double-click is enabled
-			if self:DB_Custom(obj, cont, nil, i) then
-				local props = self.properties["custom_" .. i]
-				
-				-- Check if prop is aimed for active container
-				local bag_allowed = true
-				if props.cont then
-					bag_allowed = props.cont[cont] and true or false
-				end
-				if props.cont_func and props.cont_func[1] and self[props.cont_func[1]] then
-					bag_allowed = self[props.cont_func[1]](self, obj, cont, unpack(props.cont_func)) and true or false
-				end
-				
-				if bag_allowed then
-				
-					local cond = true
-					local k = 1
-					while cond and props["precondition" .. k] do
-						local precond = props["precondition" .. k]
-						if precond[1] and self[precond[1]] then
-							cond = self[precond[1]](self, obj, cont, unpack(precond)) and true or false
-						else
-							cond = false
-						end
-						k = k + 1
-					end
-					if cond then
-						local id = obj:id()
-						
-						local name = props.name
-						local func_name = props.name_func
-						if func_name and func_name[1] and self[func_name[1]] then
-							name = self[func_name[1]](self, id, cont, unpack(func_name)) or name
-						end
-						if name then
-						
-							local func_action = props.action
-							if func_action and func_action[1] and self[func_action[1]] then
-								self[func_action[1]](self, id, cont, unpack(func_action))
-								break
-							end
-						end
-					end
-					
-				end
-			end
-		
-			i = i + 1
-		end
-	end 
+	end
 end
 
 function MPG:On_CC_Mouse2(cont, idx)

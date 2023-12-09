@@ -54,20 +54,10 @@
     </sci_side_menu_frame>
 
     <!--Buttons-->
-    <unpack_all_btn x="190" y="590" width="70" height="30" >
-            <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_unpack_all</text>
-            <texture>ui_medpack_btn</texture>
-    </unpack_all_btn>
-
     <close_btn x="315" y="590" width="70" height="30" >
         <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_close</text>
         <texture>ui_medpack_btn</texture>
     </close_btn>
-
-    <fill_all_btn x="440" y="590" width="70" height="30" >
-        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_fill_all</text>
-        <texture>ui_medpack_btn</texture>
-    </fill_all_btn>
 
     <!--Text Windows-->
     <weight x="150" y="185" width="100" height="50">
