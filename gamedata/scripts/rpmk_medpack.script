@@ -718,7 +718,7 @@ local ui_info_item_update = utils_ui.UIInfoItem.Update
 function utils_ui.UIInfoItem:Update(obj, sec, flags)
     ui_info_item_update(self, obj, sec, flags)
     if obj and is_repackable_medpack(obj) then
-        self.weight:SetText(get_total_weight(obj:id()).." "..weight_unit)
+        self.weight:SetText(round_idp(get_total_weight(obj:id()), 2).." "..weight_unit)
     end
 end
 
