@@ -183,3 +183,12 @@ function contains_sect(tbl, sect)
     end
     return false
 end
+
+function contains_id(tbl, id)
+    for idx, obj in pairs(tbl) do
+        if obj:id() == id then
+            return true
+        end
+    end
+    return false
+end

@@ -655,31 +655,6 @@ function MPG:On_CC_Remove(cont, idx, on_area)
 	self.update_info = true
 end
 
--- Functionality
-
-function MPG:SelectItem()
-end
-
-function MPG:MoveItem()
-end
-
-function MPG:DragItem()
-end
-
-function MPG:ShowItemDetails()
-end
-
-function MPG:ShowItemActions()
-end
-
-function MPG:UpdateWeight()
-end
-
-function MPG:UpdateTotalItems()
-end
-
-
-
 -- Right Click/Properties Functors
 
 function MPG:InitProperties(obj, cont)
@@ -767,9 +742,10 @@ function MPG:Action_Use(obj, cont)
 	if (CInventory__eat(obj) == false) then return end
 	--self:PlaySND(snd_item_use)
 	db.actor:eat(obj)
-	self:On_Item_Update()
+	
 	self:UpdateMedpackProps({obj=obj, flags={add=false, remove=false}})
 	self.active_window:RemoveItem(obj)
+	self:On_Item_Update()
 	self:Close()
 end
 
