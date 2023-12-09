@@ -1272,7 +1272,7 @@ add_functor("rpmk_medpack_unzip", unzip_condition_function, unzip_menu_function,
 -- open
 
 function open_condition_met(obj)
-    if obj and is_medpack_useable(obj) and not is_medpack_zipped(obj) then
+    if obj and get_config("main","enable_gui") and is_medpack_useable(obj) and not is_medpack_zipped(obj) then
         return true
     end
     return false

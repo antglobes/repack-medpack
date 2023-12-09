@@ -8,7 +8,8 @@ local defaults = {
         ["itm_clr_army"] = "1",
         ["itm_clr_sci"] = "2",
         ["cond_limit"] = 25,
-        ["display_msg"] = true
+        ["display_msg"] = true,
+        ["enable_gui"] = true
     }
 }
 
@@ -86,7 +87,8 @@ function on_mcm_load()
                     },
                     {id="divider", type="line"},
                     {id="cond_limit", type="track", val=2, min=0, max=100, step=1, def=25},
-                    {id="display_msg", type="check", val=1, def=true,}
+                    {id="display_msg", type="check", val=1, def=true,},
+                    {id="enable_gui", type="check", val=1, def=true,}
                 }
 
             }

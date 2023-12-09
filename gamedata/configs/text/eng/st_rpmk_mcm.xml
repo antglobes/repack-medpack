@@ -12,6 +12,9 @@
      <string id="ui_mcm_rpmk_main_display_msg">
         <text>Display Medpack Messages</text>
     </string>
+     <string id="ui_mcm_rpmk_main_enable_gui">
+        <text>Enable Medpack Menu</text>
+    </string>
     <!--Menus-->
     <string id="ui_mcm_menu_rpmk">
         <text>Repack Medpack</text>

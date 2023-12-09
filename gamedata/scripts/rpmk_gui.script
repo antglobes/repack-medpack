@@ -113,11 +113,10 @@ function MPG:__init(medpack) super()
 	self.holding_ctrl    = false
 	self.holding_shift   = false
 	self.properties = {
-		["use"]             = { index= 1 ,  name= "st_use",                    			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},                    precondition1= {"Cond_Use"},                                               	       action= {"Action_Use"} },
-		["move"]            = { index= 2 ,  name_func= {"Name_Move"},          			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},   				  precondition1= {"Cond_Move"},                                                        action= {"Action_Move"} },
-		["move_all"]        = { index= 3 ,  name= "st_move_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},   				  precondition1= {"Cond_Childs"},         precondition2= {"Cond_Move"},          	   action= {"Action_Move_All"} },
-		["drop"]            = { index= 4,  name= "st_drop",                  			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},        			 precondition1= {"Cond_NotQuest"},                                                     action= {"Action_Drop"} },
-		["drop_all"]        = { index= 5,  name= "st_drop_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},                   precondition1= {"Cond_Childs"}, 	      precondition2= {"Cond_NotQuest"},            action= {"Action_Drop_All"} },
+		["move"]            = { index= 1 ,  name_func= {"Name_Move"},          			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},   				  precondition1= {"Cond_Move"},                                                        action= {"Action_Move"} },
+		["move_all"]        = { index= 2 ,  name= "st_move_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},   				  precondition1= {"Cond_Childs"},         precondition2= {"Cond_Move"},          	   action= {"Action_Move_All"} },
+		["drop"]            = { index= 3,  name= "st_drop",                  			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},        			 precondition1= {"Cond_NotQuest"},                                                     action= {"Action_Drop"} },
+		["drop_all"]        = { index= 4,  name= "st_drop_all",               			cont= {self.medpack_type.."_cont", self.medpack_type.."_side_cont"},                   precondition1= {"Cond_Childs"}, 	      precondition2= {"Cond_NotQuest"},            action= {"Action_Drop_All"} },
 	}
 
 	for _,props in pairs(self.properties) do
@@ -730,23 +729,6 @@ end
 function MPG:Name_Move(obj, cont)
 	local op_cont = {[self.medpack_type.."_cont"] = "side_menu", [self.medpack_type.."_side_cont"] = "medpack_menu"}
 	return "st_rpmk_move_to_"..op_cont[cont]
-end
-
-function MPG:Cond_Use(obj, cont)
-	obj = self:CheckItem(obj)
-	return IsItem("consumable", obj:section()) and true or false
-end
-
-function MPG:Action_Use(obj, cont)
-	obj = self:CheckItem(obj)
-	if (CInventory__eat(obj) == false) then return end
-	--self:PlaySND(snd_item_use)
-	db.actor:eat(obj)
-	
-	self:UpdateMedpackProps({obj=obj, flags={add=false, remove=false}})
-	self.active_window:RemoveItem(obj)
-	self:On_Item_Update()
-	self:Close()
 end
 
 function MPG:Cond_Move(obj, cont, temp, cont_to)
