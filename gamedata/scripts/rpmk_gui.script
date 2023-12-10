@@ -1,7 +1,11 @@
-
-
-
-
+--[[    
+   Repackable Medpacks
+   Author: AntGlobes
+   Source: https://www.moddb.com/mods/repackable-medpacks
+   Version: v1.0
+   Last Modified: 10/12/23
+   Purpose: Display GUI and update medpack/inventory contents
+--]]
 
 -- Imports
 
@@ -43,8 +47,6 @@ side_menu_names = {
 	[3] = "sci_side_menu"
 }
 
--- Boolean Functions
-
 -- Functions
 
 function keybind_pass()
@@ -56,12 +58,17 @@ function keybind_pass()
 	return false
 end
 
+--- Debugging logger
+---@param str string
 function dbg_pr(str, ...)
 	if DEBUG then
 		printf("Repackable Medpack|GUI %s", strformat(str, ...))
 	end
 end
 
+--- Get index by value of a game object
+---@param tbl table
+---@param value string
 function sect_index_of(tbl, value)
     for k, v in pairs(tbl) do
 		if v:section() == value then
@@ -73,6 +80,8 @@ end
 
 -- UI 
 
+--- Start Medpack GUI 
+---@param medpack_obj any
 function display_medpack_gui(medpack_obj)
     hide_hud_inventory()
 	printf("Showing UI")
@@ -98,7 +107,6 @@ function MPG:__init(medpack) super()
     self.medpack = medpack
 	self.medpack_type = rpmk_medpack.get_medpack_type(self.medpack:id())
 	self.medpack_props = rpmk_medpack.mt_all_vars(self.medpack:id())
-	--dbg_pr_tbl(self.medpack_props, "Showing table entry details")
 	self.medpack_contents = self.medpack_props["contents"]
 	self.total_items = self.medpack_props["total_itms"]
 	self.total_weight = self.medpack_props["total_weight"]
@@ -236,6 +244,7 @@ function MPG:Reset(medpack)
 	self.holding_shift   = false
 end
 
+--- Close GUI
 function MPG:Close()
 	dbg_pr("Closing UI")
 	self:Cleanup()
@@ -246,6 +255,7 @@ function MPG:Close()
 	CloseAll_UI()
 end
 
+--- Checks if new items in inventory
 function MPG:ActorInvNewItems()
 	local current_contents = self:GetCurrentContents("actor")
 	local original_contents = self.orginal_contents
@@ -267,6 +277,7 @@ function MPG:ActorInvNewItems()
 	return not compare_tables(get_sect_list(current_contents), get_sect_list(original_contents))
 end -- update actor objs list 
 
+--- Removes duplicate medpack objects, adds objects to medpack and inventory
 function MPG:Cleanup()
 
 	local function search(temp, item)
@@ -341,6 +352,8 @@ function MPG:On_Item_Update()
 	self.update_info = true
 end
 
+--- Updates Medpack Contents
+---@param props table
 function MPG:UpdateMedpackProps(props)
 	dbg_pr("Updating Medpack Properties")
 	local obj = props.obj

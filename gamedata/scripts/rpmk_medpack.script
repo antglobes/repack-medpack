@@ -3,11 +3,15 @@
    Author: AntGlobes
    Source: https://www.moddb.com/mods/repackable-medpacks
    Version: v1.0
-   Last Modified: 10/11/23
+   Last Modified: 10/12/23
    Purpose: Main Functionality of medpacks, unpack/repack, zip/unzip, var calculation etc
 --]]
 
-DEBUG = true
+DEBUG = false
+
+--- Debugging logger
+---@param str string
+---@param ... any
 function pr(str, ...)
     if DEBUG then
         printf("Repackable Medpacks|Script: %s",strformat(str, ...))
@@ -38,7 +42,9 @@ obj_to_sect_list = rpmk_utils.obj_to_sect_list
 mcm_to_itm_clr = rpmk_utils.mcm_to_itm_clr
 alt_itm_clr = rpmk_utils.alt_itm_clr
 display_gui = rpmk_gui.display_medpack_gui
+
 -- Configs
+
 ini_medpack = ini_file_ex("items\\items\\items_repackable_medpack.ltx", true)
 ini_medical = ini_file_ex("items\\items\\items_medical.ltx")
 ini_drugs = ini_file_ex("items\\items\\items_drugs.ltx")
@@ -59,6 +65,8 @@ MEDPACK_TABLE = {}
 
 --settings = rpmk_utils.settings
 
+--- Returns XML valid colour string 
+---@param ( any
 function get_colour_string(name)
     return strformat("%c[%s]", name)
 end
@@ -74,37 +82,35 @@ local contents_str = title_grey_clr.."CONTENTS:\\n"
 local props_str = title_grey_clr.."PROPERTIES:\\n"
 local storage_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_storage_descr").."\\n"
 local repack_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_repack_descr").."\\n"
--- Once a medpack enters the player's inv add to table
--- Store section, id, package contents, capacity, each item weight + medpack weight, max weight threshold
--- if unpacking decrease only package contents
--- if repack add to package contents and for each item added also add it's weight
--- above max weight threshold and medpack slowly starts to decrease in condition (possible update icon in stages)
--- if medpack is open, when zipped, create closed medpack with package contents, remove open medpack
--- if medpack is closed, when unzipped, create open medpack with package contents, remove closed medpack
--- if sold remove from table
--- if dropped and player moves more than 100m from it remove from table
--- if dropped and trans level then remove  
--- id = medpack id
--- section = medpack section name
--- contents = list of medical items
--- capacity = current total amount of items in medpack
--- total_weight = the sum weight of all items in the medpack plus the medpack weight
--- max_weight = total weight limit that the medpack can contain
--- Remove all kits of medpacks and replace all trader profiles with medpack with repackable version
+--[[ 
+Repackable Medpack Explanation
+------------------------------
+Once a medpack enters the player's inv add to table
+Store section, id, package contents, capacity, each item weight + medpack weight, max weight threshold
+if unpacking decrease only package contents
+if repack add to package contents and for each item added also add it's weight
+above max weight threshold and medpack slowly starts to decrease in condition (possible update icon in stages)
+if medpack is open, when zipped, create closed medpack with package contents, remove open medpack
+if medpack is closed, when unzipped, create open medpack with package contents, remove closed medpack
+if sold remove from table
+if dropped and player moves more than 100m from it remove from table
+if dropped and trans level then remove  
 
-
-
-
-
-
-
+Medpack Table Variables
+-----------------------
+id = medpack id
+section = medpack section name
+contents = list of medical items
+capacity = current total amount of items in medpack
+total_weight = the sum weight of all items in the medpack plus the medpack weight
+max_weight = total weight limit that the medpack can contain
+--]]
 
 -------------------------------
 -- Tables
 -------------------------------
 
 --Mcm conversion tables
-
 mcm_to_clr = {
     ["0"] = "red",
     ["1"] = "blue",
@@ -176,7 +182,7 @@ damage_multi ={
     ["sci"] = get_config("main","dam_multi_basic") 
 }
 
-
+-- Item Weight of each Body Health System Expanded Item
 bhs_item_weight = {
     ["bandage_army"] = 0,
     ["surginst"] = 0.15,
@@ -725,7 +731,6 @@ end
 local ui_inv_update_weight = ui_inventory.UIInventory.UpdateWeight
 function ui_inventory.UIInventory:UpdateWeight()
     ui_inv_update_weight(self)
-    pr("has medpack in inv in order to update")
     if not has_medpacks_in_inv() then return end
     local updated_weight = db.actor:get_total_weight() + sum_medpack_weight() or 0
     self.player_weight:SetText(strformat("%s %s", round_idp(updated_weight, 1), weight_unit))
@@ -795,7 +800,7 @@ function medpack_descr(obj, sect)
         local medpack_type = get_medpack_type(nil, sect)
         local itm_clr = mcm_to_itm_clr(get_config("main", "itm_clr_"..medpack_type))
         itm_clr = alt_itm_clr(itm_clr)
-        local sect_colour = get_colour_string(itm_clr) --or get_string("st_"..sect.."_descr_colour")
+        local sect_colour = get_colour_string(itm_clr) 
         
         --printf("sect %s medpack type %s sect colour %s", sect, medpack_type, sect_colour)
 
@@ -820,8 +825,6 @@ function medpack_descr(obj, sect)
 end    
 
 -- Monkey patch UIInfoItem:Update for weight correction
-
-
 -- Medpack Info
 
 --- Convert medical section to item name
@@ -908,7 +911,7 @@ end
 ---@param base_weight number
 function calculate_total_weight(id, sect, contents, total_items, base_weight)
     if not total_items or total_items == 0 then return base_weight end    
-    local total_weight = 0 --get_total_weight(id) or base_weight
+    local total_weight = 0 
     local medpack_type = get_medpack_type(id, sect)
     pr("total weight: %s", total_weight)
     for item, details in pairs(contents) do
@@ -1081,7 +1084,7 @@ function repack_all(obj)
     local max_weight = get_max_weight(obj:id())
     local items_to_remove = {}
     local med_items = get_inv_medpack_itms()
-    local sect_list = obj_to_sect_list(med_items) --combine_contents(get_contents(obj:id()), build_contents(obj_to_sect_list(med_items)))
+    local sect_list = obj_to_sect_list(med_items) 
     local old_contents = get_contents(obj:id())
     local contents = build_contents(sect_list)
 
@@ -1154,7 +1157,6 @@ function unpack_action(obj, bag, mode)
     local medpack = is_repackable_medpack(obj) and obj
     if not medpack then return end
 
-    --rpmk_gui.display_medpack_gui(true, nil, medpack)
     unpack_all(obj)
     if is_medpack_closed(medpack) and is_medpack_zipped(medpack) and is_medpack_empty(medpack) then
         switch_medpack(obj, false, false)
@@ -1189,9 +1191,7 @@ function repack_medpack_action(obj, bag, mode)
     local medpack = is_repackable_medpack(obj) and obj
     if not medpack then return end
 
-    --rpmk_gui.display_medpack_gui(nil, true, medpack)
     repack_all(obj)
-    --switch_medpack(obj, true)
 end
 
 local add_functor = custom_functor_autoinject.add_functor
@@ -1222,7 +1222,6 @@ end
 function zip_action(obj, bag, mode)
     local medpack = is_repackable_medpack(obj) and  obj
     if not medpack then return end
-    -- printf("medpack condition %s", medpack:condition())
     local contents = get_contents(medpack:id())
     local closed_sect = switch_status(medpack:section())
     local obj = alife_create_item(closed_sect, db.actor, {["cond"]=medpack:condition()})
@@ -1337,7 +1336,6 @@ function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
     set_total_weight(medpack:id(), get_total_weight(medpack:id()) + get_item_weight(itm:section()))
 
     alife_release(itm)
-    --rpmk_utils.display_msg("st_repacked_item", lower(med_itm_name(itm:section())), get_medpack_type(medpack:id()))
 end
 
 -------------------------------
@@ -1356,7 +1354,6 @@ local function load_table(mdata)
 end
 
 local function on_item_take(item)
-    pr("on take")
     if is_vanilla_medpack(item) then
         create_new_medpack(item, true, true)
     end
