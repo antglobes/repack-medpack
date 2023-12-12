@@ -18,11 +18,10 @@ get_sect_list = rpmk_utils.obj_to_sect_list
 build_contents = rpmk_medpack.build_contents
 contains_sect = rpmk_utils.contains_sect
 combine_contents = rpmk_medpack.combine_contents
-
+get_config = rpmk_mcm.get_config
 -- Constants
 
 GUI = nil
-DEBUG = false
 local clr01_RedOrange = GetARGB(0xff, 0xff, 0x40, 0x00)
 local weight_unit = game.translate_string("st_kg")
 local K_Timer   = false
@@ -61,7 +60,7 @@ end
 --- Debugging logger
 ---@param str string
 function dbg_pr(str, ...)
-	if DEBUG then
+	if get_config("main","enable_debug") then
 		printf("Repackable Medpack|GUI %s", strformat(str, ...))
 	end
 end

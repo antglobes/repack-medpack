@@ -9,7 +9,8 @@ local defaults = {
         ["itm_clr_sci"] = "2",
         ["cond_limit"] = 25,
         ["display_msg"] = true,
-        ["enable_gui"] = true
+        ["enable_gui"] = true,
+        ["enable_debug"] = false
     }
 }
 
@@ -88,7 +89,8 @@ function on_mcm_load()
                     {id="divider", type="line"},
                     {id="cond_limit", type="track", val=2, min=0, max=100, step=1, def=25},
                     {id="display_msg", type="check", val=1, def=true,},
-                    {id="enable_gui", type="check", val=1, def=true,}
+                    {id="enable_gui", type="check", val=1, def=true,},
+                    {id="enable_debug", type="check", val=1, def=true}
                 }
 
             }

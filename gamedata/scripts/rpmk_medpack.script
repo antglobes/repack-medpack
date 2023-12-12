@@ -7,13 +7,12 @@
    Purpose: Main Functionality of medpacks, unpack/repack, zip/unzip, var calculation etc
 --]]
 
-DEBUG = false
 
 --- Debugging logger
 ---@param str string
 ---@param ... any
 function pr(str, ...)
-    if DEBUG then
+    if get_config("main","enable_debug") then
         printf("Repackable Medpacks|Script: %s",strformat(str, ...))
     end
 end

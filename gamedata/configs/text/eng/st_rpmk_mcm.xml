@@ -15,6 +15,9 @@
      <string id="ui_mcm_rpmk_main_enable_gui">
         <text>Enable Medpack Menu</text>
     </string>
+    <string id="ui_mcm_rpmk_main_enable_debug">
+        <text>Enable Debugging</text>
+    </string>
     <!--Menus-->
     <string id="ui_mcm_menu_rpmk">
         <text>Repack Medpack</text>
