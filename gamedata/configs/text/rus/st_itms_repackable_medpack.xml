@@ -1,0 +1,291 @@
+
+<string_table>
+	<!--Base Medpack Description-->
+	<string id="st_medpack_open_basic_base_descr">
+        <text>Вскрытая сумка с базовым медицинским набором. Содержит некоторое количество лекарств и медицинских инструментов для лечения небольших повреждений.\n \n</text>
+    </string>
+    <string id="st_medpack_open_army_base_descr">
+    	<text>Вскрытая сумка с медицинским набором армейского образца. Содержит, в числе прочего, большое количество стимуляторов.\n \n</text>
+    </string>
+    <string id="st_medpack_open_sci_base_descr">
+    	<text>Вскрытая сумка с медицинским набором, разработанным специально для применения в Зоне. Содержит большое количество медикаментов для противостояния химическим, радиоактивным и пси-угрозам.\n \n</text>
+    </string>
+
+    <string id="st_medpack_closed_basic_base_descr">
+        <text>Опечатанная сумка с базовым медицинским набором. Содержит некоторое количество лекарств и медицинских инструментов для лечения небольших повреждений.\n \n</text>
+    </string>
+    <string id="st_medpack_closed_army_base_descr">
+        <text>Опечатанная сумка с медицинским набором армейского образца. Содержит, в числе прочего, большое количество стимуляторов.\n \n</text>
+    </string>
+    <string id="st_medpack_closed_sci_base_descr">
+        <text>Опечатанная сумка с медицинским набором, разработанным специально для применения в Зоне. Содержит большое количество медикаментов для противостояния химическим, радиоактивным и пси-угрозам\n \n</text>
+    </string>
+
+	<string id="st_medpack_zipped_descr">
+		<text>Застёгнутый</text>
+	</string>
+	<string id="st_medpack_unzipped_descr">
+		<text>Расстёгнутый</text>
+	</string>
+
+	<string id="st_medpack_descr_bullet_point">
+		<text>•</text>
+	</string>
+
+	<string id="st_medpack_storage_descr">
+		<text>Используется для хранения медикаментов</text>
+	</string>
+	
+	<string id="st_medpack_Состояние_descr">
+		<text> %s%</text>
+	</string>
+	<string id="st_medpack_max_weight_descr">
+		<text>Максимальный вес: %s</text>
+	</string>
+	<!--Item Amount colours-->
+	<string id="st_medpack_open_basic_descr_colour">
+        <text>%c[d_red]</text>
+    </string>
+    <string id="st_medpack_open_army_descr_colour">
+    	<text>%c[d_blue]</text>
+    </string>
+    <string id="st_medpack_open_sci_descr_colour">
+    	<text>%c[pda_yellow]</text>
+    </string>
+
+    <string id="st_medpack_closed_basic_descr_colour">
+        <text>%c[d_red]</text>
+    </string>
+    <string id="st_medpack_closed_army_descr_colour">
+        <text>%c[d_blue]</text>
+    </string>
+    <string id="st_medpack_closed_sci_descr_colour">
+        <text>%c[pda_yellow]</text>
+    </string>
+
+	<string id="st_medpack_repack_descr">
+		<text>Можно перепаковать</text>
+	</string>
+
+    <!--Unzipped Medpack Titles-->
+    <string id="st_medpack_open_basic">
+        <text>Вскрытая сумка с базовым медкомплектом</text>
+    </string>
+    <string id="st_medpack_open_army">
+    <text>Вскрытая сумка с армейским медкомплектом</text>
+    </string>
+    <string id="st_medpack_open_scientific">
+    <text>Вскрытая сумка с научным медкомплектом</text>
+    </string>
+
+	<!--Zipped Medpack Titles-->
+    <string id="st_medpack_closed_basic">
+        <text>Опечатанная сумка с базовым медкомплектом</text>
+    </string>
+    <string id="st_medpack_closed_army">
+        <text>Опечатанная сумка с армейским медкомплектом</text>
+    </string>
+    <string id="st_medpack_closed_scientific">
+        <text>Опечатанная сумка с научным медкомплектом</text>
+    </string>
+
+    <!--Unzipped Medpack Descriptions-->
+    <string id="st_medpack_open_basic_descr">
+        <text>Вскрытая сумка с базовым медицинским набором. Содержит некоторое количество лекарств и медицинских инструментов для лечения небольших повреждений.\n \n
+		%c[ui_gray_3]Содержимое:\n
+		%c[d_red] • %c[default] бинт x4\n
+		%c[d_red] • %c[default] диклофенак натрия x1\n
+		%c[d_red] • %c[default] самопальный стимпак x1\n
+		%c[d_red] • %c[default] ампула салициловой кислоты x1\n
+		%c[d_red] • %c[default] минеральная вода x1\n
+		%c[d_red] • %c[default] сульфадиметоксин x1\n
+		%c[d_red] • %c[default] жгут x1\n
+		%c[d_red] • %c[default] йадулин x1\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_orange] • %c[ui_gray_2] Максимальный вес: 1.75 кг
+		%c[d_orange] • %c[ui_gray_2] Состояние: 100%
+		%c[d_blue] • %c[ui_gray_2] Используется для хранения медикаментов\n
+        %c[d_blue] • %c[ui_gray_2] Можно перепаковать\n
+        %c[d_red] • %c[ui_gray_2] Расстёгнуто\n</text>
+    </string>
+    <string id="st_medpack_open_army_descr">
+        <text>Вскрытая сумка с медицинским набором армейского образца. Содержит, в числе прочего, большое количество стимуляторов.\n \n
+		%c[ui_gray_3]Содержимое:\n
+		%c[d_blue] • %c[default] ампула промедола\n
+		%c[d_blue] • %c[default] антирадиационный препарат\n
+		%c[d_blue] • %c[default] таблетки "Акватабс"\n
+		%c[d_blue] • %c[default] бинт x4\n
+		%c[d_blue] • %c[default] таблетки кофеина\n
+		%c[d_blue] • %c[default] диклофенак натрия\n
+		%c[d_blue] • %c[default] жгут x2\n
+		%c[d_blue] • %c[default] военный стимулятор\n
+		%c[d_blue] • %c[default] минеральная вода\n
+		%c[d_blue] • %c[default] таблетки 027-R\n
+		%c[d_blue] • %c[default] вакцина от столбняка\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_orange] • %c[ui_gray_2] Максимальный вес: 2 кг
+		%c[d_orange] • %c[ui_gray_2] Состояние: 100%
+		%c[d_blue] • %c[ui_gray_2] Используется для хранения медикаментов\n
+        %c[d_blue] • %c[ui_gray_2] Можно перепаковать\n
+        %c[d_red] • %c[ui_gray_2] Расстёгнуто\n</text>
+    </string>
+    <string id="st_medpack_open_scientific_descr">
+        <text>Вскрытая сумка с медицинским набором, разработанным специально для применения в Зоне. Содержит большое количество медикаментов для противостояния химическим, радиоактивным и пси-угрозам\n \n
+		%c[ui_gray_3]Содержимое:\n
+		%c[pda_yellow] • %c[default] противорадиационные препараты (2)\n
+		%c[pda_yellow] • %c[default] антитоксикант IP2\n
+		%c[pda_yellow] • %c[default] большая инъекция глюкозы\n
+		%c[pda_yellow] • %c[default] цистамин (2)\n
+		%c[pda_yellow] • %c[default] диклофенак натрия\n
+		%c[pda_yellow] • %c[default] эпинефрин\n
+		%c[pda_yellow]• %c[default] жгут\n
+		%c[pda_yellow] • %c[default] радиопротектор\n
+		%c[pda_yellow] • %c[default] минеральная вода\n
+		%c[pda_yellow] • %c[default] пси-блокада\n
+		%c[pda_yellow] • %c[default]экспериментальный научный стимулятор (2)\n
+		%c[pda_yellow] • %c[default] сульфадиметоксин\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_orange] • %c[ui_gray_2] Максимальный вес: 3.5 кг
+		%c[d_orange] • %c[ui_gray_2] Состояние: 100%
+		%c[d_blue] • %c[ui_gray_2] Используется для хранения медикаментов\n
+        %c[d_blue] • %c[ui_gray_2] Можно перепаковать\n
+        %c[d_red] • %c[ui_gray_2] Расстёгнуто\n</text>
+    </string>
+
+    <!--Zipped Medpack Descriptions-->
+    <string id="st_medpack_closed_basic_descr">
+        <text>Опечатанная сумка с базовым медицинским набором. Содержит некоторое количество лекарств и медицинских инструментов для лечения небольших повреждений.\n \n
+		%c[ui_gray_3]Содержимое:\n
+		%c[d_red] • %c[default] бинт x4\n
+		%c[d_red] • %c[default] диклофенак натрия x1\n
+		%c[d_red] • %c[default] самопальный стимпак x1\n
+		%c[d_red] • %c[default] ампула салициловой кислоты x1\n
+		%c[d_red] • %c[default] минеральная вода x1\n
+		%c[d_red] • %c[default] сульфадиметоксин x1\n
+		%c[d_red] • %c[default] жгут x1\n
+		%c[d_red] • %c[default] йадулин x1\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_orange] • %c[ui_gray_2] Максимальный вес: 1.75 кг
+		%c[d_orange] • %c[ui_gray_2] Состояние: 100%
+		%c[d_blue] • %c[ui_gray_2] Используется для хранения медикаментов\n
+        %c[d_blue] • %c[ui_gray_2] Можно перепаковать\n
+        %c[d_red] • %c[ui_gray_2] Zipped\n</text>
+    </string>
+    <string id="st_medpack_closed_army_descr">
+        <text>Опечатанная сумка с медицинским набором армейского образца. Содержит, в числе прочего, большое количество стимуляторов.\n \n
+		%c[ui_gray_3]Содержимое:\n
+		%c[d_blue] • %c[default] ампула промедола\n
+		%c[d_blue] • %c[default] антирадиационный препарат\n
+		%c[d_blue] • %c[default] таблетки "Акватабс"\n
+		%c[d_blue] • %c[default] бинт x4\n
+		%c[d_blue] • %c[default] таблетки кофеина\n
+		%c[d_blue] • %c[default] диклофенак натрия\n
+		%c[d_blue] • %c[default] жгут x2\n
+		%c[d_blue] • %c[default] военный стимулятор\n
+		%c[d_blue] • %c[default] минеральная вода\n
+		%c[d_blue] • %c[default] таблетки 027-R\n
+		%c[d_blue] • %c[default] вакцина от столбняка\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_orange] • %c[ui_gray_2] Максимальный вес: 2 кг
+		%c[d_orange] • %c[ui_gray_2] Состояние: 100%
+		%c[d_blue] • %c[ui_gray_2] Используется для хранения медикаментов\n
+        %c[d_blue] • %c[ui_gray_2] Можно перепаковать\n
+        %c[d_red] • %c[ui_gray_2] Zipped\n</text>
+    </string>
+    <string id="st_medpack_closed_scientific_descr">
+        <text>Опечатанная сумка с медицинским набором, разработанным специально для применения в Зоне. Содержит большое количество медикаментов для противостояния химическим, радиоактивным и пси-угрозам\n \n
+		%c[ui_gray_3]Содержимое:\n
+		%c[pda_yellow] • %c[default] противорадиационные препараты x2\n
+		%c[pda_yellow] • %c[default] антитоксикант IP2\n
+		%c[pda_yellow] • %c[default] большая инъекция глюкозы\n
+		%c[pda_yellow] • %c[default] цистамин x2\n
+		%c[pda_yellow] • %c[default] диклофенак натрия\n
+		%c[pda_yellow] • %c[default] эпинефрин\n
+		%c[pda_yellow]• %c[default] жгут\n
+		%c[pda_yellow] • %c[default] радиопротектор\n
+		%c[pda_yellow] • %c[default] минеральная вода\n
+		%c[pda_yellow] • %c[default] пси-блокада\n
+		%c[pda_yellow] • %c[default]экспериментальный научный стимулятор x2\n
+		%c[pda_yellow] • %c[default] сульфадиметоксин\n \n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_orange] • %c[ui_gray_2] Максимальный вес: 3.5 кг
+		%c[d_orange] • %c[ui_gray_2] Состояние: 100%
+		%c[d_blue] • %c[ui_gray_2] Используется для хранения медикаментов\n
+        %c[d_blue] • %c[ui_gray_2] Можно перепаковать\n
+        %c[d_red] • %c[ui_gray_2] Zipped\n</text>
+    </string>
+
+	<!--GUI Text-->
+	<string id="ui_rpmk_btn_unpack_all">
+		<text>Распаковать всё</text>
+	</string>
+
+	<string id="ui_rpmk_btn_close">
+		<text>Закрыть</text>
+	</string>
+
+	<string id="ui_rpmk_btn_fill_all">
+		<text>Заполнить всё</text>
+	</string>
+	
+	<string id="ui_rpmk_text_weight">
+		<text>Вес: %s кг</text>
+	</string>
+	
+	<string id="ui_rpmk_text_total_items">
+		<text>Всего предметов: %s</text>
+	</string>
+	
+	<string id="st_rpmk_move_to_medpack_menu">
+		<text>переместить в меднабор</text>
+	</string>
+	
+	<string id="st_rpmk_move_to_side_menu">
+		<text>переместить в инвентарь</text>
+	</string>
+
+	<!--Functor Strings-->
+	<string id="st_rpmk_menu_unpack">
+		<text>распаковать всё</text>
+	</string>
+
+	<string id="st_rpmk_menu_repack">
+		<text>перепаковать всё</text>
+	</string>
+
+	<string id="st_rpmk_menu_zip">
+		<text>застегнуть</text>
+	</string>
+	<string id="st_rpmk_menu_unzip">
+		<text>расстегнуть</text>
+	</string>
+	<string id="st_rpmk_menu_open">
+		<text>открыть</text>
+	</string>
+	
+	<!--News Manager Strings-->
+	<string id="st_empty_medpack">
+		<text>Медкомплект пуст.</text>
+	</string>
+
+	<string id="st_full_medpack">
+		<text>Медкомплект заполнен.</text>
+	</string>
+	
+	<string id="st_no_meds">
+		<text>Нет предметов, которые можно поместить в медкомплект.</text>
+	</string>
+
+	<string id="st_unpacked_item">
+		<text>Распакованный %s</text>
+	</string>
+	<string id="st_repacked_item">
+		<text>Перепакованный %s</text>
+	</string>
+	<string id="st_full_medpack_item">
+		<text>Медкомплект заполнен. Невозможно добавить %s</text>
+	</string>
+	<string id="st_drop_medpack_item">
+		<text>Состояние медкомплекта ухудшается. %s выпал.</text>
+	</string>
+</string_table>

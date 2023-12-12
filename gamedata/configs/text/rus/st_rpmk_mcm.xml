@@ -1,0 +1,131 @@
+<string_table>
+    <!--Titles-->
+    <string id="ui_mcm_rpmk_main_dam_multi">
+        <text>Множитель ухудшения состояния при выпадении</text>
+    </string>
+    <string id="ui_mcm_rpmk_main_itm_clr">
+        <text>Изменить цвет описания предметов в медкомплекте</text>
+    </string>
+    <string id="ui_mcm_rpmk_main_cond_limit">
+        <text>Задать минимальное допустимое состояние</text>
+    </string>
+     <string id="ui_mcm_rpmk_main_display_msg">
+        <text>Показывать сообщения</text>
+    </string>
+     <string id="ui_mcm_rpmk_main_enable_gui">
+        <text>Включить контекстное меню</text>
+    </string>
+    <!--Menus-->
+    <string id="ui_mcm_menu_rpmk">
+        <text>Перепаковываемые меднаборы</text>
+    </string>
+    <string id="ui_mcm_menu_main">
+        <text>Основные настройки</text>
+    </string>
+    <!--General Settings-->
+    <string id="ui_mcm_rpmk_main_dam_multi_basic">
+        <text>Базовый медкомплект</text>
+    </string>
+    <string id="ui_mcm_rpmk_main_dam_multi_army">
+        <text>Армейский медкомплект</text>
+    </string>
+    <string id="ui_mcm_rpmk_main_dam_multi_sci">
+        <text>Научный медкомплект</text>
+    </string>
+    <string id="ui_mcm_rpmk_main_itm_clr_basic">
+        <text>Предметы в базовом комплекте</text>
+    </string>
+    <string id="ui_mcm_rpmk_main_itm_clr_army">
+        <text>Предметы в армейском медкомплекте</text>
+    </string>
+    <string id="ui_mcm_rpmk_main_itm_clr_sci">
+        <text>Предметы в научном медкомплекте</text>
+    </string>
+    <string id="ui_mcm_lst_b_red">
+        <text>красный</text>
+    </string>
+    <string id="ui_mcm_lst_a_red">
+        <text>красный</text>
+    </string>
+    <string id="ui_mcm_lst_s_red">
+        <text>красный</text>
+    </string>
+    <string id="ui_mcm_lst_b_blue">
+        <text>синий</text>
+    </string>
+    <string id="ui_mcm_lst_a_blue">
+        <text>синий</text>
+    </string>
+    <string id="ui_mcm_lst_s_blue">
+        <text>синий</text>
+    </string>
+    <string id="ui_mcm_lst_b_yellow">
+        <text>жёлтый</text>>
+    </string>
+    <string id="ui_mcm_lst_a_yellow">
+        <text>жёлтый</text>>
+    </string>
+    <string id="ui_mcm_lst_s_yellow">
+        <text>жёлтый</text>>
+    </string>
+    <string id="ui_mcm_lst_b_green">
+        <text>зелёный</text>
+    </string>
+    <string id="ui_mcm_lst_a_green">
+        <text>зелёный</text>
+    </string>
+    <string id="ui_mcm_lst_s_green">
+        <text>зелёный</text>
+    </string>
+    <string id="ui_mcm_lst_b_orange">
+        <text>оранжевый</text>
+    </string>
+    <string id="ui_mcm_lst_a_orange">
+        <text>оранжевый</text>
+    </string>
+    <string id="ui_mcm_lst_s_orange">
+        <text>оранжевый</text>
+    </string>
+    <string id="ui_mcm_lst_b_purple">
+        <text>фиолетовый</text>
+    </string>
+    <string id="ui_mcm_lst_a_purple">
+        <text>фиолетовый</text>
+    </string>
+    <string id="ui_mcm_lst_s_purple">
+        <text>фиолетовый</text>
+    </string>
+    <string id="ui_mcm_lst_b_grey">
+        <text>серый</text>
+    </string>
+    <string id="ui_mcm_lst_a_grey">
+        <text>серый</text>
+    </string>
+    <string id="ui_mcm_lst_s_grey">
+        <text>серый</text>
+    </string>
+    <string id="ui_mcm_lst_b_black">
+        <text>чёрный</text>
+    </string>
+    <string id="ui_mcm_lst_a_black">
+        <text>чёрный</text>
+    </string>
+    <string id="ui_mcm_lst_s_black">
+        <text>чёрный</text>
+    </string>
+    <string id="ui_mcm_lst_b_white">
+       <text>белый</text>
+    </string>
+    <string id="ui_mcm_lst_a_white">
+       <text>белый</text>
+    </string>
+    <string id="ui_mcm_lst_s_white">
+       <text>белый</text>
+    </string>
+    <string id="ui_mcm_lst_dm_yes">
+        <text>Да</text>
+    </string>
+    <string id="ui_mcm_lst_dm_no">
+        <text>Нет</text>
+    </string>
+</string_table>
