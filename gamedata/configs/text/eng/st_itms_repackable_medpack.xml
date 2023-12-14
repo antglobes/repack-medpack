@@ -262,6 +262,12 @@
 	<string id="st_rpmk_menu_open">
 		<text>open</text>
 	</string>
+	<string id="st_rpmk_menu_peel">
+		<text>peel one</text>
+	</string>
+	<string id="st_rpmk_menu_write">
+		<text>open</text>
+	</string>
 	
 	<!--News Manager Strings-->
 	<string id="st_empty_medpack">
@@ -288,4 +294,38 @@
 	<string id="st_drop_medpack_item">
 		<text>Medpack condition degrading, %s fell out</text>
 	</string>
+	
+	<!--Medpack Filter Items-->
+	<string id="st_perm_marker_open">
+		<text>Opened Permenant Marker</text>
+	</string>
+	<string id="st_perm_marker_closed">
+		<text>Permenant Marker</text>
+	</string>
+	<string id="st_sticker_box">
+		<text>A Box of Stickers</text>
+	</string>
+	<string id="st_sticker">
+		<text>A Sticker</text>
+	</string>
+	<string id="st_plastic_wallet">
+		<text>A Plastic wallet</text>
+	</string>
+	
+	<string id="st_perm_marker_closed_descr">
+		<text>Your standard permenant marker, in black ink; often used for tagging, graffiti and drawing those weird S's we all seem to have drawn in school</text>
+	</string>
+	<string id="st_perm_marker_open_descr">
+		<text>Your standard permenant marker, in black ink, with the cap open; often used for tagging, graffiti and drawing those weird S's we all seem to have drawn in school</text>
+	</string>
+	<string id="st_sticker_box_descr">
+		<text>A box of 5 opaque white stickers, used for listing items to go in a container</text>
+	</string>
+	<string id="st_sticker_descr">
+		<text>A single white sticker, not to be resold as multipack</text>
+	</string>
+	<string id="st_plastic_wallet_descr">
+		<text>A zippable plastic wallet, used for holding certain medical items</text>
+	</string>
+	
 </string_table>
