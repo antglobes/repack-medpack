@@ -25,35 +25,52 @@ end
 local geometry_ray = demonized_geometry_ray.geometry_ray
 
 -- Functions
-get_config = rpmk_mcm.get_config
+--      Base Game
+lower = string.lower
 get_string = game.translate_string
+--      MCM
+get_config = rpmk_mcm.get_config
+get_config = rpmk_mcm.get_config
+--      Utils
 get_translation = rpmk_utils.get_translation
 sum = rpmk_utils.sum
 concat_pairs = rpmk_utils.concat_pairs
 concat = rpmk_utils.concat
 index_of = rpmk_utils.index_of
 sum_nested = rpmk_utils.sum_nested
-lower = string.lower
 collect_section = utils_data.collect_section
-trader_type = trader_autoinject.get_trader_type
-TraderUpdate = trader_autoinject.update
 obj_to_sect_list = rpmk_utils.obj_to_sect_list
 mcm_to_itm_clr = rpmk_utils.mcm_to_itm_clr
 alt_itm_clr = rpmk_utils.alt_itm_clr
+get_colour_string = rpmk_utils.get_colour_string
+get_colour = rpmk_utils.get_colour
+get_condition_colour = rpmk_utils.get_condition_colour
+med_itm_name = rpmk_utils.sect_to_name
+get_item_weight = rpmk_utils.get_item_weight
+
+default_clr = rpmk_utils.default_clr
+blue_clr =  rpmk_utils.blue_clr
+title_grey_clr =  rpmk_utils.title_grey_clr
+text_grey_clr =  rpmk_utils.text_grey_clr
+cyan_clr =  rpmk_utils.cyan_clr
+orange_clr = rpmk_utils.orange_clr
+red_clr =  rpmk_utils.red_clr
+
+--      GUI
 display_gui = rpmk_gui.display_medpack_gui
+--      Trader Auto
+trader_type = trader_autoinject.get_trader_type
+TraderUpdate = trader_autoinject.update
 
 -- Configs
 
-ini_medpack = ini_file_ex("items\\items\\items_repackable_medpack.ltx", true)
-ini_medical = ini_file_ex("items\\items\\items_medical.ltx")
-ini_drugs = ini_file_ex("items\\items\\items_drugs.ltx")
-ini_drink = ini_file_ex("items\\items\\items_drink.ltx")
-ini_manager = ini_file_ex("items\\settings\\itms_manager.ltx")
-ini_eft_meds = ini_file_ex("mod_system_eftmeds_bhsro.ltx")
-
--- If you want to include an item in the medpack, put it's section here
--- Add config file in here to convert section to name
-config_list = {ini_medical, ini_drugs, ini_drink, ini_eft_meds}
+ini_medpack = rpmk_utils.ini_medpack
+ini_medical = rpmk_utils.ini_medical
+ini_drugs = rpmk_utils.ini_drugs
+ini_drink = rpmk_utils.ini_drink
+ini_manager = rpmk_utils.ini_manager
+ini_eft_meds = rpmk_utils.ini_eft_meds
+config_list = rpmk_utils.config_list
 
 -- Other
 bullet_point = get_string("st_medpack_descr_bullet_point")
@@ -61,26 +78,11 @@ weight_unit = get_string("st_kg")
 
 -- Globals & Constants
 MEDPACK_TABLE = {}
-
---settings = rpmk_utils.settings
-
---- Returns XML valid colour string 
----@param ( any
-function get_colour_string(name)
-    return strformat("%c[%s]", name)
-end
-
-local default_clr = get_colour_string("default")
-local blue_clr = get_colour_string("d_blue")
-local title_grey_clr = get_colour_string("ui_gray_3")
-local text_grey_clr = get_colour_string("ui_gray_2")
-local cyan_clr = get_colour_string("d_cyan")
-local orange_clr = get_colour_string("d_orange")
-local red_clr = get_colour_string("d_red")
 local contents_str = title_grey_clr.."CONTENTS:\\n"
 local props_str = title_grey_clr.."PROPERTIES:\\n"
 local storage_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_storage_descr").."\\n"
 local repack_str = blue_clr.." "..bullet_point.." "..text_grey_clr.." "..get_string("st_medpack_repack_descr").."\\n"
+
 --[[ 
 Repackable Medpack Explanation
 ------------------------------
@@ -134,45 +136,9 @@ closed_to_zip_status = {
     [false] = "unzipped"
 }
 
--- Returns common non-item and vanilla medkits to exclude when searching for medpack compat items 
-sect_to_exclude = {
-    ["identity_immunities"] = true,
-    ["booster"] = true,
-    ["medkit_ai1"] = true,
-    ["medkit_ai2"] = true,
-    ["medkit_ai3"] = true,
-    ["booster_multi"] = true,
-
-}
-
--- Common surface types
-surfaces = {
-    "grass", "earth", "tin", "water", "wood", "metal", "soft", "gravel", "bushes", "default",
-    "glass", "concrete", "dirt", "sand", "tree", "clothes", "tile", "asphalt", "furniture"
-}
-
--- Condition reduction based on the surface type
-damages = {
-    ["grass"] = 0.001,
-    ["tin"] = 0.001,
-    ["soft"] = 0.001,
-    ["clothes"] = 0.001,
-    ["metal"] = 0.001,
-    ["concrete"] = 0.001,
-    ["tile"] = 0.001,
-    ["glass"] = 0.001,
-    ["tree"] = 0.001,
-    ["wood"] = 0.001,
-    ["dirt"] = 0.002,
-    ["furniture"] = 0.002,
-    ["earth"] = 0.0025,
-    ["asphalt"] = 0.003,
-    ["sand"] = 0.004,
-    ["default"] = 0.01,
-    ["water"] = 0.015,
-    ["bushes"] = 0.02,
-    ["gravel"] = 0.02,
-}
+sect_to_exclude = rpmk_utils.sect_to_exclude
+surfaces = rpmk_utils.surfaces
+damages = rpmk_utils.damages
 
 -- Damage multiplier based  on medpack type
 damage_multi ={
@@ -464,49 +430,49 @@ end
 -- Getters
 -------------------------------
 
---- Get a Medpack's section
+--- Get a Wallet's section
 ---@param id number
 function get_section(id)
     return mt_get_var(id, "section")
 end
 
---- Get a Medpack's contents
+--- Get a Wallet's contents
 ---@param id number
 function get_contents(id)
     return mt_get_var(id, "contents")
 end
 
---- Get a Medpack's total number of items
+--- Get a Wallet's total number of items
 ---@param id number
 function get_total_itms(id)
     return mt_get_var(id, "total_itms")
 end
 
---- Get a Medpack's weight
+--- Get a Wallet's weight
 ---@param id number
 function get_total_weight(id)
     return mt_get_var(id, "total_weight") or 0
 end
 
---- Get a Medpack's max weight
+--- Get a Wallet's max weight
 ---@param id number
 function get_max_weight(id)
     return mt_get_var(id, "max_weight")
 end
 
---- Get a Medpack's base weight i.e weight of the bag
+--- Get a Wallet's base weight i.e weight of the bag
 ---@param id number
 function get_base_weight(id)
     return mt_get_var(id, "base_weight")
 end
 
---- Get a Medpack's closed status
+--- Get a Wallet's closed status
 ---@param id number
 function get_closed_status(id)
     return mt_get_var(id, "closed")
 end
 
---- Get a Medpack's zipped status
+--- Get a Wallet's zipped status
 ---@param id number
 function get_zipped_status(id)
     return mt_get_var(id, "zipped")
@@ -686,28 +652,6 @@ function sum_medpack_weight()
     return medpack_weight
 end
 
--- Colour Related
-
--- Get xml defined colour
-function get_colour(name)
-    return utils_xml.get_color(name)
-end
-
---- Get colour based on medpack's condition
----@param condition number
-function get_condition_colour(condition)
-    condition = math.floor(condition * 100)
-    if condition > 75 then
-        return get_colour_string("d_green")
-    elseif condition <= 75 and condition >= 50  then
-        return get_colour_string("pda_yellow")
-    elseif condition < 50 and condition > 25 then
-        return get_colour_string("d_orange")
-    else
-        return get_colour_string("d_red")
-    end
-end
-
 -- Medpack Description 
 
 base_obj_desc = ui_item.get_obj_desc
@@ -826,15 +770,7 @@ end
 -- Monkey patch UIInfoItem:Update for weight correction
 -- Medpack Info
 
---- Convert medical section to item name
----@param sect string
-function med_itm_name(sect)
-    for _, config in pairs(config_list) do
-        if config:section_exist(sect) then
-            return get_string(config:r_value(sect, "inv_name"))
-        end
-    end
-end
+
 
 --- Combine match items from current and new contents
 ---@param contents table
@@ -874,16 +810,7 @@ function update_contents(id, new_contents)
     pr("new total items %s, new total weight %s", get_total_itms(id), get_total_weight(id))
 end
 
---- Get weight of item by section
----@param item string
-function get_item_weight(item)
-    for _, config in pairs(config_list) do
-        if config:section_exist(item) then
-            return config:r_float_ex(item, "inv_weight")
-        end
-    end
-    return 0.01
-end
+
 
 --- Get the uses of an item by section
 ---@param sect string

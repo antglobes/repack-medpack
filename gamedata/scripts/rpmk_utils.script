@@ -7,8 +7,68 @@
    Purpose: Utility functions, some reused from past addons. Credited if not authored by AG
 --]]
 
+-- Imports
 get_config = rpmk_mcm.get_config
 set_config = rpmk_mcm.set_config
+
+
+-- Configs
+ini_medpack = ini_file_ex("items\\items\\items_repackable_medpack.ltx", true)
+ini_medical = ini_file_ex("items\\items\\items_medical.ltx")
+ini_drugs = ini_file_ex("items\\items\\items_drugs.ltx")
+ini_drink = ini_file_ex("items\\items\\items_drink.ltx")
+ini_manager = ini_file_ex("items\\settings\\itms_manager.ltx")
+ini_eft_meds = ini_file_ex("mod_system_eftmeds_bhsro.ltx")
+-- If you want to include an item in the medpack, put it's section here
+-- Add config file in here to convert section to name
+config_list = {ini_medical, ini_drugs, ini_drink, ini_eft_meds}
+
+-------------------------
+-- Tables
+-------------------------
+-- Returns common non-item and vanilla medkits to exclude when searching for medpack compat items 
+sect_to_exclude = {
+    ["identity_immunities"] = true,
+    ["booster"] = true,
+    ["medkit_ai1"] = true,
+    ["medkit_ai2"] = true,
+    ["medkit_ai3"] = true,
+    ["booster_multi"] = true,
+
+}
+
+-- Common surface types
+surfaces = {
+    "grass", "earth", "tin", "water", "wood", "metal", "soft", "gravel", "bushes", "default",
+    "glass", "concrete", "dirt", "sand", "tree", "clothes", "tile", "asphalt", "furniture"
+}
+
+-- Condition reduction based on the surface type
+damages = {
+    ["grass"] = 0.001,
+    ["tin"] = 0.001,
+    ["soft"] = 0.001,
+    ["clothes"] = 0.001,
+    ["metal"] = 0.001,
+    ["concrete"] = 0.001,
+    ["tile"] = 0.001,
+    ["glass"] = 0.001,
+    ["tree"] = 0.001,
+    ["wood"] = 0.001,
+    ["dirt"] = 0.002,
+    ["furniture"] = 0.002,
+    ["earth"] = 0.0025,
+    ["asphalt"] = 0.003,
+    ["sand"] = 0.004,
+    ["default"] = 0.01,
+    ["water"] = 0.015,
+    ["bushes"] = 0.02,
+    ["gravel"] = 0.02,
+}
+
+------------------
+-- Table Related
+------------------
 
 --- Check if table contains a key
 ---@param tbl table
@@ -100,79 +160,6 @@ function obj_to_sect_list(objs)
     return sect_list
 end
 
---- Display News Manager message
----@param text_string string
----@param values any
----@param medpack_type string
-function display_msg(text_string, values, medpack_type)
-    if not get_config("main", "display_msg") then return end
-    printf("Displaying message: %s with icon for %s", get_translation(text_string, values), medpack_type)
-    news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 1500)
-end
-
---- Display Screen message
----@param message string
----@param values any
----@param delay number
----@param colour ARGB
-function display_screen_msg(message, values, delay, colour)
-    actor_menu.set_msg(1, get_translation(message, values), delay, colour)
-end
-
---- @author NLTP_ASHES
---- Function used to know if there exists a translation for a given game string.
---- @param str string
---- @return boolean
-function has_translation(str)
-    return game.translate_string(str) ~= str
-end
-
---- @author NLTP_ASHES
---- Function used to know if there exists a translation for a given game string.
---- @param str string
---- @return boolean
-function get_translation(str,...)
-    if not has_translation(str) then return "No translation" end
-
-    local string = game.translate_string(str)
-
-    if (select('#',...) >= 1) then
-        local i = 0
-        local p = {...}
-        local function sr()
-            i = i + 1
-            if (type(p[i]) == "userdata") then
-                return "userdata"
-            end
-            return tostring(p[i])
-        end
-        string = string.gsub(string,"%%s",sr)
-    end
-
-    return string
-end
-
---- Returns Item colour string 
----@param itm_clr string
-function mcm_to_itm_clr(itm_clr)
-    local start, _end = string.find(itm_clr, "_")
-    --printf("%s %s %s", itm_clr, start, _end)
-    return "d_"..string.sub(itm_clr, _end+1, #itm_clr)
-end
-
---- Alternative version of Item colour string
----@param itm_clr string
-function alt_itm_clr(itm_clr)
-    if string.find(itm_clr, "yellow") then
-        return "pda_yellow"
-    elseif string.find(itm_clr, "white") then
-        return "pda_white"
-    elseif string.find(itm_clr, "black") then
-        return GetARGB(1, 1, 1, 1)
-    else
-        return itm_clr
-    end
-end
 
 --- Alternative print_table
 ---@param tbl table
@@ -231,4 +218,145 @@ function contains_id(tbl, id)
         end
     end
     return false
+end
+
+------------------------------------
+-- Displaying Message on Screen
+------------------------------------
+
+--- Display News Manager message
+---@param text_string string
+---@param values any
+---@param medpack_type string
+function display_msg(text_string, values, medpack_type)
+    if not get_config("main", "display_msg") then return end
+    printf("Displaying message: %s with icon for %s", get_translation(text_string, values), medpack_type)
+    news_manager.send_tip(db.actor, get_translation(text_string, values), nil, "repack_medpack_"..medpack_type, 1500)
+end
+
+--- Display Screen message
+---@param message string
+---@param values any
+---@param delay number
+---@param colour ARGB
+function display_screen_msg(message, values, delay, colour)
+    actor_menu.set_msg(1, get_translation(message, values), delay, colour)
+end
+
+-----------------------------------
+-- Translation Strings i.e ui text
+-----------------------------------
+
+--- @author NLTP_ASHES
+--- Function used to know if there exists a translation for a given game string.
+--- @param str string
+--- @return boolean
+function has_translation(str)
+    return game.translate_string(str) ~= str
+end
+
+--- @author NLTP_ASHES
+--- Function used to know if there exists a translation for a given game string.
+--- @param str string
+--- @return boolean
+function get_translation(str,...)
+    if not has_translation(str) then return "No translation" end
+
+    local string = game.translate_string(str)
+
+    if (select('#',...) >= 1) then
+        local i = 0
+        local p = {...}
+        local function sr()
+            i = i + 1
+            if (type(p[i]) == "userdata") then
+                return "userdata"
+            end
+            return tostring(p[i])
+        end
+        string = string.gsub(string,"%%s",sr)
+    end
+
+    return string
+end
+
+--- Returns Item colour string 
+---@param itm_clr string
+function mcm_to_itm_clr(itm_clr)
+    local start, _end = string.find(itm_clr, "_")
+    --printf("%s %s %s", itm_clr, start, _end)
+    return "d_"..string.sub(itm_clr, _end+1, #itm_clr)
+end
+
+--- Alternative version of Item colour string
+---@param itm_clr string
+function alt_itm_clr(itm_clr)
+    if string.find(itm_clr, "yellow") then
+        return "pda_yellow"
+    elseif string.find(itm_clr, "white") then
+        return "pda_white"
+    elseif string.find(itm_clr, "black") then
+        return GetARGB(1, 1, 1, 1)
+    else
+        return itm_clr
+    end
+end
+
+--- Returns XML valid colour string 
+---@param any
+function get_colour_string(name)
+    return strformat("%c[%s]", name)
+end
+
+-- Descr Colours
+default_clr = get_colour_string("default")
+blue_clr = get_colour_string("d_blue")
+title_grey_clr = get_colour_string("ui_gray_3")
+text_grey_clr = get_colour_string("ui_gray_2")
+cyan_clr = get_colour_string("d_cyan")
+orange_clr = get_colour_string("d_orange")
+red_clr = get_colour_string("d_red")
+
+
+-- Colour Related
+
+-- Get xml defined colour
+function get_colour(name)
+    return utils_xml.get_color(name)
+end
+
+--- Get colour based on medpack's condition
+---@param condition number
+function get_condition_colour(condition)
+    condition = math.floor(condition * 100)
+    if condition > 75 then
+        return get_colour_string("d_green")
+    elseif condition <= 75 and condition >= 50  then
+        return get_colour_string("pda_yellow")
+    elseif condition < 50 and condition > 25 then
+        return get_colour_string("d_orange")
+    else
+        return get_colour_string("d_red")
+    end
+end
+
+--- Convert section to item name
+---@param sect string
+function sect_to_name(sect)
+    for _, config in pairs(config_list) do
+        if config:section_exist(sect) then
+            return game.translate_string(config:r_value(sect, "inv_name"))
+        end
+    end
+end
+
+--- Get weight of item by section
+---@param item string
+function get_item_weight(item)
+    for _, config in pairs(config_list) do
+        if config:section_exist(item) then
+            return config:r_float_ex(item, "inv_weight")
+        end
+    end
+    return 0.01
 end

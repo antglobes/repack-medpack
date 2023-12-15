@@ -1,0 +1,177 @@
+PLASTIC_WALLETS_TABLE = {}
+
+function pwt_new_entry(m_id, pw)
+    local id = pw:id()
+    local section = pw:section()
+    local contents = {}
+    local total_items = 0
+    local total_weight = 0
+    local max_weight = get_max_weight(section)
+    local base_weight = get_base_weight(section)
+    local zipped = true
+    local filter_items = {}
+    local sticker_id = 0
+    local sticker_text = ""
+    local sticker_attached = false
+    PLASTIC_WALLETS_TABLE[#PLASTIC_WALLETS_TABLE + 1] = {id=id, medpack_id=m_id, section=section, contents=contents,
+                            total_items=total_items, total_weight=total_weight, max_weight=max_weight,
+                            base_weight=base_weight, zipped=zipped, filter_items=filter_items,
+                            sticker_id=sticker_id, sticker_text=sticker_text, sticker_attached=sticker_attached }
+end
+
+function pwt_remove_entry(id)
+    for idx, entry in ipairs(PLASTIC_WALLETS_TABLE) do
+        if id == entry.id then
+            PLASTIC_WALLETS_TABLE[idx] = nil
+        end
+    end
+end
+
+--- Change an var's value in a certain entry by id
+---@param id number
+---@param var string
+---@param value any
+function pwt_get_var(id, var)
+    for idx, entry in ipairs(PLASTIC_WALLETS_TABLE) do
+        if id == entry.id then
+            return entry[var]
+        end
+    end
+end
+
+--- Get an var's value from a certain entry by id
+---@param id number
+---@param var any
+function pwt_set_var(id, var, value)
+    for idx, entry in ipairs(PLASTIC_WALLETS_TABLE) do
+        if id == entry.id and entry[var] and type(var) == "string" then
+            entry[var] = value
+        end
+    end
+end
+
+--- Change all the contents of an entry, if the ids match
+---@param id number
+---@param tbl table
+function pwt_update_vars(id, tbl)
+    for idx, entry in ipairs(PLASTIC_WALLETS_TABLE) do
+        if id == entry.id then
+            for k, v in pairs(entry) do
+                if tbl[k] then
+                    entry[k] = tbl[k]
+                end
+            end
+        end
+    end
+end
+
+--- Debugging function, returns all vars in an entry
+---@param id number
+---@param unpck boolean
+function pwt_all_vars(id, unpck)
+    for idx, entry in ipairs(PLASTIC_WALLETS_TABLE) do
+        if id == entry["id"] then
+            if not unpck then
+                return entry
+            end
+            return unpack(entry)
+        end
+    end
+end
+
+function is_pw_in_table(id)
+    for _, entry in pairs(PLASTIC_WALLETS_TABLE) do
+        if id == entry.id then
+            return true
+        end
+    end
+    return false
+end
+
+--- Get a Wallet's section
+---@param id number
+function get_section(id)
+    return pwt_get_var(id, "section")
+end
+
+--- Get a Wallet's contents
+---@param id number
+function get_contents(id)
+    return pwt_get_var(id, "contents")
+end
+
+--- Get a Wallet's total number of items
+---@param id number
+function get_total_itms(id)
+    return pwt_get_var(id, "total_itms")
+end
+
+--- Get a Wallet's weight
+---@param id number
+function get_total_weight(id)
+    return mt_get_var(id, "total_weight") or 0
+end
+
+--- Get a Wallet's max weight
+---@param id number
+function get_max_weight(id)
+    return pwt_get_var(id, "max_weight")
+end
+
+--- Get a Wallet's base weight i.e weight of the bag
+---@param id number
+function get_base_weight(id)
+    return pwt_get_var(id, "base_weight")
+end
+
+--- Get a Wallet's closed status
+---@param id number
+function get_closed_status(id)
+    return pwt_get_var(id, "closed")
+end
+
+--- Get a Wallet's zipped status
+---@param id number
+function get_zipped_status(id)
+    return pwt_get_var(id, "zipped")
+end
+
+-------------------------------
+-- Setters
+-------------------------------
+
+--- Change the contents of a Wallet
+---@param id number
+---@param contents table
+function set_contents(id, contents)
+    pwt_set_var(id, "contents", contents)
+end
+
+--- Change the total number of items for a Wallet
+---@param id number
+---@param total_itms number
+function set_total_itms(id, total_itms)
+    pwt_set_var(id, "total_itms", total_itms)
+end
+
+--- Change total weight of a Wallet
+---@param id number
+---@param total_weight number
+function set_total_weight(id, total_weight)
+    pwt_set_var(id, "total_weight", total_weight)
+end
+
+--- Change zipped status of a Wallet
+---@param id number
+---@param zipped boolean
+function set_zipped_status(id, zipped)
+    pwt_set_var(id, "zipped", zipped)
+end
+
+--- Change the condition of a Wallet
+---@param medpack game_object
+---@param condition number
+function set_conditon(pw, condition)
+    if not is_pw_in_table(pw:id()) then return end
+    pw:set_condition(condition)
+end
