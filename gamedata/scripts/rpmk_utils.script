@@ -66,6 +66,15 @@ damages = {
     ["gravel"] = 0.02,
 }
 
+function dbg_pr(header, str, ...)
+    if get_config("main", "enable_debug") then
+        printf(header, strformat(str, ...))
+    end
+end
+
+
+
+
 ------------------
 -- Table Related
 ------------------
@@ -359,4 +368,26 @@ function get_item_weight(item)
         end
     end
     return 0.01
+end
+
+--- Combine match items from current and new contents
+---@param contents table
+---@param new_contents table
+function combine_contents(contents, new_contents)
+    for sect, details in pairs(new_contents) do
+        -- printf(#contents)
+       
+            if contents[sect]  then
+                pr("adding %s %s %s to contents", sect, table.concat(contents[sect].uses,","), contents[sect].amount)
+                contents[sect].amount = contents[sect].amount + new_contents[sect].amount
+                for i=1, #new_contents[sect].uses do
+                    table.insert(contents[sect].uses, new_contents[sect].uses[i])
+                end
+            else
+                contents[sect] = {uses=new_contents[sect].uses, amount=new_contents[sect].amount}
+                pr("default %s %s %s to contents", sect, table.concat(contents[sect].uses,","), contents[sect].amount)
+            end
+       
+    end
+    return contents
 end

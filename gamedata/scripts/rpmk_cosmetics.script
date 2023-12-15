@@ -1,3 +1,12 @@
+
+
+
+
+
+function pr(str,...)
+    rpmk_utils.dbg_pr("Repackable Medpacks| Cosmetics: %s", str, ...)
+end
+
 PLASTIC_WALLETS_TABLE = {}
 
 function pwt_new_entry(m_id, pw)
@@ -17,12 +26,15 @@ function pwt_new_entry(m_id, pw)
                             total_items=total_items, total_weight=total_weight, max_weight=max_weight,
                             base_weight=base_weight, zipped=zipped, filter_items=filter_items,
                             sticker_id=sticker_id, sticker_text=sticker_text, sticker_attached=sticker_attached }
+
+    pr("Plastic Wallets Table new entry: %s", table.concat(PLASTIC_WALLETS_TABLE[#PLASTIC_WALLETS_TABLE], ","))
 end
 
 function pwt_remove_entry(id)
     for idx, entry in ipairs(PLASTIC_WALLETS_TABLE) do
         if id == entry.id then
             PLASTIC_WALLETS_TABLE[idx] = nil
+            pr("Removing entry from plastic wallets table at idx: %s", idx)
         end
     end
 end
@@ -174,4 +186,36 @@ end
 function set_conditon(pw, condition)
     if not is_pw_in_table(pw:id()) then return end
     pw:set_condition(condition)
+end
+
+function get_filter_num_by_type(medpack_type)
+    filter_nums = {
+        ["basic"] = 2,
+        ["army"] = 3,
+        ["sci"] = 4
+    }
+    return filter_nums[medpack_type]
+end
+
+function is_filter_item(sect)
+    return #{string.find(sect, "itm_plastic_wallet_")} > 0 
+end
+
+-----------------------
+-- Callbacks
+-----------------------
+local function save_table(mdata)
+    local SAVE_TABLE = {}
+    copy_table(SAVE_TABLE, PLASTIC_WALLETS_TABLE)
+    mdata.active_medpack_filters = SAVE_TABLE
+end
+
+local function load_table(mdata)
+    local SAVE_TABLE = mdata.active_medpack_filters or {}
+    copy_table(PLASTIC_WALLETS_TABLE, SAVE_TABLE)
+end
+
+function on_game_start()
+    RegisterScriptCallback("save_state", save_table)
+    RegisterScriptCallback("load_state", load_table)
 end

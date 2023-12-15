@@ -268,6 +268,9 @@
 	<string id="st_rpmk_menu_write">
 		<text>open</text>
 	</string>
+	<string id="st_rpmk_menu_remove_filter">
+		<text>remove %s</text>
+	</string>
 	
 	<!--News Manager Strings-->
 	<string id="st_empty_medpack">

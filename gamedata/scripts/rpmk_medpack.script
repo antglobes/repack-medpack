@@ -12,9 +12,7 @@
 ---@param str string
 ---@param ... any
 function pr(str, ...)
-    if get_config("main","enable_debug") then
-        printf("Repackable Medpacks|Script: %s",strformat(str, ...))
-    end
+    rpmk_utils.dbg_pr("Repackable Medpacks|Script: %s", str, ...)
 end
 
 ------------------
@@ -47,7 +45,11 @@ get_colour = rpmk_utils.get_colour
 get_condition_colour = rpmk_utils.get_condition_colour
 med_itm_name = rpmk_utils.sect_to_name
 get_item_weight = rpmk_utils.get_item_weight
+combine_contents = rpmk_utils.combine_contents
+is_filter_item = rpmk_utils.is_filter_item
+get_filter_num_by_type = rpmk_cosmetics.get_filter_num_by_type
 
+--      Colours
 default_clr = rpmk_utils.default_clr
 blue_clr =  rpmk_utils.blue_clr
 title_grey_clr =  rpmk_utils.title_grey_clr
@@ -287,6 +289,10 @@ function is_medpack_full(medpack)
     return tw >= mw
 end
 
+function is_medpack_has_filters(medpack)
+    return #mt_get_var(medpack:id(), "filters") > 0
+end
+
 -------------------------------
 -- Track medpacks through table
 -------------------------------
@@ -302,8 +308,9 @@ function mt_new_entry(medpack)
     local bw = default_base_weight(sect)
     local tw = calculate_total_weight(_id, sect, _contents, ti, bw)
     local mw = default_max_weight(sect)
-    
-    MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=true, zipped=true}
+    local fil = {}
+    local mf = get_filter_num_by_type(nil, sect)
+    MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=true, zipped=true, filters=fil, max_filters=mf}
     pr("new entry: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max_weight=%s, base weight=%s, closed=%s, zipped=%s", _id, sect, _contents, ti, tw, mw, bw, true, true)
 end
 
@@ -342,8 +349,10 @@ function mt_replace_entry(old_id, new_id, sect, _contents, _closed, _zipped)
     local tw = calculate_total_weight(new_id, sect, _contents, ti, bw)
     local mw = default_max_weight(sect)
     local idx = get_entry_index(old_id) or #MEDPACK_TABLE + 1
+    local fil = {}
+    local mf = get_filter_num_by_type(nil, sect)
     pr("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s, zipped=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, _closed, _zipped)
-    MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed, zipped=_zipped}
+    MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed, zipped=_zipped, filters=fil, max_filters=mf}
 end
 
 --- Change an var's value in a certain entry by id
@@ -518,6 +527,16 @@ function set_conditon(medpack, condition)
     medpack:set_condition(condition)
 end
 
+function set_filter(filter_id, medpack)
+    local id = medpack:id()
+    local filters = mt_get_var(id, "filters")
+
+    if #filters < mt_get_var(id, "max_filters") then
+        table.insert(filters, filter_id)
+    end
+    mt_set_var(medpack:id(), "filters", filters)
+end
+
 -------------------------------
 -- Default Medpack vars
 -------------------------------
@@ -597,22 +616,6 @@ base_use_package_random = itms_manager.use_package_random
 function itms_manager.use_package_random(obj)
     base_use_package_random(obj)
     create_new_medpack(obj, false, true)
-end
-
---- Build a ordered list of contents from a list of sections, holding amount of items and each ones uses
----@param sect_list table
-function build_contents(sect_list)
-    local ordered_contents = {}
-    
-    for _, sect in ipairs(sect_list) do
-        if ordered_contents[sect] then
-            ordered_contents[sect].amount = ordered_contents[sect].amount + 1
-            table.insert(ordered_contents[sect].uses, get_item_uses(sect))
-        else
-            ordered_contents[sect] = {uses={get_item_uses(sect)}, amount=1}
-        end
-    end
-    return ordered_contents
 end
 
 --- Get a list of objs that are medpack compatible items
@@ -771,47 +774,6 @@ end
 -- Medpack Info
 
 
-
---- Combine match items from current and new contents
----@param contents table
----@param new_contents table
-function combine_contents(contents, new_contents)
-    for sect, details in pairs(new_contents) do
-        -- printf(#contents)
-       
-            if contents[sect]  then
-                pr("adding %s %s %s to contents", sect, table.concat(contents[sect].uses,","), contents[sect].amount)
-                contents[sect].amount = contents[sect].amount + new_contents[sect].amount
-                for i=1, #new_contents[sect].uses do
-                    table.insert(contents[sect].uses, new_contents[sect].uses[i])
-                end
-            else
-                contents[sect] = {uses=new_contents[sect].uses, amount=new_contents[sect].amount}
-                pr("default %s %s %s to contents", sect, table.concat(contents[sect].uses,","), contents[sect].amount)
-            end
-       
-    end
-    return contents
-end
-
---- Update the main medpack vars
----@param id number
----@param new_contents table
-function update_contents(id, new_contents)
-    local contents = get_contents(id)
-    pr("Updating medpack old contents %s", concat_pairs(contents))
-    pr("old total items %s, old total weight %s", get_total_itms(id), get_total_weight(id))
-    
-    new_contents = combine_contents(contents, new_contents)
-    pr("new contents %s", concat_pairs(new_contents))
-    set_contents(id, new_contents)
-    set_total_itms(id, sum_nested(new_contents))
-    set_total_weight(id, calculate_total_weight(id, nil, new_contents, get_total_itms(id), get_base_weight(id)))
-    pr("new total items %s, new total weight %s", get_total_itms(id), get_total_weight(id))
-end
-
-
-
 --- Get the uses of an item by section
 ---@param sect string
 function get_item_uses(sect)
@@ -827,6 +789,39 @@ function get_item_uses(sect)
         uses = config:r_float_ex(sect, "max_uses")
     end
     return uses or 1
+end
+
+--- Build a ordered list of contents from a list of sections, holding amount of items and each ones uses
+---@param sect_list table
+function build_contents(sect_list)
+    local ordered_contents = {}
+    
+    for _, sect in ipairs(sect_list) do
+        if ordered_contents[sect] then
+            ordered_contents[sect].amount = ordered_contents[sect].amount + 1
+            table.insert(ordered_contents[sect].uses, get_item_uses(sect))
+        else
+            ordered_contents[sect] = {uses={get_item_uses(sect)}, amount=1}
+        end
+    end
+    return ordered_contents
+end
+
+
+--- Update the main medpack vars
+---@param id number
+---@param new_contents table
+function update_contents(id, new_contents)
+    local contents = get_contents(id)
+    pr("Updating medpack old contents %s", concat_pairs(contents))
+    pr("old total items %s, old total weight %s", get_total_itms(id), get_total_weight(id))
+    
+    new_contents = combine_contents(contents, new_contents)
+    pr("new contents %s", concat_pairs(new_contents))
+    set_contents(id, new_contents)
+    set_total_itms(id, sum_nested(new_contents))
+    set_total_weight(id, calculate_total_weight(id, nil, new_contents, get_total_itms(id), get_base_weight(id)))
+    pr("new total items %s, new total weight %s", get_total_itms(id), get_total_weight(id))
 end
 
 --- Calculate total weight of medpack based on the weight of each item
@@ -1057,7 +1052,7 @@ end
 ---------------------------------------
 -- Custom Functors
 ---------------------------------------
-
+local add_functor = custom_functor_autoinject.add_functor
 -- Unpack
 
 function unpack_condition_met(obj)
@@ -1089,7 +1084,6 @@ function unpack_action(obj, bag, mode)
     end
 end
 
-local add_functor = custom_functor_autoinject.add_functor
 add_functor("rpmk_medpack_unpack", unpack_condition_function, unpack_menu_function, nil, unpack_action)
 
 -- Fill 
@@ -1120,7 +1114,6 @@ function repack_medpack_action(obj, bag, mode)
     repack_all(obj)
 end
 
-local add_functor = custom_functor_autoinject.add_functor
 add_functor("rpmk_medpack_repack", repack_medpack_condition_function, repack_medpack_menu_function, nil, repack_medpack_action)
 
 
@@ -1155,7 +1148,6 @@ function zip_action(obj, bag, mode)
     alife_release(medpack)
 end
 
-local add_functor = custom_functor_autoinject.add_functor
 add_functor("rpmk_medpack_zip", zip_condition_function, zip_menu_function, nil, zip_action)
 
 
@@ -1191,7 +1183,6 @@ function unzip_action(obj, bag, mode)
     alife_release(medpack)
 end
 
-local add_functor = custom_functor_autoinject.add_functor
 add_functor("rpmk_medpack_unzip", unzip_condition_function, unzip_menu_function, nil, unzip_action)
 
 -- open
@@ -1222,8 +1213,45 @@ function open_action(obj, bag, mode)
     rpmk_gui.display_medpack_gui(medpack)
 end
 
-local add_functor = custom_functor_autoinject.add_functor
 add_functor("rpmk_medpack_open", open_condition_function, open_menu_function, nil, open_action)
+
+-- Remove filter
+
+function remove_filter_condition_met(obj)
+    if obj and is_medpack_useable(obj) and is_medpack_has_filters(obj) and not is_medpack_zipped(obj) then
+        return true
+    end
+    return false
+end
+
+function remove_filter_condition_function(obj, bag, mode)
+    local p = obj:parent()
+	if not (p and p:id() == AC_ID) then return end
+    if not is_repackable_medpack(obj) then return end
+
+    return open_condition_met(obj)
+end
+
+function remove_filter_menu_function(obj, bag, mode)
+    local filters = mt_get_var(obj:id(), "filters")
+    local filter_sect = rpmk_cosmetics.pwt_get_var(filters[1], "section")
+    return get_translation("st_rpmk_menu_remove_filter", med_itm_name(filter_sect))
+end
+
+function remove_filter_action(obj, bag, mode)
+    local medpack = is_repackable_medpack(obj) and obj
+    if not medpack then return end
+    
+    local filters = mt_get_var(obj:id(), "filters")
+    local filter_sect = rpmk_cosmetics.pwt_get_var(filters[1], "section")
+    table.remove(filters, 1)
+    mt_set_var(obj:id(), "filters", filters)
+    alife_create_item(filter_sect, db.actor)
+end
+
+add_functor("rpmk_medpack_remove_filter", remove_filter_condition_function, remove_filter_menu_function, nil, remove_filter_action)
+
+
 -------------------------------
 -- Drag/Drop repack
 -------------------------------
@@ -1248,7 +1276,14 @@ function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
     local itm = obj_1 
     local medpack = obj_2
 
-    if not is_medpack_compatible(itm:section()) or not is_medpack_open(medpack) then return end
+    if rpmk_cosmetics.is_filter_item(itm:section()) and is_medpack_open(medpack) then
+        set_filter(itm:id())
+        rpmk_cosmetics.pwt_new_entry(medpack:id(), itm)
+        alife_release(itm)
+        return
+    end
+
+    if not is_medpack_compatible(itm:section()) or not is_medpack_open(medpack) or rpmk_cosmetics.is_filter_item(itm:section()) then return end
 
     if not drop_condition_met(itm, medpack) then
         rpmk_utils.display_msg("st_full_medpack_item", lower(med_itm_name(itm:section())), get_medpack_type(medpack:id()))
