@@ -202,6 +202,11 @@ function is_filter_item(sect)
     return #{string.find(sect, "itm_plastic_wallet_")} > 0 
 end
 
+function filter_menu_string(sect)
+    local start, _end = string.find(sect, "itm_plastic_wallet_")
+    return string.sub(sect, _end + 1, #sect) .. " plastic wallet"
+end
+
 -----------------------
 -- Callbacks
 -----------------------

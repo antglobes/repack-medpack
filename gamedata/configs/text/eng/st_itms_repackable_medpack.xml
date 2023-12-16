@@ -297,6 +297,9 @@
 	<string id="st_drop_medpack_item">
 		<text>Medpack condition degrading, %s fell out</text>
 	</string>
+	<string id="st_max_filters_item">
+		<text>Medpack is at max filters, can't add %s</text>
+	</string>
 	
 	<!--Medpack Filter Items-->
 	<string id="st_perm_marker_open">

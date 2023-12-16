@@ -290,7 +290,13 @@ function is_medpack_full(medpack)
 end
 
 function is_medpack_has_filters(medpack)
-    return #mt_get_var(medpack:id(), "filters") > 0
+    x = mt_get_var(medpack:id(), "filters")
+    pr("Medpack has filters %s?", x)
+    return is_not_empty(x)
+end
+
+function is_medpack_at_max_filters(medpack)
+    return #mt_get_var(medpack:id(), "filters") == mt_get_var(medpack:id(), "max_filters") 
 end
 
 -------------------------------
@@ -1233,13 +1239,13 @@ function remove_filter_condition_function(obj, bag, mode)
 	if not (p and p:id() == AC_ID) then return end
     if not is_repackable_medpack(obj) then return end
 
-    return open_condition_met(obj)
+    return remove_filter_condition_met(obj)
 end
 
 function remove_filter_menu_function(obj, bag, mode)
     local filters = mt_get_var(obj:id(), "filters")
     local filter_sect = rpmk_cosmetics.pwt_get_var(filters[1], "section")
-    return get_translation("st_rpmk_menu_remove_filter", med_itm_name(filter_sect))
+    return get_translation("st_rpmk_menu_remove_filter", rpmk_cosmetics.filter_menu_string(filter_sect))
 end
 
 function remove_filter_action(obj, bag, mode)
@@ -1248,7 +1254,10 @@ function remove_filter_action(obj, bag, mode)
     
     local filters = mt_get_var(obj:id(), "filters")
     local filter_sect = rpmk_cosmetics.pwt_get_var(filters[1], "section")
+    pr("Removing %s from %s medpack", filter_sect, get_medpack_type(nil, medpack:section()))
+    pr("Filter ids %s Num of Filters %s", rpmk_utils.print_table(filters), #filters)
     table.remove(filters, 1)
+    pr("Filter ids %s Num of Filters %s", rpmk_utils.print_table(filters), #filters)
     mt_set_var(obj:id(), "filters", filters)
     alife_create_item(filter_sect, db.actor)
 end
@@ -1281,6 +1290,7 @@ function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
     local medpack = obj_2
 
     if rpmk_cosmetics.is_filter_item(itm:section()) and is_medpack_open(medpack) then
+        if is_medpack_at_max_filters(medpack) then rpmk_utils.display_msg("st_max_filters_item", rpmk_cosmetics.filter_menu_string(itm:section()), get_medpack_type(medpack:id())) return end
         rpmk_cosmetics.pwt_new_entry(medpack:id(), itm)
         set_filter(itm:id(), medpack)       
         alife_release(itm)
