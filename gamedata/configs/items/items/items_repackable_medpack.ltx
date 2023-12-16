@@ -7,41 +7,58 @@ use2_functor =
 use2_action_functor =
 tier = 2
 
-[itm_permenant_marker_closed]:marker_base
-inv_grid_x = 0
-inv_grid_y = 0
-inv_weight = 0.13
-cost = 1350
+[marker_open_base]:marker_base
 inv_name = st_perm_marker_closed
 inv_name_short = st_perm_marker_closed
 description = st_perm_marker_closed_descr
-max_uses = 10
+inv_weight = 0.13
 
-[itm_permenant_marker_open]:itm_permenant_marker_closed
-inv_grid_x = 0
-inv_grid_y = 1
+[marker_closed_base]:marker_base
 inv_name = st_perm_marker_open
 inv_name_short = st_perm_marker_open
 description = st_perm_marker_open_descr
+inv_weight = 0.11
 
-[itm_sticker_box]:marker_base
+[itm_marker_black_closed]:marker_closed_base
 inv_grid_x = 0
-inv_grid_y = 3
-inv_name = st_sticker_box
-inv_name_short = st_sticker_box
-description = st_sticker_descr
-inv_weight = 0.4
+inv_grid_y = 0
 cost = 1350
-max_uses = 5
+max_uses = 10
 
-[itm_sticker]:itm_sticker_box
+[itm_marker_black_open]:marker_open_base
 inv_grid_x = 0
-inv_grid_y = 2
-inv_name = st_sticker
-inv_name_short = st_sticker
-inv_weight = 0.01
-cost = 270
-description = st_sticker_box_descr
+inv_grid_y = 1
+
+[itm_marker_red_closed]:marker_closed_base
+inv_grid_x = 1
+inv_grid_y = 0
+cost = 1350
+max_uses = 10
+
+[itm_marker_red_open]:marker_open_base
+inv_grid_x = 1
+inv_grid_y = 1
+
+[itm_marker_blue_closed]:marker_closed_base
+inv_grid_x = 2
+inv_grid_y = 0
+cost = 1350
+max_uses = 10
+
+[itm_marker_blue_open]:marker_open_base
+inv_grid_x = 2
+inv_grid_y = 1
+
+[itm_marker_multipack]:marker_base
+inv_name = st_perm_marker_multipack
+inv_name_short = st_perm_marker_multipack
+description = st_perm_marker_multipack_descr
+inv_grid_x = 3
+inv_grid_y = 0
+inv_weight = 0.57
+cost = 5250
+contents = itm_marker_black_closed, itm_marker_black_closed, itm_marker_blue_closed, itm_marker_red_closed
+
 
 [p_w_base]:booster
 icons_texture = ui\ui_rpmk_icons_plasbags

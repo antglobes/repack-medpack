@@ -214,6 +214,8 @@
         %c[d_blue] • %c[ui_gray_2] Repackable\n
         %c[d_red] • %c[ui_gray_2] Zipped\n</text>
     </string>
+	
+	
 
 	<!--GUI Text-->
 	<string id="ui_rpmk_btn_unpack_all">
@@ -317,6 +319,9 @@
 	<string id="st_plastic_wallet">
 		<text>A Plastic wallet</text>
 	</string>
+	<string id="st_perm_marker_multipack">
+		<text>A Four Pack of Permenant Markers</text>
+	</string>
 	
 	<string id="st_perm_marker_closed_descr">
 		<text>Your standard permenant marker, in black ink; often used for tagging, graffiti and drawing those weird S's we all seem to have drawn in school</text>
@@ -332,6 +337,9 @@
 	</string>
 	<string id="st_plastic_wallet_descr">
 		<text>A zippable plastic wallet, used for holding certain medical items</text>
+	</string>
+	<string id="st_perm_marker_multipack_descr">
+		<text>A Multipack of four permenant markers, 2 in black and the rest red and blue. Most likley a bootleg ripoff of a well known company, that's been stolen from a roubleland</text>
 	</string>
 	
 </string_table>

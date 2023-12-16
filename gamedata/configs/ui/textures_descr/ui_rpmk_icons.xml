@@ -18,10 +18,13 @@
     </file>
 
     <file name="ui\ui_rpmk_icons_markers">
-        <texture id="ui_icon_marker_closed" x="0" y="0" width="50" height="50"/>
-        <texture id="ui_icon_marker_open" x="0" y="1" width="50" height="50"/>
-        <texture id="ui_icon_sticker" x="0" y="2" width="50" height="50"/>
-        <texture id="ui_icon_sticker_box" x="0" y="3" width="50" height="50"/>
+        <texture id="ui_icon_marker_black_closed" x="0" y="0" width="50" height="50"/>
+        <texture id="ui_icon_marker_black_open" x="0" y="1" width="50" height="50"/>
+       <texture id="ui_icon_marker_red_closed" x="1" y="0" width="50" height="50"/>
+        <texture id="ui_icon_marker_red_open" x="1" y="1" width="50" height="50"/>
+        <texture id="ui_icon_marker_blue_closed" x="2" y="0" width="50" height="50"/>
+        <texture id="ui_icon_marker_blue_open" x="2" y="1" width="50" height="50"/>
+        <texture id="ui_icon_marker_multipack" x="3" y="0" width="50" height="100"/>
     </file>
 
     <file name="ui\ui_rpmk_icons_plasbags">
