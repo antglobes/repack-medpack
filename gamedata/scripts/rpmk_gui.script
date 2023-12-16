@@ -60,9 +60,7 @@ end
 --- Debugging logger
 ---@param str string
 function dbg_pr(str, ...)
-	if get_config("main","enable_debug") then
-		printf("Repackable Medpack|GUI %s", strformat(str, ...))
-	end
+	rpmk_utils.dbg_pr("Repackable Medpack|GUI %s", str, ...)
 end
 
 --- Get index by value of a game object

@@ -27,7 +27,7 @@ function pwt_new_entry(m_id, pw)
                             base_weight=base_weight, zipped=zipped, filter_items=filter_items,
                             sticker_id=sticker_id, sticker_text=sticker_text, sticker_attached=sticker_attached }
 
-    pr("Plastic Wallets Table new entry: %s", table.concat(PLASTIC_WALLETS_TABLE[#PLASTIC_WALLETS_TABLE], ","))
+    pr("Plastic Wallets Table new entry: %s", rpmk_utils.print_table(PLASTIC_WALLETS_TABLE[#PLASTIC_WALLETS_TABLE], true))
 end
 
 function pwt_remove_entry(id)
@@ -194,6 +194,7 @@ function get_filter_num_by_type(medpack_type)
         ["army"] = 3,
         ["sci"] = 4
     }
+    pr("Max filters %s allowed for %s medpack", filter_nums[medpack_type], medpack_type)
     return filter_nums[medpack_type]
 end
 

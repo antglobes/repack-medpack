@@ -309,9 +309,9 @@ function mt_new_entry(medpack)
     local tw = calculate_total_weight(_id, sect, _contents, ti, bw)
     local mw = default_max_weight(sect)
     local fil = {}
-    local mf = get_filter_num_by_type(nil, sect)
+    local mf = get_filter_num_by_type(get_medpack_type(nil, sect))
     MEDPACK_TABLE[#MEDPACK_TABLE + 1] = {id=_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=true, zipped=true, filters=fil, max_filters=mf}
-    pr("new entry: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max_weight=%s, base weight=%s, closed=%s, zipped=%s", _id, sect, _contents, ti, tw, mw, bw, true, true)
+    pr("new entry: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max_weight=%s, base weight=%s, closed=%s, zipped=%s filters=%s max filters=%s", _id, sect, _contents, ti, tw, mw, bw, true, true, table.concat(fil,","), mf)
 end
 
 --- Get the index of a medpack table entry
@@ -350,8 +350,8 @@ function mt_replace_entry(old_id, new_id, sect, _contents, _closed, _zipped)
     local mw = default_max_weight(sect)
     local idx = get_entry_index(old_id) or #MEDPACK_TABLE + 1
     local fil = {}
-    local mf = get_filter_num_by_type(nil, sect)
-    pr("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s, zipped=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, _closed, _zipped)
+    local mf = get_filter_num_by_type(get_medpack_type(nil, sect))
+    pr("replacing entry at %s: id=%s section=%s, contents=%s, total items=%s, total weight=%s, max weight=%s, base weight=%s, closed=%s, zipped=%s, filter=%s max filters=%s", idx, new_id, sect, _contents, ti, tw, mw, bw, _closed, _zipped, table.concat(fil,","), mf)
     MEDPACK_TABLE[idx] = {id=new_id, section=sect, contents=_contents, total_itms=ti, total_weight=tw, max_weight=mw, base_weight=bw, closed=_closed, zipped=_zipped, filters=fil, max_filters=mf}
 end
 
@@ -530,6 +530,7 @@ end
 function set_filter(filter_id, medpack)
     local id = medpack:id()
     local filters = mt_get_var(id, "filters")
+    pr("filters var type %s", type(filters))
 
     if #filters < mt_get_var(id, "max_filters") then
         table.insert(filters, filter_id)
@@ -849,10 +850,13 @@ end
 ---@param sect string
 function get_medpack_type(id, sect)
     local section = get_section(id) or sect
+    pr("Getting Medpack type for: %s", section)
     for _, pattern in pairs({"(medpack_closed_)", "(medpack_open_)"}) do
         if string.match(section, pattern) then
             local start, _end = string.find(section, pattern)
-            return string.sub(section, _end + 1, #section)
+            x = string.sub(section, _end + 1, #section)
+            pr(x)
+            return x
         end
     end
 end
@@ -1277,8 +1281,8 @@ function on_item_drag_dropped(obj_1, obj_2, slot_from, slot_to)
     local medpack = obj_2
 
     if rpmk_cosmetics.is_filter_item(itm:section()) and is_medpack_open(medpack) then
-        set_filter(itm:id())
         rpmk_cosmetics.pwt_new_entry(medpack:id(), itm)
+        set_filter(itm:id(), medpack)       
         alife_release(itm)
         return
     end
