@@ -1,3 +1,4 @@
 {
-    "gitHistory.includeRemoteBranches": true
+    "gitHistory.includeRemoteBranches": true,
+    "cmake.configureOnOpen": false
 }

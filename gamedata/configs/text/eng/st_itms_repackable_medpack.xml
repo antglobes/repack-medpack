@@ -246,6 +246,14 @@
 		<text>move to inventory</text>
 	</string>
 
+	<string id="ui_rpmk_btn_set">
+		<text>Set</text>
+	</string>
+	
+	<string id="ui_rpmk_icon_help">
+		<text>?</text>
+	</string>
+	
 	<!--Functor Strings-->
 	<string id="st_rpmk_menu_unpack">
 		<text>unpack all</text>

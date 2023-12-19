@@ -6,24 +6,30 @@ use1_action_functor =
 use2_functor =
 use2_action_functor =
 tier = 2
+use_condition = true
+remove_after_use = true
+
+
 
 [marker_open_base]:marker_base
 inv_name = st_perm_marker_closed
 inv_name_short = st_perm_marker_closed
 description = st_perm_marker_closed_descr
 inv_weight = 0.13
+script_binding = bind_item.bind
 
 [marker_closed_base]:marker_base
 inv_name = st_perm_marker_open
 inv_name_short = st_perm_marker_open
 description = st_perm_marker_open_descr
 inv_weight = 0.11
+script_binding = bind_item.bind
 
 [itm_marker_black_closed]:marker_closed_base
 inv_grid_x = 0
 inv_grid_y = 0
 cost = 1350
-max_uses = 10
+max_uses = 3
 
 [itm_marker_black_open]:marker_open_base
 inv_grid_x = 0
@@ -33,7 +39,7 @@ inv_grid_y = 1
 inv_grid_x = 1
 inv_grid_y = 0
 cost = 1350
-max_uses = 10
+max_uses = 5
 
 [itm_marker_red_open]:marker_open_base
 inv_grid_x = 1
@@ -43,7 +49,7 @@ inv_grid_y = 1
 inv_grid_x = 2
 inv_grid_y = 0
 cost = 1350
-max_uses = 10
+max_uses = 5
 
 [itm_marker_blue_open]:marker_open_base
 inv_grid_x = 2
@@ -55,6 +61,7 @@ inv_name_short = st_perm_marker_multipack
 description = st_perm_marker_multipack_descr
 inv_grid_x = 3
 inv_grid_y = 0
+inv_grid_height = 2
 inv_weight = 0.57
 cost = 5250
 contents = itm_marker_black_closed, itm_marker_black_closed, itm_marker_blue_closed, itm_marker_red_closed

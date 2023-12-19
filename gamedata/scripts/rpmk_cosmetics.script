@@ -1,7 +1,7 @@
 
 
-
-
+ini_medpack = rpmk_utils.ini_medpack
+add_functor = custom_functor_autoinject.add_functor
 
 function pr(str,...)
     rpmk_utils.dbg_pr("Repackable Medpacks| Cosmetics: %s", str, ...)
@@ -207,6 +207,37 @@ function filter_menu_string(sect)
     return string.sub(sect, _end + 1, #sect) .. " plastic wallet"
 end
 
+-- Unpack Multipack Functor
+function unpack_mp_cond_met(obj)
+    if obj and obj:section() == "itm_marker_multipack" then
+        return true
+    end
+    return false
+end
+
+function unpack_mp_cond_function(obj, bag, mode)
+    local p = obj:parent()
+	if not (p and p:id() == AC_ID) then return end
+
+    return unpack_mp_cond_met(obj)
+end
+
+function unpack_mp_menu_function(obj, bag, mode)
+    return game.translate_string("st_rpmk_menu_unpack")
+end
+
+function unpack_mp_action(obj, bag, mode)
+    for _, item in ipairs(parse_list(ini_medpack, obj:section(), "contents")) do
+        pr("Unpacking %s from multipack", item)
+        local max_uses = ini_medpack:r_float_ex(item, "max_uses")
+        local rand_cond = round_idp(math.random() + math.random(8, 10), 2)
+        pr("With %s uses and %s% condition", max_uses, rand_cond * 10)
+        alife_create_item(item, db.actor, {["uses"]=max_uses, ["cond"]=rand_cond})
+    end
+    alife_release(obj)
+end
+
+add_functor("rpmk_multipack_unpack", unpack_mp_cond_function, unpack_mp_menu_function, nil, unpack_mp_action)
 -----------------------
 -- Callbacks
 -----------------------

@@ -69,4 +69,25 @@
     </total_items>
 
     <box_item x="101" y="390" width="226" height="111" stretch="1"/>
+
+    <!--Marker GUI-->
+    <marker_menu x="400" y="250" width="150" height="100" stretch="1">
+        <texture>ui_medpack_marker_menu</texture>
+    </marker_menu>
+
+    <set_btn x="420" y="330" width="70" height="30">
+        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_set</text>
+        <texture>ui_medpack_btn</texture>
+    </set_btn>
+
+    <close_btn x="420" y="330" width="70" height="30">
+        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_close</text>
+        <texture>ui_medpack_btn</texture>
+    </close_btn>
+
+    <help_icon x="580" y="225" width="20" height="20">
+        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_icon_help</text>
+        <texture>ui_medpack_btn</texture>
+    <help_icon>
+
 </w>
