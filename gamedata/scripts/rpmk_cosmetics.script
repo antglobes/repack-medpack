@@ -2,10 +2,18 @@
 
 ini_medpack = rpmk_utils.ini_medpack
 add_functor = custom_functor_autoinject.add_functor
-
+table_contains = rpmk_utils.table_contains
 function pr(str,...)
     rpmk_utils.dbg_pr("Repackable Medpacks| Cosmetics: %s", str, ...)
 end
+
+stickers = {
+    "anti_rad", "anti_chem", "anti_psy",
+    "health_reco", "stam_reco", "painkillers",
+    "surgical_equ", "bleed_prevent", "injectors_heals",
+    "injectors_bleed", "injectors_painkillers", "food",
+    "drink", "misc"
+}
 
 PLASTIC_WALLETS_TABLE = {}
 
@@ -16,16 +24,12 @@ function pwt_new_entry(m_id, pw)
     local total_items = 0
     local total_weight = 0
     local max_weight = get_max_weight(section)
-    local base_weight = get_base_weight(section)
     local zipped = true
+    local category = {}
     local filter_items = {}
-    local sticker_id = 0
-    local sticker_text = ""
     local sticker_attached = false
-    PLASTIC_WALLETS_TABLE[#PLASTIC_WALLETS_TABLE + 1] = {id=id, medpack_id=m_id, section=section, contents=contents,
-                            total_items=total_items, total_weight=total_weight, max_weight=max_weight,
-                            base_weight=base_weight, zipped=zipped, filter_items=filter_items,
-                            sticker_id=sticker_id, sticker_text=sticker_text, sticker_attached=sticker_attached }
+    PLASTIC_WALLETS_TABLE[#PLASTIC_WALLETS_TABLE + 1] = {id=id, medpack_id=m_id, section=section, total_items=total_items, category=category,
+                                                         total_weight=total_weight,  zipped=zipped, filter_items=filter_items, sticker_attached=sticker_attached }
 
     pr("Plastic Wallets Table new entry: %s", rpmk_utils.print_table(PLASTIC_WALLETS_TABLE[#PLASTIC_WALLETS_TABLE], true))
 end
@@ -202,10 +206,34 @@ function is_filter_item(sect)
     return #{string.find(sect, "itm_plastic_wallet_")} > 0 
 end
 
+function is_sticker(sect)
+    for i=1, #stickers do
+        if #{string.find(sect, stickers[i])} > 0 then
+            return true
+        end
+    end
+    return false
+end
+
+function is_filter_category_set(filter)
+    return is_not_empty(pwt_get_var(filter:id(), "category"))
+end
+
 function filter_menu_string(sect)
     local start, _end = string.find(sect, "itm_plastic_wallet_")
     return string.sub(sect, _end + 1, #sect) .. " plastic wallet"
 end
+
+function get_category_stickers()
+    local stickers = {}
+    db.actor:iterate_inventory(nil, function(temp, obj)
+        if is_sticker(obj:section()) then
+            stickers[#stickers + 1] = obj
+        end
+    end)
+    return stickers
+end
+
 
 -- Unpack Multipack Functor
 function unpack_mp_cond_met(obj)
@@ -238,6 +266,28 @@ function unpack_mp_action(obj, bag, mode)
 end
 
 add_functor("rpmk_multipack_unpack", unpack_mp_cond_function, unpack_mp_menu_function, nil, unpack_mp_action)
+
+-- Set category
+function set_category_cond_met(obj)
+    if obj and is_filter_item(obj) and not is_filter_category_set(obj) then return true end return false
+end
+
+function set_category_cond_function(obj, bag, mode)
+    local p = obj:parent()
+	if not (p and p:id() == AC_ID) then return end 
+
+    return set_category_cond_function
+end
+
+function set_category_menu_function(obj, bag, mode)
+    return game.translate_string("st_rpmk_menu_set_category")
+end
+
+function set_category_action(obj, bag, mode)
+    rpmk_gui.display_category_menu(obj)
+end
+
+add_functor("rpmk_filter_set_category", set_category_cond_function, set_category_menu_function, nil, set_category_action)
 -----------------------
 -- Callbacks
 -----------------------

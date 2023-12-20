@@ -93,3 +93,7 @@ The Help button displays a item descrption window which displays a string explai
  
 ### Drag and Drop
 The player D&Ds an item onto a PW and then it's added to the "filter_items" table for the most recently inserted PW. If the PW is at the Max items per filter, no more items can be D&D'd, a message displays stating such.
+
+Each icon is a sticker item plus there's a glue stick item, drag glue stick on to sticker gets adhsive status then drag and drop on to PW and open gui
+
+Icon GUI: loads current icon stickers in inventory, highlights which ones are available, if none cannot set catergory.

@@ -1,4 +1,11 @@
 <w>
+    <!--
+    Template for Element Defintion
+    < x="" y="" width="" height="" stretch="">
+        <texture> </texture>
+    </ >
+    -->
+
     <!--Medpack GUI-->
     <basic_menu x="150" y="175" width="400" height="450" stretch="1">
         <texture>ui_medpack_menu_basic</texture>
@@ -69,8 +76,9 @@
     </total_items>
 
     <box_item x="101" y="390" width="226" height="111" stretch="1"/>
-
+    
     <!--Marker GUI-->
+    <!--
     <marker_menu x="400" y="250" width="150" height="100" stretch="1">
         <texture>ui_medpack_marker_menu</texture>
     </marker_menu>
@@ -88,6 +96,115 @@
     <help_icon x="580" y="225" width="20" height="20">
         <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_icon_help</text>
         <texture>ui_medpack_btn</texture>
-    <help_icon>
+    </help_icon>
+    -->
+    <!--category Icon GUI-->
+    <category_menu x="50" y="50" width="1022" height="682" stretch="1">
+        <texture>ui_category_menu</texture>
+    </category_menu>
 
+    <category_tab x="120" y="120" width="120" height="150" stretch="1">
+        <texture>ui_category_tab</texture>
+    </category_tab>
+
+     <category_tab_text x="125" y="125" width="900" height="66" stretch="1">
+        <text complex_mode="1" r="255" g="255" b="255" align="c" vert_align="c" font="letterica16"/>
+    </category_tab_text>
+
+    <msg_box x="50" y="900" width="900" height="66" stretch="1">
+        <texture>ui_category_msg_box</texture>
+    </msg_box>
+
+    <msg_box_text x="50" y="900" width="900" height="66" stretch="1">
+        <text complex_mode="1" r="255" g="255" b="255" align="c" vert_align="c" font="letterica16"/>
+    </msg_box_text>
+
+    <category_frame x="120" y="120" width="1000" height="684" stretch="1">
+        <texture>ui_inGame2_hint_wnd_main_window</texture>
+    </category_frame>
+
+    <icon_highlight_selected x="0" y="0" width="105" height="105" stretch="1">
+        <texture>ui_category_highlight_selected</texture>
+    </icon_highlight_selected>
+
+    <icon_highlight_missing x="0" y="0" width="105" height="105" stretch="1">
+        <texture>ui_category_highlight_missing</texture>
+    </icon_highlight_missing>
+
+    <!--Buttons-->
+    <filter_set_btn x="50" y="650" width="200" height="50" stretch="1">
+        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_set</text>
+        <texture>ui_category_btn</texture>
+    </filter_set_btn>
+
+    <filter_help_btn x="270" y="650" width="200" height="50" stretch="1">
+        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_help</text>
+        <texture>ui_category_btn</texture>
+    </filter_help_btn>
+
+    <filter_close_btn x="490" y="650" width="200" height="50" stretch="1">
+        <text r="150" g="150" b="150" font="letterica16" align="c">ui_rpmk_btn_close</text>
+        <texture>ui_category_btn</texture>
+    </filter_close_btn>
+
+    <!--Anti Damage-->
+    <anti_rad_icon x="120" y="130" width="100" height="100" stretch="1">
+        <texture>ui_category_antirad_icon</texture>
+    </anti_rad_icon>
+
+    <anti_chem_icon x="120" y="150" width="100" height="100" stretch="1">
+        <texture>ui_category_antichem_icon</texture>
+    </anti_chem_icon>
+
+    <anti_psy_icon x="120" y="170" width="100" height="100" stretch="1">
+        <texture>ui_category_antipsy_icon</texture>
+    </anti_psy_icon>
+
+    <!--Body Recovery/Restoration-->
+    <health_reco_icon x="150" y="130" width="100" height="100" stretch="1">
+        <texture>ui_category_health_recovery_icon</texture>
+    </health_reco_icon>
+
+    <stam_reco_icon x="150" y="150" width="100" height="100" stretch="1">
+        <texture>ui_category_staminia_recovery_icon</texture>
+    </stam_reco_icon>
+
+    <painkillers_icon x="150" y="170" width="100" height="100" stretch="1">
+        <texture>ui_category_painkillers_icon</texture>
+    </painkillers_icon>
+
+    <surgical_equ_icon x="150" y="190" width="100" height="100" stretch="1">
+        <texture>ui_category_surgical_equipment_icon</texture>
+    </surgical_equ_icon>
+
+    <bleed_prevent_icon x="150" y="210" width="100" height="100" stretch="1">
+        <texture>ui_category_bleed_prevention_icon</texture>
+    </bleed_prevent_icon>
+
+    <!--Injectors-->
+    <injectors_health_icon x="170" y="130" width="100" height="100" stretch="1">
+        <texture>ui_category_injectors_health_icon</texture>
+    </injectors_health_icon>
+
+    <injectors_bleed_icon x="170" y="150" width="100" height="100" stretch="1">
+        <texture>ui_category_injectors_bleed_icon</texture>
+    </injectors_bleed_icon>
+
+    <injectors_painkillers_icon x="170" y="190" width="100" height="100" stretch="1">
+        <texture>ui_category_injectors_painkillers_icon</texture>
+    </injectors_painkillers_icon>
+
+    <!--Consumables-->
+    <food_icon x="190" y="130" width="100" height="100" stretch="1">
+        <texture>ui_category_food_icon</texture>
+    </food_icon>
+
+    <drink_icon x="190" y="150" width="100" height="100" stretch="1">
+        <texture>ui_category_drink_icon</texture>
+    </drink_icon>
+
+    <!--Miscellaneous-->
+    <misc_icon x="210" y="190" width="100" height="100" stretch="1">
+        <texture>ui_category_miscellaneous_icon</texture>
+    </misc_icon>
 </w>

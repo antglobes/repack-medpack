@@ -857,3 +857,122 @@ function MPG:Action_Drop_All(obj, cont)
 	
 	--self:PlaySND(snd_drop_item)
 end
+------------------------------------------------------------------------------------------------------
+
+
+
+tab_name = {
+	[1] = "anti_damage",
+	[2] = "body_recovery",
+	[3] = "injectors",
+	[4] = "consumables",
+	[5] = "misc"
+}
+
+tab_icon_num = {
+	[1] = 3,
+	[2] = 5,
+	[3] = 3,
+	[4] = 2,
+	[5] = 1
+}
+
+tab_text = {
+	[1] = "Anti Damage",
+	[2] = "Body Recovery and Restoration",
+	[3] = "Injectors",
+	[4] = "Consumables",
+	[5] = "Misc"
+}
+
+tab_icon_name = {
+	[1] = {
+		[1] = "anti_rad",
+		[2] = "anti_chem",
+		[3] = "anti_psy"
+	},
+	[2] = {
+		[1] = "health_reco",
+		[2] = "stam_reco",
+		[3] = "painkillers",
+		[4] = "surgical_equ",
+		[5] = "bleed_prevent"
+	},
+	[3] = {
+		[1] = "injectors_health",
+		[2] = "injectors_bleed",
+		[3] = "injectors_painkillers"
+	},
+	[4] = {
+		[1] = "food",
+		[2] = "drink"
+	},
+	[5] = {
+		[1] = "misc"
+	}
+}
+
+btn_name = {
+	[1] = "set",
+	[2] = "help",
+	[3] = "close"
+}
+
+
+function display_category_menu(filter)
+	hide_hud_inventory()
+	printf("Showing Category GUI")
+	if not GUI then
+		GUI = CM(filter)
+	end
+
+	if GUI and not GUI:IsShown() then
+		GUI:Reset()
+		GUI:ShowDialog(true)
+		Register_UI("CM", "category_gui")
+	end
+end
+
+
+class "CM" (CUIScriptWnd)
+
+function CM:__init(filter) super()
+	self.filter = filter
+	--self.category_stickers = rpmk_cosmetics.get_category_stickers()
+
+	self:InitControls()
+	self:InitCallBacks()
+end
+
+function CM:__finalize()
+end
+
+function CM:InitControls()
+	printf("init controls")
+	self:SetWndRect(Frect():set(0,0,1024,768))
+	self:SetAutoDelete(true)
+
+	self.xml = CScriptXmlInit()
+	local xml = self.xml
+	 xml:ParseFile("ui_rmpk_gui.xml")
+
+
+	-- GUI Elements
+	self.category_menu = xml:InitStatic("category_menu", self)
+end
+
+function CM:InitCallBacks()
+end
+
+function CM:Reset()
+end
+
+function CM:Close()
+	printf("closing")
+	utils_obj.play_sound("interface\\inv_close")
+	self:HideDialog()
+	self:Show(false)
+	Unregister_UI("CM")
+	CloseAll_UI()
+end
+

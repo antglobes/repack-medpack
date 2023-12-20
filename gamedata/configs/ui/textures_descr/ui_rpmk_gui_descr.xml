@@ -30,38 +30,36 @@
         <texture id="ui_medpack_side_menu_frame" x="158" y="0" width="98" height="190" stretch="1"/>
     </file>
 
-    <file name="ui\ui_medpack_filter_gui">
-        <texture id="" x="" y="" width="" height=""/>
-        <texture id="ui_catergory_menu" x="0" y="0" width="1016" height="684"/>
-        <texture id="ui_catergory_antirad_icon" x="200" y="700" width="100" height="100"/>
-        <texture id="ui_catergory_antichem_icon" x="300" y="700" width="100" height="100"/>
-        <texture id="ui_catergory_antipsy_icon" x="400" y="700" width="100" height="100"/>
-        <texture id="ui_catergory_health_recovery_icon" x="500" y="700" width="100" height="100"/>
-        <texture id="ui_catergory_staminia_recovery_icon" x="600" y="700" width="100" height="100"/>
-        <texture id="ui_catergory_painkillers_icon" x="700" y="700" width="100" height="100"/>
-        <texture id="ui_catergory_surgical_equipment_icon" x="800" y="700" width="100" height="100"/>
-        <texture id="ui_catergory_bleed_prevention_icon" x="200" y="800" width="100" height="100"/>
-        <texture id="ui_catergory_injectors_health_icon" x="300" y="800" width="100" height="100"/>
-        <texture id="ui_catergory_injectors_bleed_icon" x="400" y="800" width="100" height="100"/>
-        <texture id="ui_catergory_injectors_painkillers_icon" x="500" y="800" width="100" height="100"/>
-        <texture id="ui_catergory_food_icon" x="600" y="800" width="100" height="100"/>
-        <texture id="ui_catergory_drink_icon" x="700" y="800" width="100" height="100"/>
-        <texture id="ui_catergory_miscellaneous_icon" x="800" y="800" width="100" height="100"/>
-        <texture id="ui_catergory_msg_box" x="0" y="900" width="900" height="66"/>
-        <texture id="ui_catergory_btn_d" x="0" y="700" width="200" height="50"/>
-        <texture id="ui_catergory_btn_e" x="0" y="800" width="200" height="50"/>
-        <texture id="ui_catergory_btn_h" x="0" y="900" width="200" height="50"/>
-        <texture id="ui_catergory_btn_t" x="0" y="1000" width="200" height="50"/>
-        <texture id="ui_catergory_tab" x="0" y="100" width="150" height="150"/>
-        <texture id="ui_text_based_inv_menu" x="0" y="1050" width="100" height="200"/>
-        <texture id="ui_text_based_pw_menu_red" x="150" y="1000" width="100" height="150"/>
-        <texture id="ui_text_based_pw_menu_yellow" x="200" y="1000" width="100" height="150"/>
-        <texture id="ui_text_based_pw_menu_black" x="250" y="1000" width="100" height="150"/>
-        <texture id="ui_text_based_pw_menu_blue" x="300" y="1000" width="100" height="150"/>
-        <texture id="ui_text_based_pw_menu_green" x="350" y="1000" width="100" height="150"/>
-        <texture id="ui_text_based_pw_menu_orange" x="400" y="1000" width="100" height="150"/>
-        <texture id="ui_text_based_pw_menu_purple" x="450" y="1000" width="100" height="150"/>
-        <texture id="ui_text_based_pw_menu_pink" x="500" y="1000" width="100" height="150"/>
-        <texture id="ui_text_based_transfer_icon" x="900" y="1000" width="100" height="100"/>
+    <file name="ui\ui_rpmk_filter_gui">
+        <!--<texture id="" x="" y="" width="" height=""/>-->
+        <texture id="ui_category_menu" x="0" y="0" width="1022" height="682" stretch="1"/>
+        <texture id="ui_category_tab" x="0" y="686" width="150" height="51" stretch="1"/>
+        <texture id="ui_category_msg_box" x="150" y="686" width="874" height="64" stretch="1"/>
+    </file>
+
+    <file name="ui\ui_rpmk_filter_gui_1">
+        <texture id="ui_category_btn_d" x="0" y="0" width="200" height="50" stretch="1"/>
+        <texture id="ui_category_btn_e" x="0" y="50" width="200" height="50" stretch="1"/>
+        <texture id="ui_category_btn_h" x="0" y="100" width="200" height="50" stretch="1"/>
+        <texture id="ui_category_btn_t" x="0" y="150" width="200" height="50" stretch="1"/>
+
+        <texture id="ui_category_antirad_icon" x="200" y="0" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_antichem_icon" x="300" y="0" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_antipsy_icon" x="400" y="0" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_health_recovery_icon" x="500" y="0" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_staminia_recovery_icon" x="600" y="0" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_painkillers_icon" x="700" y="0" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_surgical_equipment_icon" x="800" y="0" width="100" height="100" stretch="1"/>
+
+        <texture id="ui_category_bleed_prevention_icon" x="200" y="100" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_injectors_health_icon" x="300" y="100" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_injectors_bleed_icon" x="400" y="100" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_injectors_painkillers_icon" x="500" y="100" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_food_icon" x="600" y="100" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_drink_icon" x="700" y="100" width="100" height="100" stretch="1"/>
+        <texture id="ui_category_miscellaneous_icon" x="800" y="100" width="100" height="100" stretch="1"/>
+
+        <texture id="ui_category_highlight_selected" x="0" y="100" width="106" height="106" stretch="1"/>
+        <texture id="ui_category_highlight_missing" x="0" y="307" width="106" height="108" stretch="1"/>        
     </file>
 </w>

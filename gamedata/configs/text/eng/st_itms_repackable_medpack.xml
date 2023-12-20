@@ -254,6 +254,10 @@
 		<text>?</text>
 	</string>
 	
+	<string id="ui_rpmk_msg_box_text">
+		<text>Categories selected:</text>
+	</string>
+	
 	<!--Functor Strings-->
 	<string id="st_rpmk_menu_unpack">
 		<text>unpack all</text>
@@ -280,6 +284,9 @@
 	</string>
 	<string id="st_rpmk_menu_remove_filter">
 		<text>remove %s</text>
+	</string>
+	<string id="st_rpmk_menu_set_category">
+		<text>set category</text>
 	</string>
 	
 	<!--News Manager Strings-->
