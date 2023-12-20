@@ -98,8 +98,8 @@
         <texture>ui_medpack_btn</texture>
     </help_icon>
     -->
-    <!--category Icon GUI-->
-    <category_menu x="50" y="50" width="1022" height="682" stretch="1">
+    <!--Category Icon GUI-->
+    <category_menu x="0" y="0" width="890" height="597" stretch="1">
         <texture>ui_category_menu</texture>
     </category_menu>
 
