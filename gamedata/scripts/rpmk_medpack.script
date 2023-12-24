@@ -670,6 +670,8 @@ function ui_item.get_obj_desc(obj)
         return medpack_descr(obj, obj:section())
     elseif is_vanilla_medpack(obj) then
         return vanilla_medpack_descr(obj, obj:section())
+    else
+        return base_obj_desc(obj)
     end
 end
 

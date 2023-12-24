@@ -250,7 +250,7 @@
 		<text>Set</text>
 	</string>
 	
-	<string id="ui_rpmk_icon_help">
+	<string id="ui_rpmk_btn_help">
 		<text>?</text>
 	</string>
 	
@@ -319,42 +319,300 @@
 	</string>
 	
 	<!--Medpack Filter Items-->
-	<string id="st_perm_marker_open">
-		<text>Opened Permenant Marker</text>
-	</string>
-	<string id="st_perm_marker_closed">
-		<text>Permenant Marker</text>
-	</string>
-	<string id="st_sticker_box">
-		<text>A Box of Stickers</text>
-	</string>
-	<string id="st_sticker">
-		<text>A Sticker</text>
-	</string>
 	<string id="st_plastic_wallet">
 		<text>A Plastic wallet</text>
-	</string>
-	<string id="st_perm_marker_multipack">
-		<text>A Four Pack of Permenant Markers</text>
-	</string>
-	
-	<string id="st_perm_marker_closed_descr">
-		<text>Your standard permenant marker, in black ink; often used for tagging, graffiti and drawing those weird S's we all seem to have drawn in school</text>
-	</string>
-	<string id="st_perm_marker_open_descr">
-		<text>Your standard permenant marker, in black ink, with the cap open; often used for tagging, graffiti and drawing those weird S's we all seem to have drawn in school</text>
-	</string>
-	<string id="st_sticker_box_descr">
-		<text>A box of 5 opaque white stickers, used for listing items to go in a container</text>
-	</string>
-	<string id="st_sticker_descr">
-		<text>A single white sticker, not to be resold as multipack</text>
 	</string>
 	<string id="st_plastic_wallet_descr">
 		<text>A zippable plastic wallet, used for holding certain medical items</text>
 	</string>
-	<string id="st_perm_marker_multipack_descr">
-		<text>A Multipack of four permenant markers, 2 in black and the rest red and blue. Most likley a bootleg ripoff of a well known company, that's been stolen from a roubleland</text>
+	
+	<!--Category Patch Packs-->
+	<string id="st_category_pack_anti_damage">
+		<text>A Pack of Anti-Damage Patches</text>
+	</string>
+	<string id="st_category_pack_anti_damage_descr">
+		<text>A Small pack of adhesive patches similar in style to the ones belonging to varying factions of the zone. The bright neon tones, ensure that during combat 
+		the stupidest stalker can easily find where which medpack and what items in said medpack, are located at; now where did i put those damm psy pills.\n
+		%c[pda_yellow] These patches belong to the "Anti-Damage" Catergory, visit the pda for more info\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] Non-recycalable\n
+		%c[d_red] • %c[ui_gray_2] Environmentally Unfriendly\n
+		%c[d_green] • %c[ui_gray_2] Reusable\n
+		%c[ui_gray_2] Patches Included: \n
+		%c[d_cyan] • %c[ui_gray_2] Anti-Radiation\n
+		%c[d_cyan] • %c[ui_gray_2] Anti-Chemical\n
+		%c[d_cyan] • %c[ui_gray_2] Anti-Psy\n
+		</text>
 	</string>
 	
+	<string id="st_category_pack_body_recovery">
+		<text>A Pack of Body Recovery Patches</text>
+	</string>
+	<string id="st_category_pack_body_recovery_descr">
+		<text>A Small pack of adhesive patches similar in style to the ones belonging to varying factions of the zone. The bright neon tones, ensure that during combat 
+		the stupidest stalker can easily find where which medpack and what items in said medpack, are located at; now where did i put those damm psy pills.\n
+		%c[pda_yellow] These patches belong to the "Body Recovery" Catergory, visit the pda for more info\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] Non-recycalable\n
+		%c[d_red] • %c[ui_gray_2] Environmentally Unfriendly\n
+		%c[d_green] • %c[ui_gray_2] Reusable\n
+		%c[ui_gray_2] Patches Included: \n
+		%c[d_cyan] • %c[ui_gray_2] Health Recovery \n
+		%c[d_cyan] • %c[ui_gray_2] Stamina Recovery\n
+		%c[d_cyan] • %c[ui_gray_2] Painkillers\n
+		%c[d_cyan] • %c[ui_gray_2] Surgical Equipment\n
+		%c[d_cyan] • %c[ui_gray_2] Bleed Prevention\n
+		</text>
+	</string>
+	
+	<string id="st_category_pack_consumables">
+		<text>A Pack of Consumables Patches</text>
+	</string>
+	<string id="st_category_pack_consumables_descr">
+		<text>A Small pack of adhesive patches similar in style to the ones belonging to varying factions of the zone. The bright neon tones, ensure that during combat 
+		the stupidest stalker can easily find where which medpack and what items in said medpack, are located at; now where did i put those damm psy pills.\n
+		%c[pda_yellow] These patches belong to the "Consumables" Catergory, visit the pda for more info\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] Non-recycalable\n
+		%c[d_red] • %c[ui_gray_2] Environmentally Unfriendly\n
+		%c[d_green] • %c[ui_gray_2] Reusable\n
+		%c[ui_gray_2] Patches Included: \n
+		%c[d_cyan] • %c[ui_gray_2] Food\n
+		%c[d_cyan] • %c[ui_gray_2] Drink\n
+		</text>
+	</string>
+	
+	<string id="st_category_pack_injectors">
+		<text>A Pack of Injectors Patches</text>
+	</string>
+	<string id="st_category_pack_injectors_descr">
+		<text>A Small pack of adhesive patches similar in style to the ones belonging to varying factions of the zone. The bright neon tones, ensure that during combat 
+		the stupidest stalker can easily find where which medpack and what items in said medpack, are located at; now where did i put those damm psy pills.\n
+		%c[pda_yellow] These patches belong to the "Anti-Damage" Catergory, visit the pda for more info\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] Non-recycalable\n
+		%c[d_red] • %c[ui_gray_2] Environmentally Unfriendly\n
+		%c[d_green] • %c[ui_gray_2] Reusable\n
+		%c[ui_gray_2] Patches Included: \n
+		%c[d_cyan] • %c[ui_gray_2] Health Recovery Injectors\n
+		%c[d_cyan] • %c[ui_gray_2] Stamina Recovery Injectors\n
+		%c[d_cyan] • %c[ui_gray_2] Painkilling Injectors\n
+		</text>
+	</string>
+	
+	<string id="st_category_pack_miscellaneous">
+		<text>A Miscellaneous Patch Pack</text>
+	</string>
+	<string id="st_category_pack_miscellaneous_descr">
+		<text>A Small pack of adhesive patches similar in style to the ones belonging to varying factions of the zone. The bright neon tones, ensure that during combat 
+		the stupidest stalker can easily find where which medpack and what items in said medpack, are located at; now where did i put those damm psy pills.\n
+		%c[pda_yellow] These patches belong to the "Miscellaneous" Catergory, visit the pda for more info\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] Non-recycalable\n
+		%c[d_red] • %c[ui_gray_2] Environmentally Unfriendly\n
+		%c[d_green] • %c[ui_gray_2] Reusable\n
+		%c[ui_gray_2] Patches Included: \n
+		%c[d_cyan] • %c[ui_gray_2] Misc\n
+		</text>
+	</string>
+	
+	<string id="st_category_pack_mystery">
+		<text>Mystery Pack of Patches</text>
+	</string>
+	<string id="st_category_pack_mystery_descr">
+		<text>A Small pack of adhesive patches similar in style to the ones belonging to varying factions of the zone. The bright neon tones, ensure that during combat 
+		the stupidest stalker can easily find where which medpack and what items in said medpack, are located at; now where did i put those damm psy pills.\n
+		%c[pda_yellow] These patches have been packaged at random, you could get up to 5 different patches or nothing at all. Visit the pda for more info\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[d_red] • %c[ui_gray_2] Non-recycalable\n
+		%c[d_red] • %c[ui_gray_2] Environmentally Unfriendly\n
+		%c[d_green] • %c[ui_gray_2] Reusable\n
+		%c[ui_gray_2] Patches Included: \n
+		%c[d_cyan] • %c[ui_gray_2] Unknown and Unspecified\n
+		</text>
+	</string>
+	
+	<!--Category Patches-->
+	<string id="st_category_patch_antirad">
+		<text>Anti-Radiation Patch</text>
+	</string>
+	<string id="st_category_patch_antirad_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with radiation damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_antichem">
+		<text>Anti-Chemical Patch</text>
+	</string>
+	<string id="st_category_patch_antichem_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_antipsy ">
+		<text>Anti-Psy Patch</text>
+	</string>
+	<string id="st_category_patch_antipsy _descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_health_recovery">
+		<text>Health Recovery Patch</text>
+	</string>
+	<string id="st_category_patch_health_recovery_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_surgical_equipment">
+		<text>Surgical Equipment Patch</text>
+	</string>
+	<string id="st_category_patch_surgical_equipment_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_bleed_prevention">
+		<text>Bleed Prevention Patch</text>
+	</string>
+	<string id="st_category_patch_bleed_prevention_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_injectors_health_recovery">
+		<text>Health Recovery Injectors Patch</text>
+	</string>
+	<string id="st_category_patch_injectors_health_recovery_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_injectors_bleed_prevention">
+		<text>Bleed Prevention Injectors Patch</text>
+	</string>
+	<string id="st_category_patch_injectors_bleed_prevention_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_injectors_painkillers">
+		<text>Painkilling Injectors Patch</text>
+	</string>
+	<string id="st_category_patch_injectors_painkillers_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_drink">
+		<text>Drinks Patch</text>
+	</string>
+	<string id="st_category_patch_drink_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_misc">
+		<text>Miscellaneous Patch</text>
+	</string>
+	<string id="st_category_patch_misc_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_painkillers">
+		<text>Painkillers Patch</text>
+	</string>
+	<string id="st_category_patch_painkillers_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_stamina_recovery">
+		<text>Stamina Recovery Patch</text>
+	</string>
+	<string id="st_category_patch_stamina_recovery_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
+	
+	<string id="st_category_patch_food">
+		<text>Food Patch</text>
+	</string>
+	
+	<string id="st_category_patch_food_descr">
+		<text>A 3x3 inch patch, sewn in a satin stich with neon blue dyed cotton. This patch contains items that deal with chemical damage\n\n
+		%c[ui_gray_3]PROPERTIES:\n
+		%c[ui_gray_2]Items Included:\n
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		%c[d_cyan] • %c[ui_gray_2]
+		</text>
+	</string>
 </string_table>
