@@ -1,8 +1,13 @@
 
 
 ini_medpack = rpmk_utils.ini_medpack
+ini_filters = ini_file_ex("items\\items\\items_repackable_medpack_filters.ltx")
 add_functor = custom_functor_autoinject.add_functor
 table_contains = rpmk_utils.table_contains
+trader_type = trader_autoinject.get_trader_type
+TraderUpdate = trader_autoinject.update
+sections = ini_filters:get_sections()
+
 function pr(str,...)
     rpmk_utils.dbg_pr("Repackable Medpacks| Cosmetics: %s", str, ...)
 end
@@ -234,6 +239,90 @@ function get_category_stickers()
     return stickers
 end
 
+-- Trader Inject
+
+function patch_traders(trader_type) 
+    local accepted_traders = {
+        [trader_autoinject.MEDIC] = {true, "medic"}, 
+        [trader_autoinject.SUPPLIER] = {true, "supplier"}
+    }
+    return unpack(accepted_traders[trader_type])
+end
+
+function get_patches()
+    local patches = {}
+    for _, sect in pairs(sections) do
+        if string.match(sect, "itm_category_patch_") then
+            patches[#patches + 1] = sect
+        end
+    end
+    return patches
+end
+
+function get_packs()
+    local packs = {}
+    for _, sect in pairs(sections) do
+        if string.match(sect, "itm_category_pack_") then
+            packs[#packs + 1] = sect
+        end
+    end
+    return packs
+end
+
+function get_rand_patch()
+    local patches = get_patches()
+    return patches[math.random(1, #patches)]
+end
+
+function get_rand_pack()
+    local packs = get_packs()
+    return packs[math.random(1, #packs)]
+end
+
+
+function patch_supply_level(npc)
+    local supply_level = {["patch"] = 0, ["pack"] = 0}
+    local function search(temp, obj)
+        if is_patch(obj) then
+            supply_level[obj:section()] = supply_level["patch"] + 1
+        elseif is_pack then
+            supply_level[obj:section()] = supply_level["pack"] + 1
+        end
+    end
+    npc:iterate_inventory(nil, search)
+    return supply_level
+end
+
+function restore_patch_supply_level(npc)
+    local supply_level = patch_supply_level(npc)
+    local patches = {}
+
+    repeat
+        if supply_level["patch"] < 2 then
+            patches[#patches] = get_rand_patch()
+            supply_level["patch"] = supply_level["patch"] + 1
+        end
+
+        if supply_level["pack"] < 1 then
+            patches[#patches] = get_rand_pack()
+            supply_level["pack"] = supply_level["pack"] + 1
+        end
+    until supply_level["patch"] == 2 and supply_level["pack"] == 1 and #patches == 3
+
+    return patches
+end
+
+function stock_patches(npc)
+    local trader_accepted, trader_type = patch_traders[get_trader_type(npc)]
+    if not trader_accepted or not trader_type then return end
+    local trade_t = restore_patch_supply_level(npc)
+    trader_autoinject.spawn_items(npc, trade_t, true)
+end
+
+function trader_autoinject.update(npc)
+    TraderUpdate(npc)
+    stock_patches(npc)
+end
 
 -- Unpack Multipack Functor
 function unpack_mp_cond_met(obj)
