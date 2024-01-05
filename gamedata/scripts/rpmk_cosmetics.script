@@ -4,7 +4,7 @@ ini_medpack = rpmk_utils.ini_medpack
 ini_filters = ini_file_ex("items\\items\\items_repackable_medpack_filters.ltx")
 add_functor = custom_functor_autoinject.add_functor
 table_contains = rpmk_utils.table_contains
-trader_type = trader_autoinject.get_trader_type
+get_trader_type = trader_autoinject.get_trader_type
 TraderUpdate = trader_autoinject.update
 sections = ini_filters:get_sections()
 
@@ -243,10 +243,10 @@ end
 
 function patch_traders(trader_type) 
     local accepted_traders = {
-        [trader_autoinject.MEDIC] = {true, "medic"}, 
-        [trader_autoinject.SUPPLIER] = {true, "supplier"}
+        [trader_autoinject.MEDIC] = true, 
+        [trader_autoinject.SUPPLIER] = true, 
     }
-    return unpack(accepted_traders[trader_type])
+    return accepted_traders[trader_type]
 end
 
 function get_patches()
@@ -313,8 +313,7 @@ function restore_patch_supply_level(npc)
 end
 
 function stock_patches(npc)
-    local trader_accepted, trader_type = patch_traders[get_trader_type(npc)]
-    if not trader_accepted or not trader_type then return end
+    if not patch_traders(get_trader_type(npc)) then return end
     local trade_t = restore_patch_supply_level(npc)
     trader_autoinject.spawn_items(npc, trade_t, true)
 end
